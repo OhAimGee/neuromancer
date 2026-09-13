@@ -1,0 +1,189 @@
+/* NEUROMANCER — palette et socle.
+ *
+ * PALETTE VERROUILLEE A 32 COULEURS. Elle est la reference unique : les memes
+ * valeurs exactes sont chargees dans Aseprite pour tous les assets. Ne jamais
+ * introduire une couleur hors de cette liste. */
+
+:root {
+  /* Noirs et bleus nuit — fonds, ombres, profondeur */
+  --n0: #05060a;
+  --n1: #0d1018;
+  --n2: #161b28;
+  --n3: #232a3d;
+  --n4: #333c56;
+
+  /* Gris beton — architecture, metal terne */
+  --g0: #4a5570;
+  --g1: #66718c;
+  --g2: #8c95ab;
+  --g3: #b9c0d0;
+
+  /* Magenta neon — enseignes, interface, le Fragment */
+  --m0: #3d0a2e;
+  --m1: #7a1052;
+  --m2: #c41e7f;
+  --m3: #ff4fb8;
+
+  /* Cyan neon — matrice, donnees, glace */
+  --c0: #04333d;
+  --c1: #0a6e7a;
+  --c2: #12b5c4;
+  --c3: #5bf0ff;
+
+  /* Orange sodium — lampadaires, chaleur, rouille */
+  --o0: #3d1f05;
+  --o1: #8a4a0d;
+  --o2: #d4820f;
+  --o3: #ffc247;
+
+  /* Vert malade — terminaux, biotech, nausee */
+  --v0: #14301a;
+  --v1: #2e7a35;
+  --v2: #6ed46b;
+
+  /* Rouge sang — alerte, glace noire, violence */
+  --r0: #2e0708;
+  --r1: #8a1219;
+  --r2: #e02b32;
+
+  /* Chair */
+  --p0: #5c3a2e;
+  --p1: #9c6b52;
+  --p2: #d4a284;
+
+  /* Blancs */
+  --w0: #e8eef5;
+  --w1: #ffffff;
+
+  /* Resolution interne du jeu */
+  --vw: 320;
+  --vh: 180;
+
+  color-scheme: dark;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  background: var(--n0);
+  color: var(--g3);
+  overflow: hidden;
+}
+
+body {
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+/* Le conteneur centre le viewport et peint les bandes noires du letterbox. */
+.stage {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+/* Viewport a la resolution interne. L'echelle entiere est appliquee par
+ * transform, de sorte qu'un pixel du jeu reste un carre parfait de N x N. */
+.viewport {
+  position: relative;
+  width: calc(var(--vw) * 1px);
+  height: calc(var(--vh) * 1px);
+  transform-origin: center center;
+  background: var(--n1);
+  overflow: hidden;
+  image-rendering: pixelated;
+}
+
+.viewport canvas,
+.viewport img {
+  image-rendering: pixelated;
+  display: block;
+}
+
+/* --- Ecran de demarrage ------------------------------------------------- */
+
+.boot {
+  position: absolute;
+  inset: 0;
+  padding: 10px 12px;
+  font-size: 7px;
+  line-height: 11px;
+  letter-spacing: 0.04em;
+  color: var(--c2);
+  background: radial-gradient(circle at 50% 45%, var(--n2) 0%, var(--n0) 100%);
+}
+
+.boot__line {
+  white-space: pre;
+}
+
+.boot__ok {
+  color: var(--v2);
+}
+.boot__warn {
+  color: var(--o2);
+}
+.boot__err {
+  color: var(--r2);
+}
+.boot__dim {
+  color: var(--n4);
+}
+
+.boot__title {
+  margin: 14px 0 2px;
+  font-size: 15px;
+  line-height: 18px;
+  letter-spacing: 0.18em;
+  color: var(--m3);
+  text-shadow: 0 0 6px var(--m1);
+}
+
+.boot__sub {
+  font-size: 7px;
+  letter-spacing: 0.22em;
+  color: var(--g0);
+}
+
+.boot__caret::after {
+  content: "\2588";
+  animation: caret 1s steps(1) infinite;
+  color: var(--c3);
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Scanlines — desactivables (accessibilite : risque photosensible). */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.22) 0px,
+    rgba(0, 0, 0, 0.22) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot__caret::after {
+    animation: none;
+  }
+}

@@ -1,0 +1,28 @@
+node_modules/
+dist/
+.vite/
+*.log
+npm-debug.log*
+*.tsbuildinfo
+capture*.png
+
+# JSON Ink compile depuis content/ink — artefact de build
+public/content/
+
+# Tests
+playwright-report/
+test-results/
+coverage/
+
+# Editeurs / OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Aseprite : les .aseprite sont les sources, on les versionne.
+# Les exports PNG/JSON sont regeneres, mais on les versionne aussi
+# pour que le jeu tourne sans Aseprite installe.
+*.aseprite-session
