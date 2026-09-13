@@ -158,7 +158,52 @@ composer par tilemap reste la règle.
 **Si les outils `mcp__aseprite__*` sont absents** : le serveur avait échoué à se connecter au
 démarrage d'une session parce que `~/.config/pixel-mcp/config.json` n'existait pas encore, et
 l'échec est mis en cache. Le binaire fonctionne (sonde stdio concluante) ; il suffit de
-redémarrer Claude Code.
+reconnecter via `/mcp`.
+
+### PIÈGE ASEPRITE CRITIQUE — jamais l'exécutable Windows
+
+**L'Aseprite de Windows ne peut pas servir depuis WSL.** Il accepte les chemins POSIX, ne crée
+aucun fichier, et **sort avec le code 0** — échec parfaitement silencieux. Le serveur MCP
+remontait seulement `exit status 255`.
+
+La chaîne de production utilise donc l'**AppImage Linux extraite** (WSL n'a pas FUSE) :
+
+```bash
+mkdir -p ~/.local/aseprite && cd ~/.local/aseprite
+cp /mnt/c/Users/rapha/Desktop/Aseprite_1.3.18.5-x64.AppImage ./aseprite.AppImage
+chmod +x ./aseprite.AppImage && ./aseprite.AppImage --appimage-extract
+# binaire : ~/.local/aseprite/squashfs-root/usr/bin/aseprite
+```
+
+`~/.config/pixel-mcp/config.json` doit pointer vers ce binaire Linux.
+
+### Production d'assets — script Lua, pas appels MCP
+
+Le binaire Linux donne accès à **l'API Lua complète d'Aseprite**, que le serveur MCP n'expose
+pas. Pour un tileset entier, un script avec des boucles et des fonctions vaut infiniment mieux
+que cinquante appels MCP discrets. Les outils MCP restent utiles pour une retouche isolée.
+
+```bash
+tools/aseprite.sh tools/aseprite/ts_interior.lua
+```
+
+- `tools/aseprite/palette.lua` — les 32 couleurs, une clé d'un caractère chacune
+- `tools/aseprite/lib.lua` — art ASCII, matière procédurale, enregistrement
+- `tools/aseprite/<nom>.lua` — un générateur par asset
+
+Chaque générateur produit `.aseprite` (éditable à la main), `.png` et un `.json` de manifeste.
+**Les générateurs doivent être déterministes** : toute matière procédurale passe par
+`L.rng(graine)` et des listes ordonnées, jamais `pairs()`, dont l'ordre n'est pas garanti en
+Lua. Vérification : deux exécutions successives donnent le même MD5.
+
+L'ordre des tuiles dans un générateur fait foi — les tilemaps s'y réfèrent par index. Ajouter
+en fin de liste, ne jamais réordonner.
+
+Aperçu agrandi pour inspection :
+```bash
+~/.local/aseprite/squashfs-root/usr/bin/aseprite --batch assets/tilesets/ts_interior.png \
+  --scale 8 --save-as /tmp/apercu.png
+```
 
 ## Limites du contenu
 

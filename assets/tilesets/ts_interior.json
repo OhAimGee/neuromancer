@@ -1,0 +1,14 @@
+{
+  "tuile": 16,
+  "colonnes": 8,
+  "noms": [
+    "mur_beton",
+    "mur_tache",
+    "sol_beton",
+    "plinthe",
+    "comptoir",
+    "etagere",
+    "neon_magenta",
+    "terminal"
+  ]
+}
