@@ -28,9 +28,9 @@ Boucle de 60-90 min, horloge de 12 cycles, 8 fins, forte rejouabilité.
 - Pas de commentaires de code sauf si le *pourquoi* est non évident.
 - Anglicismes cyberpunk conservés : deck, glace/ICE, matrice, cowboy, flatline, simstim.
 - `npm run validate:narrative` doit passer avant tout commit touchant à `content/`.
-- Les fichiers `.ink` sont écrits **sans accents** (le compilateur les accepte, mais on évite
-  les soucis d'encodage dans la chaîne d'outils). Les accents sont réintroduits à l'affichage
-  si besoin — décision à trancher au Lot D.
+- Les fichiers `.ink` sont écrits en **français typographique complet** : accents, majuscules
+  accentuées, guillemets « » pour les dialogues. Vérifié sur inkjs 2.4.0 — l'UTF-8 traverse le
+  compilateur, les choix et les tags sans altération.
 
 ---
 

@@ -6,7 +6,10 @@ import path from 'node:path';
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: { '@': path.resolve(__dirname, 'src') },
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      '@data': path.resolve(__dirname, 'data'),
+    },
   },
   build: {
     // Les spritesheets doivent rester des fichiers : une spritesheet inlinee en
@@ -23,5 +26,6 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/unit/**/*.test.ts'],
+    setupFiles: ['tests/unit/setup.ts'],
   },
 });
