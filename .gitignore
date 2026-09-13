@@ -4,7 +4,12 @@ dist/
 *.log
 npm-debug.log*
 *.tsbuildinfo
+
+# Sorties des outils de verification visuelle.
+# captures/ est le dossier par defaut de tools/jouer.mjs : sans la barre
+# oblique, le motif ne couvrirait pas les fichiers qu'il contient.
 capture*.png
+captures/
 
 # JSON Ink compile depuis content/ink — artefact de build
 public/content/
