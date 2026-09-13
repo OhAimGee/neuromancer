@@ -1,8 +1,8 @@
 /* NEUROMANCER — palette et socle.
  *
  * PALETTE VERROUILLEE A 32 COULEURS. Elle est la reference unique : les memes
- * valeurs exactes sont chargees dans Aseprite pour tous les assets. Ne jamais
- * introduire une couleur hors de cette liste. */
+ * valeurs exactes sont chargees dans Aseprite (tools/aseprite/palette.lua) pour
+ * tous les assets. Ne jamais introduire une couleur hors de cette liste. */
 
 :root {
   /* Noirs et bleus nuit — fonds, ombres, profondeur */
@@ -55,12 +55,18 @@
   --w0: #e8eef5;
   --w1: #ffffff;
 
-  /* Resolution interne du jeu */
-  --vw: 320;
-  --vh: 180;
+  /* Echelle entiere, posee par React sur .viewport. --px vaut un pixel de jeu. */
+  --s: 4;
+  --px: calc(var(--s) * 1px);
 
   color-scheme: dark;
 }
+
+/* Jersey 10 pour la prose : condensee et tranchante, sa grille de 10 px tombe
+ * juste sur les echelles entieres. Silkscreen pour le HUD et les terminaux :
+ * bitmap strict, sur une grille de 8 px. Sortir de ces multiples fait baver les
+ * glyphes. Les deux sous-ensembles sont necessaires — latin-ext ne contient que
+ * le complement accentue, pas les lettres de base. */
 
 * {
   margin: 0;
@@ -72,18 +78,18 @@ html,
 body,
 #root {
   height: 100%;
-  background: var(--n0);
+  background: #000;
   color: var(--g3);
   overflow: hidden;
 }
 
 body {
-  font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  font-family: 'Jersey 10', ui-monospace, monospace;
+  /* Indispensable au rendu pixel : sans cela le navigateur lisse les glyphes. */
   -webkit-font-smoothing: none;
   font-smooth: never;
 }
 
-/* Le conteneur centre le viewport et peint les bandes noires du letterbox. */
 .stage {
   display: grid;
   place-items: center;
@@ -92,20 +98,25 @@ body {
   background: #000;
 }
 
-/* Viewport a la resolution interne. L'echelle entiere est appliquee par
- * transform, de sorte qu'un pixel du jeu reste un carre parfait de N x N. */
+/* Le viewport occupe la taille finale a l'ecran. Contrairement a l'approche
+ * precedente, il n'est PAS mis a l'echelle par transform : le texte serait
+ * re-rasterise en haute resolution et perdrait son aspect pixel. Chaque
+ * dimension est donc exprimee en multiples de --px. */
 .viewport {
   position: relative;
-  width: calc(var(--vw) * 1px);
-  height: calc(var(--vh) * 1px);
-  transform-origin: center center;
+  width: calc(320 * var(--px));
+  height: calc(180 * var(--px));
   background: var(--n1);
   overflow: hidden;
-  image-rendering: pixelated;
 }
 
-.viewport canvas,
-.viewport img {
+/* Le canvas Pixi, lui, rend bien en 320x180 et se laisse agrandir par le
+ * navigateur en plus proche voisin. */
+.viewport canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   image-rendering: pixelated;
   display: block;
 }
@@ -115,10 +126,10 @@ body {
 .boot {
   position: absolute;
   inset: 0;
-  padding: 10px 12px;
-  font-size: 7px;
-  line-height: 11px;
-  letter-spacing: 0.04em;
+  padding: calc(10 * var(--px)) calc(12 * var(--px));
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  line-height: calc(13 * var(--px));
   color: var(--c2);
   background: radial-gradient(circle at 50% 45%, var(--n2) 0%, var(--n0) 100%);
 }
@@ -126,7 +137,6 @@ body {
 .boot__line {
   white-space: pre;
 }
-
 .boot__ok {
   color: var(--v2);
 }
@@ -141,22 +151,23 @@ body {
 }
 
 .boot__title {
-  margin: 14px 0 2px;
-  font-size: 15px;
-  line-height: 18px;
-  letter-spacing: 0.18em;
+  margin: calc(14 * var(--px)) 0 calc(2 * var(--px));
+  font-family: 'Jersey 10', monospace;
+  font-size: calc(30 * var(--px));
+  line-height: calc(32 * var(--px));
+  letter-spacing: calc(2 * var(--px));
   color: var(--m3);
-  text-shadow: 0 0 6px var(--m1);
 }
 
 .boot__sub {
-  font-size: 7px;
-  letter-spacing: 0.22em;
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  letter-spacing: calc(1 * var(--px));
   color: var(--g0);
 }
 
 .boot__caret::after {
-  content: "\2588";
+  content: '\2588';
   animation: caret 1s steps(1) infinite;
   color: var(--c3);
 }
@@ -167,15 +178,6 @@ body {
   }
 }
 
-.filigrane {
-  position: fixed;
-  right: 8px;
-  bottom: 6px;
-  font-size: 10px;
-  color: var(--n4);
-  pointer-events: none;
-}
-
 /* --- Dialogue ----------------------------------------------------------- */
 
 .dlg {
@@ -184,20 +186,20 @@ body {
   display: flex;
   flex-direction: column;
   background: var(--n1);
-  font-size: 7px;
-  line-height: 10px;
 }
 
 .dlg__hud {
   display: flex;
   justify-content: space-between;
-  padding: 3px 5px;
-  border-bottom: 1px solid var(--n3);
-  background: var(--n0);
-  color: var(--g0);
-  font-size: 6px;
-  letter-spacing: 0.1em;
   flex: 0 0 auto;
+  padding: calc(3 * var(--px)) calc(5 * var(--px));
+  border-bottom: var(--px) solid var(--n3);
+  background: var(--n0);
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  /* 11 et non 10 : a 10 l'accent aigu des majuscules touche le bord. */
+  line-height: calc(11 * var(--px));
+  color: var(--g0);
 }
 .dlg__hud b {
   color: var(--c2);
@@ -211,24 +213,26 @@ body {
 }
 
 .dlg__portrait {
-  flex: 0 0 46px;
-  margin: 5px 0 5px 5px;
-  height: 58px;
+  flex: 0 0 calc(48 * var(--px));
+  height: calc(60 * var(--px));
+  margin: calc(5 * var(--px)) 0 0 calc(5 * var(--px));
   display: grid;
   place-items: center;
-  border: 1px solid var(--n4);
+  border: var(--px) solid var(--n4);
   background: linear-gradient(160deg, var(--n3), var(--n2));
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(7 * var(--px));
   color: var(--g1);
-  font-size: 6px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
 
 .dlg__journal {
   flex: 1 1 auto;
   min-width: 0;
   overflow-y: auto;
-  padding: 5px 6px 6px;
+  padding: calc(4 * var(--px)) calc(6 * var(--px)) calc(6 * var(--px));
+  font-size: calc(10 * var(--px));
+  line-height: calc(12 * var(--px));
   scrollbar-width: none;
 }
 .dlg__journal::-webkit-scrollbar {
@@ -236,39 +240,46 @@ body {
 }
 
 .dlg__ligne {
-  margin-bottom: 4px;
+  margin-bottom: calc(4 * var(--px));
   color: var(--g2);
   text-wrap: pretty;
 }
 
-/* La replique choisie par le joueur, reaffichee par Ink. */
+/* La replique choisie par le joueur, reaffichee par Ink. Le tiret de dialogue
+ * est ajoute ici plutot que dans le contenu : le meme texte sert d'etiquette de
+ * bouton, ou le tiret n'aurait pas de sens. */
 .dlg__ligne--replique {
   color: var(--c3);
-  padding-left: 5px;
-  border-left: 1px solid var(--c1);
+  padding-left: calc(4 * var(--px));
+  border-left: var(--px) solid var(--c1);
+}
+.dlg__ligne--replique::before {
+  content: '— ';
 }
 
 .dlg__choix {
-  margin-top: 6px;
-  border-top: 1px solid var(--n3);
-  padding-top: 5px;
+  margin-top: calc(5 * var(--px));
+  padding-top: calc(4 * var(--px));
+  border-top: var(--px) solid var(--n3);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--px);
 }
 
 .dlg__bouton {
   display: flex;
-  gap: 3px;
+  gap: calc(3 * var(--px));
   align-items: baseline;
   width: 100%;
   text-align: left;
-  padding: 2px 3px;
+  padding: var(--px) calc(3 * var(--px));
   border: 0;
-  border-left: 1px solid transparent;
+  border-left: var(--px) solid transparent;
   background: transparent;
   color: var(--g3);
-  font: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
   cursor: pointer;
 }
 .dlg__bouton:hover:not(:disabled),
@@ -285,38 +296,50 @@ body {
 
 .dlg__etq {
   flex: 0 0 auto;
-  font-size: 6px;
-  letter-spacing: 0.06em;
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(7 * var(--px));
 }
 
 .dlg__cout {
   flex: 0 0 auto;
   margin-left: auto;
-  padding-left: 4px;
+  padding-left: calc(4 * var(--px));
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(7 * var(--px));
   color: var(--o1);
-  font-size: 6px;
 }
 
 .dlg__fin {
-  margin-top: 8px;
-  color: var(--n4);
+  margin-top: calc(8 * var(--px));
   text-align: center;
-  letter-spacing: 0.12em;
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  color: var(--n4);
 }
 
 /* Scanlines — desactivables (accessibilite : risque photosensible). */
 .scanlines::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.22) 0px,
-    rgba(0, 0, 0, 0.22) 1px,
-    transparent 1px,
-    transparent 2px
+    rgba(0, 0, 0, 0.22) 0,
+    rgba(0, 0, 0, 0.22) var(--px),
+    transparent var(--px),
+    transparent calc(2 * var(--px))
   );
+}
+
+.filigrane {
+  position: fixed;
+  right: 8px;
+  bottom: 6px;
+  font-family: 'Silkscreen', monospace;
+  font-size: 8px;
+  color: var(--n4);
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

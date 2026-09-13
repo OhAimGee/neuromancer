@@ -67,7 +67,7 @@ export function App() {
     <div className="stage">
       <div
         className={scanlines ? 'viewport scanlines' : 'viewport'}
-        style={{ transform: `scale(${scale})` }}
+        style={{ '--s': scale } as React.CSSProperties}
       >
         {lance && moteur ? (
           <Dialogue moteur={moteur} />

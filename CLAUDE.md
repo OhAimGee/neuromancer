@@ -28,9 +28,14 @@ Boucle de 60-90 min, horloge de 12 cycles, 8 fins, forte rejouabilité.
 - Pas de commentaires de code sauf si le *pourquoi* est non évident.
 - Anglicismes cyberpunk conservés : deck, glace/ICE, matrice, cowboy, flatline, simstim.
 - `npm run validate:narrative` doit passer avant tout commit touchant à `content/`.
-- Les fichiers `.ink` sont écrits en **français typographique complet** : accents, majuscules
-  accentuées, guillemets « » pour les dialogues. Vérifié sur inkjs 2.4.0 — l'UTF-8 traverse le
-  compilateur, les choix et les tags sans altération.
+- Les fichiers `.ink` sont écrits en **français typographique complet** : accents et majuscules
+  accentuées. Vérifié sur inkjs 2.4.0 — l'UTF-8 traverse le compilateur, les choix et les tags
+  sans altération.
+- **Dialogue au tiret cadratin `—`, jamais de guillemets `« »`** : Jersey 10 rend `«` et `»`
+  sous la forme de doubles chevrons `<<` `>>`. Le tiret cadratin est à la fois la convention
+  française correcte et le seul rendu propre en pixel. Les répliques du joueur s'écrivent **sans
+  tiret** dans le `.ink` — le même texte sert d'étiquette de bouton, où le tiret n'aurait pas de
+  sens ; c'est la règle CSS `.dlg__ligne--replique::before` qui l'ajoute à l'affichage.
 
 ---
 
@@ -125,6 +130,28 @@ dpkg -x libasound2t64_*.deb extracted
 ## Direction artistique
 
 - Résolution interne **320×180**, mise à l'échelle **entière** uniquement (×4, ×6) + letterbox.
+
+### Texte pixel — pourquoi pas de `transform: scale()`
+
+La couche DOM n'est **jamais** mise à l'échelle par `transform`. Le navigateur re-rastériserait
+le texte à la résolution finale et le rendrait lisse, ruinant l'aspect pixel. À la place,
+React pose `--s` (l'échelle entière) sur `.viewport`, et **toute** dimension s'exprime en
+multiples de `--px` (`calc(10 * var(--px))`). Le canvas Pixi, lui, rend bien en 320×180 et se
+laisse agrandir par le navigateur en `image-rendering: pixelated`.
+
+Deux polices, chacune sur sa grille — sortir de ces multiples fait baver les glyphes :
+
+| Police | Rôle | Grille | Tailles valides |
+|---|---|---|---|
+| **Jersey 10** | Prose, dialogues, choix | 10 px | `calc(10 * var(--px))`, `calc(20 * var(--px))`… |
+| **Silkscreen** | HUD, étiquettes, terminaux | 8 px | `calc(8 * var(--px))`, `calc(16 * var(--px))`… |
+
+`-webkit-font-smoothing: none` et `font-smooth: never` sont obligatoires sur `body`.
+
+**Chaque police charge ses DEUX sous-ensembles** (`latin-400.css` et `latin-ext-400.css`) :
+`latin-ext` ne contient que le complément accentué. Sans `latin`, certaines lettres de base
+retombent silencieusement sur une police système — le défaut est discret mais très visible sur
+le « A ».
 - **Palette verrouillée à 32 couleurs**, définie dans `src/styles.css` (`--n0`…`--w1`) et
   reprise à l'identique dans Aseprite. Ne pas introduire de couleur hors palette.
 - Décors composés depuis des **tilesets 16×16** via des tilemaps JSON, jamais des images

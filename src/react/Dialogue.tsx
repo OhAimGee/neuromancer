@@ -35,8 +35,8 @@ export function Dialogue({ moteur }: { moteur: MoteurDialogue }) {
         <span>
           CYCLES <b>{cycles}</b>
         </span>
-        <span className="dlg__hud-droite">
-          HUMANITE <b>{humanite}</b>
+        <span>
+          HUMANITÉ <b>{humanite}</b>
         </span>
       </div>
 
@@ -81,7 +81,7 @@ export function Dialogue({ moteur }: { moteur: MoteurDialogue }) {
             </div>
           )}
 
-          {etat.termine && <p className="dlg__fin">— FIN DE SCENE —</p>}
+          {etat.termine && <p className="dlg__fin">— FIN DE SCÈNE —</p>}
         </div>
       </div>
     </div>
