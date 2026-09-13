@@ -131,6 +131,35 @@ dpkg -x libasound2t64_*.deb extracted
   plein écran dessinées au pixel.
 - Bascule d'accessibilité obligatoire pour glitch et scanlines (risque photosensible réel).
 
+### Pipeline d'assets — MCP Aseprite
+
+Le serveur `pixel-mcp` expose **50 outils** (vérifié par sonde stdio, pas par la doc, qui en
+documente 26). Il n'expose **pas** de scripting Lua, mais il expose bien plus que du dessin :
+
+- **Dessin** : `draw_pixels` (par lot, `{x,y,color}` en `#RRGGBBAA`), `draw_line`,
+  `draw_rectangle`, `draw_circle`, `draw_contour`, `fill_area`, `draw_with_dither`
+- **Import/export** : `import_image`, `get_pixels`, `export_sprite`, `export_spritesheet`,
+  `save_as`, `downsample_image`
+- **Sélection** : `select_rectangle`, `select_ellipse`, `copy_selection`, `paste_clipboard`,
+  `move_selection` — permet de composer des tuiles sans les redessiner
+- **Transformation** : `scale_sprite`, `resize_canvas`, `crop_sprite`, `flip_sprite`,
+  `rotate_sprite`
+- **Palette** : `set_palette`, `set_palette_color`, `add_palette_color`, `sort_palette`,
+  `quantize_palette`, `analyze_palette_harmonies`
+- **Assistance** : `apply_shading`, `apply_auto_shading`, `apply_outline`,
+  `suggest_antialiasing`, `analyze_reference`
+- **Animation** : `add_frame`, `duplicate_frame`, `set_frame_duration`, `create_tag`, `link_cel`
+
+**Conséquence sur la méthode** : `import_image` ouvre une voie bien plus rapide que le dessin
+pixel par pixel pour les assets denses — générer le PNG par programme, puis l'importer. Réserver
+`draw_pixels` aux retouches et aux petits éléments. Pour les décors, produire des tuiles puis
+composer par tilemap reste la règle.
+
+**Si les outils `mcp__aseprite__*` sont absents** : le serveur avait échoué à se connecter au
+démarrage d'une session parce que `~/.config/pixel-mcp/config.json` n'existait pas encore, et
+l'échec est mis en cache. Le binaire fonctionne (sonde stdio concluante) ; il suffit de
+redémarrer Claude Code.
+
 ## Limites du contenu
 
 Registre du roman : violence brève, clinique, sans complaisance. Drogues, prostitution, body
