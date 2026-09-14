@@ -125,10 +125,31 @@ planche('items_scripts', {
   },
 })
 
--- ----------------------------------------------------------------- PLANS --
--- Ce sont des PLANS voles, pas des implants poses : chacun se dessine sur le
--- meme fond de calque cyan, comme une fiche technique.
+-- ----------------------------------------------------- PLANS ET IMPLANTS --
+-- Le meme sujet dessine deux fois. Un PLAN est une fiche technique volee :
+-- cadre cyan, fond vide, on le lit. Un IMPLANT est la meme chose une fois
+-- posee : plus de cadre, et de la chair autour. Le joueur doit voir d'un coup
+-- d'oeil la difference entre ce qu'il possede et ce qu'il est devenu.
+--
+-- Les six corps sont ecrits une seule fois : deux planches qui divergeraient
+-- montreraient deux objets differents pour un seul identifiant.
 
+local CORPS = {
+  -- bande_passante : un tuyau qui s'elargit.
+  { '...........', '..lll......', '.lllllll...', 'lllllllllll', '.lllllll...', '..lll......', '...........', '...........', '.iiiiiiiii.', '...........' },
+  -- reflexes_neuraux : un arc nerveux.
+  { '.....l.....', '....lll....', '...l.l.l...', '..l..l..l..', '.l...l...l.', '.....l.....', '...lllll...', '..l.....l..', '...........', '.iiiiiiiii.' },
+  -- coprocesseur : une puce a pattes.
+  { '...........', '..l.l.l.l..', '.lllllllll.', '.l.......l.', '.l.lllll.l.', '.l.l...l.l.', '.l.lllll.l.', '.lllllllll.', '..l.l.l.l..', '...........' },
+  -- filtre_noir : une grille devant une source.
+  { '...........', '...vvvvv...', '..v.....v..', '.l.l.l.l.l.', '.l.l.l.l.l.', '.l.l.l.l.l.', '.l.l.l.l.l.', '..v.....v..', '...vvvvv...', '...........' },
+  -- lentilles_molly : la bande miroir, en coupe.
+  { '...........', '...........', '.lllllllll.', 'lzzzzzzzzzl', 'lzcccccccbl', 'lzbbbbbbbbl', '.lllllllll.', '...........', '.i.......i.', '...........' },
+  -- glandes_toxiques : deux sacs et un conduit. C'est ce qu'on t'a pose.
+  { '...........', '...uu.uu...', '..uvvuvvu..', '..uvvuvvu..', '...uu.uu...', '.....u.....', '.....u.....', '....uuu....', '...u...u...', '...........' },
+}
+
+--- Le plan : une fiche encadree, posee a plat.
 local function fiche(corps)
   local lignes = {
     'kkkkkkkkkkkkkkk.',
@@ -141,17 +162,29 @@ local function fiche(corps)
   return lignes
 end
 
-planche('items_plans', {
-  -- bande_passante : un tuyau qui s'elargit.
-  fiche({ '...........', '..lll......', '.lllllll...', 'lllllllllll', '.lllllll...', '..lll......', '...........', '...........', '.iiiiiiiii.', '...........' }),
-  -- reflexes_neuraux : un arc nerveux.
-  fiche({ '.....l.....', '....lll....', '...l.l.l...', '..l..l..l..', '.l...l...l.', '.....l.....', '...lllll...', '..l.....l..', '...........', '.iiiiiiiii.' }),
-  -- coprocesseur : une puce a pattes.
-  fiche({ '...........', '..l.l.l.l..', '.lllllllll.', '.l.......l.', '.l.lllll.l.', '.l.l...l.l.', '.l.lllll.l.', '.lllllllll.', '..l.l.l.l..', '...........' }),
-  -- filtre_noir : une grille devant une source.
-  fiche({ '...........', '...vvvvv...', '..v.....v..', '.l.l.l.l.l.', '.l.l.l.l.l.', '.l.l.l.l.l.', '.l.l.l.l.l.', '..v.....v..', '...vvvvv...', '...........' }),
-  -- lentilles_molly : la bande miroir, en coupe.
-  fiche({ '...........', '...........', '.lllllllll.', 'lzzzzzzzzzl', 'lzcccccccbl', 'lzbbbbbbbbl', '.lllllllll.', '...........', '.i.......i.', '...........' }),
-  -- glandes_toxiques : deux sacs et un conduit. C'est ce qu'on t'a pose.
-  fiche({ '...........', '...uu.uu...', '..uvvuvvu..', '..uvvuvvu..', '...uu.uu...', '.....u.....', '.....u.....', '....uuu....', '...u...u...', '...........' }),
-})
+--- L'implant pose : le meme objet, enchasse dans de la chair.
+--
+-- Le cyan du corps reste : c'est la piece. Ce qui change est autour — une
+-- logette de peau et son ombre. Un implant pose n'est pas un objet qu'on a,
+-- c'est un objet qu'on porte.
+local function pose(corps)
+  local lignes = {
+    '................',
+    '...wwwwwwwwww...',
+    '.wwxxxxxxxxxxww.',
+  }
+  for _, l in ipairs(corps) do lignes[#lignes + 1] = 'wx' .. l .. 'xw.' end
+  lignes[#lignes + 1] = '.wwxxxxxxxxxxww.'
+  lignes[#lignes + 1] = '...wwwwwwwwww...'
+  lignes[#lignes + 1] = '................'
+  return lignes
+end
+
+local plans, implants = {}, {}
+for i, corps in ipairs(CORPS) do
+  plans[i] = fiche(corps)
+  implants[i] = pose(corps)
+end
+
+planche('items_plans', plans)
+planche('items_implants', implants)

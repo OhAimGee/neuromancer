@@ -1,0 +1,62 @@
+{
+  "_note": "La pose d'implants, chez le Finn. Un implant se paie trois fois : en credits, en cycles d'horloge, et en humanite — le corps rendu a la corpo qui l'a concu. L'ordre de cette liste fait foi : items_implants est indexe dessus.",
+
+  "_effets": "competence : ajoutee au hacking le temps d'une plongee. traceMax : plafond de trace repousse. cyclesParTicks : plus il est haut, moins une plongee coute de cycles. filtres : frappes de glace noire absorbees, une par filtre. Un effet vide veut dire que l'implant n'ouvre que des repliques.",
+
+  "implants": [
+    {
+      "id": "bande_passante",
+      "nom": "BANDE PASSANTE",
+      "resume": "Le temps de la matrice s'etire. On y reste plus longtemps pour le meme prix.",
+      "coutCredits": 1400,
+      "coutCycles": 1,
+      "coutHumanite": 4,
+      "effet": { "cyclesParTicks": 8 }
+    },
+    {
+      "id": "reflexes_neuraux",
+      "nom": "REFLEXES NEURAUX",
+      "resume": "On sent la trace monter avant qu'elle ne morde. Le plafond recule.",
+      "coutCredits": 1800,
+      "coutCycles": 1,
+      "coutHumanite": 6,
+      "effet": { "traceMax": 30 }
+    },
+    {
+      "id": "coprocesseur",
+      "nom": "COPROCESSEUR",
+      "resume": "Un rang de glace de plus a la portee des memes scripts.",
+      "coutCredits": 2400,
+      "coutCycles": 2,
+      "coutHumanite": 8,
+      "effet": { "competence": 1 }
+    },
+    {
+      "id": "filtre_noir",
+      "nom": "FILTRE NOIR",
+      "resume": "La premiere frappe de glace noire passe a travers. La deuxieme, non.",
+      "coutCredits": 3000,
+      "coutCycles": 2,
+      "coutHumanite": 10,
+      "effet": { "filtres": 1 }
+    },
+    {
+      "id": "lentilles_molly",
+      "nom": "LENTILLES MIROIR",
+      "resume": "Plus personne ne lit rien sur ce visage. Sable non plus.",
+      "coutCredits": 2000,
+      "coutCycles": 1,
+      "coutHumanite": 12,
+      "effet": {}
+    },
+    {
+      "id": "glandes_toxiques",
+      "nom": "GLANDES TOXIQUES",
+      "resume": "Deux sacs sous la langue. Ce qu'on crache tue.",
+      "coutCredits": 2600,
+      "coutCycles": 1,
+      "coutHumanite": 14,
+      "effet": {}
+    }
+  ]
+}

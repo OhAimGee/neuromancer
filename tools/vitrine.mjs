@@ -130,6 +130,40 @@ const panneau = async (ouvrir, racine, nom) => {
 await panneau(() => page.keyboard.press('Tab'), '.etat', 'etat');
 await panneau(() => page.locator('.opt__ouvrir:not(.opt__ouvrir--fiche)').click(), '.opt', 'options');
 
+// 6 bis. La meme fiche, une fois que des plans ont ete voles et montes.
+//
+// L'etat est POSE et non joue : le butin d'une plongee est tire au sort, et un
+// outil qui attendrait de piller trois plans precis serait une loterie, pas une
+// capture. Ce qu'on verifie ici est l'affichage — l'ordre des vignettes, le
+// filtre qui empeche un plan deja pose de figurer deux fois — et la logique de
+// la pose est couverte par les tests unitaires. L'etat injecte est retire
+// aussitot : les captures suivantes doivent montrer une partie ordinaire.
+const posable = await page.evaluate(() => {
+  if (!window.__runStore) return false;
+  const run = window.__runStore.getState();
+  for (const id of ['coprocesseur', 'filtre_noir', 'lentilles_molly']) run.acquerir('plans', id);
+  for (const id of ['coprocesseur', 'lentilles_molly']) run.acquerir('implants', id);
+  return true;
+});
+if (!posable) {
+  console.error('sonde __runStore absente : capture des implants impossible');
+  process.exitCode = 1;
+} else {
+  // La fiche depasse la hauteur de la vue et defile : ouverte en haut, elle
+  // couperait justement les deux sections qu'on vient capturer.
+  await page.keyboard.press('Tab');
+  await page.waitForSelector('.etat', { timeout: 3000 });
+  await page.evaluate(() => {
+    const f = document.querySelector('.etat');
+    if (f) f.scrollTop = f.scrollHeight;
+  });
+  await page.waitForTimeout(250);
+  await capturer('implants');
+  await page.locator('.etat .net__bouton').last().click();
+  await page.waitForSelector('.etat', { state: 'detached', timeout: 3000 });
+  await page.evaluate(() => window.__runStore.setState({ plans: [], implants: [] }));
+}
+
 // 7. Le cyberespace, une fois branche et deux noeuds plus loin.
 // Le voile de branchement ne dure que six dixiemes de seconde : on ne le
 // capture pas en le poursuivant, on se contente de verifier qu'il est bien

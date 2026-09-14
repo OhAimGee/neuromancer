@@ -134,6 +134,24 @@ Quatre types de butin, dont un seul compte vraiment :
 Le quatrième est la clé de voûte : c'est lui qui empêche le hacking d'être un mini-jeu
 décoratif. Voler un dossier médical débloque l'option de confronter quelqu'un avec.
 
+### Les plans volés deviennent de la chair
+
+Un plan n'est pas une ligne d'inventaire : c'est un rendez-vous sur la paillasse du Finn. Il s'y
+paie **trois fois** — en crédits, en cycles d'horloge, et en **humanité**, la seule des trois
+monnaies qu'on ne regagne jamais.
+
+Quatre des six implants changent la matrice : le coprocesseur rend un rang de glace, les réflexes
+neuraux repoussent le plafond où la trace mord, la bande passante étire le temps d'une plongée,
+et le filtre noir encaisse la première frappe — la première. Les deux derniers ne changent rien
+à une plongée et ouvrent des répliques que rien d'autre n'ouvre : c'est à ça que sert
+l'étiquette `[IMPLANT]`.
+
+Le validateur refuse depuis qu'un plan pillable qu'aucun atelier ne sait poser reste dans les
+données — c'est la même règle que pour les infos, et c'est l'état dans lequel le jeu a vécu
+plusieurs lots : six plans volables, aucune paillasse.
+
+![La fiche, plans volés et implants posés](docs/images/implants.png)
+
 ![Le cyberespace](docs/images/cyberespace.png)
 
 Le passage d'un côté à l'autre du câble se voit : un voile de bandes horizontales pince l'image
@@ -332,7 +350,8 @@ Chaque contrôle a été vérifié contre une faute introduite volontairement.
 
 ## État d'avancement
 
-Tranche verticale en cours. Ce qui tourne aujourd'hui :
+La tranche verticale est dépassée : trois actes, huit fins, et tous les systèmes du plan
+initial branchés les uns aux autres. Ce qui tourne aujourd'hui :
 
 - [x] Chaîne Ink complète, sans dépendance .NET
 - [x] Moteur de dialogue : jauges cachées, quatre paliers, étiquettes, coûts
@@ -354,6 +373,7 @@ Tranche verticale en cours. Ce qui tourne aujourd'hui :
 - [x] La pluie de Ninsei — une tuile de 16 px, déplacée au pixel par le CSS
 - [x] Transition de branchement et carton de mort par glace noire
 - [x] Scènes de friction par paire d'équipiers — six paires écrites, une par partie
+- [x] **Les implants** : plans volés posés chez le Finn, effets en plongée, répliques `[IMPLANT]`
 
 ---
 

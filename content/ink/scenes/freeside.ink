@@ -70,6 +70,21 @@ Au bout du fuseau, là où la lumière artificielle n'allait plus, il y avait la
     Sable y rampa sur trente mètres en écoutant sa propre respiration, et personne ne sut jamais qu'il était passé.
     -> percee
 
++ { has_implant("lentilles_molly") } Traverser le contrôle sans regarder personne. # etq:IMPLANT # cout_cycles:1
+    ~ cycles_restants -= 1
+    ~ approche_mode = "social"
+    Les lentilles ne rendaient pas invisible. Elles rendaient illisible, ce qui va plus loin : un garde qui ne lit rien invente, et il invente toujours quelque chose d'inoffensif.
+    Celui-ci décida que Sable était un sous-traitant en retard. Il lui tint même la porte.
+    -> percee
+
++ { has_implant("glandes_toxiques") } Laisser le garde s'approcher. # etq:IMPLANT # cout_humanite:8
+    ~ humanite -= 8
+    ~ approche_mode = "violence"
+    ~ sang_verse = true
+    Il fallut le laisser venir à trois pas, sourire, et cracher. L'homme eut le temps de comprendre, pas celui de crier.
+    Sable resta un moment au-dessus du corps, la bouche pleine d'un goût de métal, à se dire que le Finn l'avait prévenu du goût et pas du reste.
+    -> percee
+
 + { crew_present("molly") } Laisser Molly ouvrir la porte à sa manière. # etq:ACTION # cout_humanite:10
     ~ humanite -= 10
     ~ approche_mode = "violence"
@@ -104,6 +119,10 @@ Une glace de rang Kuang ne vous repousse pas. Elle vous laisse entrer, elle pren
     -> percee_dixie
 
 + { kuang_en_main } Charger le Kuang et se brancher. # etq:ACTION
+    -> percee_plongee
+
++ { has_implant("coprocesseur") && not kuang_en_main } Se brancher, et laisser le coprocesseur faire la différence. # etq:IMPLANT
+    Le coprocesseur ne cassait pas la glace à sa place. Il lui rendait un rang, et un rang, contre du Kuang, c'est la différence entre lire et être lu.
     -> percee_plongee
 
 + Se brancher sans rien de plus. # etq:ACTION

@@ -198,6 +198,42 @@ paire dans `runStore` puis `reprendre('freeside')`.
 
 ---
 
+## Les implants — ce qui relie le pillage au reste du jeu
+
+Un plan vole est un butin mort tant qu'aucun atelier ne sait le monter. La chaine complete tient
+en quatre maillons, et il suffit qu'un seul lache pour que le hacking redevienne decoratif :
+
+| Maillon | Ou |
+|---|---|
+| Le plan se pille | `data/hacking.json` → `plans`, tire par le butin des BDD |
+| Le recit le voit | `a_plan("<id>")`, lu dans `scenes/finn.ink` |
+| La pose l'ecrit | `poser_implant("<id>")` → `runStore.implants` |
+| L'effet s'applique | `data/implants.json` → `src/hacking/implants.ts`, lu par `demarrer()` |
+
+- **Les effets sont figes au branchement**, comme la competence : `demarrer()` est le seul endroit
+  qui lit les implants. `traceMax`, `cyclesParTicks` et `filtres` vivent donc dans `EtatSession`
+  et non dans `data/hacking.json` — un implant les deplace. Relire `donnees.trace.max` dans
+  `tracer()` annulerait silencieusement les reflexes neuraux ; un test le verrouille.
+- **Le prix se preleve dans le corps du choix, en clair** (`~ credits -= 2400`), parce que le
+  validateur compare le cout affiche a l'arithmetique Ink. Un `poser_implant()` qui prelevererait
+  lui-meme rendrait ce controle aveugle.
+- **Un plan reste au dossier apres la pose** : c'est de l'information volee, pas une piece
+  consommee. C'est `has_implant()` qui empeche de poser deux fois, et la fiche de partie filtre
+  les plans deja montes pour ne pas afficher le meme objet dans deux sections.
+- **L'etiquette `[IMPLANT]` decrit une porte que seul un implant DEJA pose ouvre**
+  (`data/gloses.json`). Elle n'a rien a faire sur un choix d'achat — la mettre la etait la
+  premiere version, et elle contredisait la glose que le jeu affiche au joueur.
+- `npm run validate:narrative` refuse desormais un plan pillable qu'aucun `a_plan()` ne monte et
+  un implant de `data/implants.json` qu'aucun `poser_implant()` n'appelle. Les deux controles ont
+  ete verifies contre des fautes introduites volontairement.
+- **Sonde de developpement `window.__runStore`** (comme `window.__noeudsVisibles`) : l'etat de
+  partie est jetable et ne passe pas par `localStorage` au demarrage, donc un outil de
+  verification n'a aucun autre moyen de poser un butin avant d'ouvrir l'atelier. `vitrine.mjs`
+  s'en sert pour la capture de la fiche, et remet les listes a vide aussitot apres. Retiree du
+  build.
+
+---
+
 ## Architecture
 
 - **Vite + TypeScript + React 19** — DOM pour dialogues, HUD, menus

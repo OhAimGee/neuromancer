@@ -158,6 +158,38 @@ if (infosMortes.length > 0) {
   );
 }
 
+// Meme regle pour les plans. Un plan volable qu'aucun atelier ne sait poser est
+// exactement le meme butin mort qu'une info que personne ne lit, et c'est la
+// forme qu'avait le jeu jusqu'au lot des implants : six plans pillables, aucune
+// paillasse pour les monter.
+const plansPosables = new Set(
+  [...sourcesInk.matchAll(/a_plan\(\s*"([^"]+)"\s*\)/g)].map((m) => m[1]),
+);
+const plansMorts = hacking.plans.filter((id) => !plansPosables.has(id));
+if (plansMorts.length > 0) {
+  erreurs.push(
+    `dette narrative : ${plansMorts.length}/${hacking.plans.length} plans pillables ne sont ` +
+    `poses par aucun a_plan() dans content/ink — ${plansMorts.join(', ')}`,
+  );
+}
+
+// Et l'inverse : un implant decrit dans data/implants.json que rien ne pose est
+// une ligne d'equilibrage qui ne s'applique jamais.
+const implantsData = JSON.parse(
+  fs.readFileSync(path.join(RACINE, 'data/implants.json'), 'utf-8'),
+);
+const implantsPoses = new Set(
+  [...sourcesInk.matchAll(/poser_implant\(\s*"([^"]+)"\s*\)/g)].map((m) => m[1]),
+);
+const implantsOrphelins = implantsData.implants
+  .map((i) => i.id)
+  .filter((id) => !implantsPoses.has(id));
+if (implantsOrphelins.length > 0) {
+  erreurs.push(
+    `implants jamais poses par le recit : ${implantsOrphelins.join(', ')}`,
+  );
+}
+
 // --- Passe dynamique : fuzzing --------------------------------------------
 
 const { json, errors, warnings } = compileInk();
@@ -267,6 +299,18 @@ function jouerUnePartie(permissif = false) {
   });
   lier('skill', () => (permissif ? 3 : 1 + Math.floor(dé() * 3)));
   lier('has_implant', () => (permissif ? true : dé() < 0.3));
+  // Tire une fois par partie, comme les connaissances : un plan qu'on a puis
+  // qu'on n'a plus ne decrirait aucun joueur. C'est ce qui fait entrer
+  // l'atelier du Finn dans la passe aleatoire — sans lui, les six choix de
+  // pose ne seraient jamais joues.
+  const plans = new Map();
+  lier('a_plan', (id) => {
+    if (permissif) return true;
+    const cle = String(id);
+    if (!plans.has(cle)) plans.set(cle, dé() < 0.4);
+    return plans.get(cle);
+  });
+  lier('poser_implant', () => 0);
   lier('crew_present', () => (permissif ? true : dé() < 0.3));
   lier('learn', () => 0);
   lier('resolve_scene', () => 0);

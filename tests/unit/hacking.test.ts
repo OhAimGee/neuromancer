@@ -249,3 +249,82 @@ describe('journal de plongée', () => {
     }
   });
 });
+
+describe('implants — ce que la chair change dans la matrice', () => {
+  const graphe = genererGraphe('chatsubo', 'implants');
+
+  it('cumule les effets de plusieurs implants au branchement', () => {
+    const nu = demarrer(graphe, 1, TOUS_SCRIPTS);
+    const equipe = demarrer(graphe, 1, TOUS_SCRIPTS, [
+      'coprocesseur',
+      'reflexes_neuraux',
+      'bande_passante',
+      'filtre_noir',
+    ]);
+    expect(equipe.competence).toBe(nu.competence + 1);
+    expect(equipe.traceMax).toBe(nu.traceMax + 30);
+    expect(equipe.cyclesParTicks).toBe(nu.cyclesParTicks + 8);
+    expect(equipe.filtres).toBe(1);
+  });
+
+  it('un implant sans effet de plongee ne change rien', () => {
+    const nu = demarrer(graphe, 1, TOUS_SCRIPTS);
+    const pose = demarrer(graphe, 1, TOUS_SCRIPTS, ['lentilles_molly', 'glandes_toxiques']);
+    expect(pose.competence).toBe(nu.competence);
+    expect(pose.traceMax).toBe(nu.traceMax);
+    expect(pose.filtres).toBe(0);
+  });
+
+  // La regle qui se casse en silence : si `tracer` relisait donnees.trace.max
+  // au lieu de e.traceMax, le plafond repousse ne servirait a rien et la
+  // riposte frapperait quand meme a 100.
+  it('le filtre noir absorbe la première riposte, et une seule', () => {
+    // On pose la trace au bord du plafond plutot que d'y monter pas a pas :
+    // le chemin importe peu ici, c'est le franchissement qui est teste.
+    const auBord = (e: ReturnType<typeof demarrer>) => ({ ...e, trace: e.traceMax - 1 });
+    const passage = (e: ReturnType<typeof demarrer>) => {
+      const voisin = courant(e).voisins.find((id) => {
+        const t = e.graphe.noeuds[id]?.type;
+        return t === 'relais' || t === 'bdd';
+      });
+      expect(voisin).toBeDefined();
+      return deplacer(auBord(e), voisin as string);
+    };
+
+    const premiere = passage(demarrer(graphe, 3, TOUS_SCRIPTS, ['filtre_noir']));
+    expect(premiere.journal.map((ev) => ev.code)).toContain('filtre_absorbe');
+    expect(premiere.filtres).toBe(0);
+    expect(premiere.integrite).toBe(donnees.integrite.max);
+
+    // Filtre consomme : la frappe suivante entame l'integrite.
+    const seconde = passage(premiere);
+    expect(seconde.journal.map((ev) => ev.code)).toContain('riposte');
+    expect(seconde.integrite).toBeLessThan(donnees.integrite.max);
+
+    // Et sans filtre, la premiere frappe passe deja.
+    const nu = passage(demarrer(graphe, 3, TOUS_SCRIPTS));
+    expect(nu.journal.map((ev) => ev.code)).toContain('riposte');
+    expect(nu.integrite).toBeLessThan(donnees.integrite.max);
+  });
+
+  // Sans cette assertion, remettre `donnees.trace.max` dans `tracer` passerait
+  // inapercu : le test du filtre ne joue qu'avec le plafond par defaut.
+  it('les réflexes neuraux repoussent le plafond où la glace riposte', () => {
+    const e = demarrer(graphe, 3, TOUS_SCRIPTS, ['reflexes_neuraux']);
+    const voisin = courant(e).voisins.find((id) => {
+      const t = e.graphe.noeuds[id]?.type;
+      return t === 'relais' || t === 'bdd';
+    });
+    const auPlafondNu = deplacer({ ...e, trace: donnees.trace.max - 1 }, voisin as string);
+    expect(auPlafondNu.trace).toBeGreaterThanOrEqual(donnees.trace.max);
+    expect(auPlafondNu.journal.map((ev) => ev.code)).not.toContain('riposte');
+    expect(auPlafondNu.integrite).toBe(donnees.integrite.max);
+
+    const auVraiPlafond = deplacer({ ...e, trace: e.traceMax - 1 }, voisin as string);
+    expect(auVraiPlafond.journal.map((ev) => ev.code)).toContain('riposte');
+  });
+
+  it('chaque code de journal des implants a une formulation', () => {
+    expect(Object.keys(journal)).toContain('filtre_absorbe');
+  });
+});

@@ -154,3 +154,13 @@ export const useRunStore = create<RunEtat & RunActions>()(
     },
   ),
 );
+
+// Sonde de developpement, comme `window.__noeudsVisibles` cote cyberespace :
+// l'etat de partie est jetable et ne passe pas par localStorage au demarrage,
+// donc un outil de verification n'a aucun autre moyen de poser un butin avant
+// d'ouvrir l'atelier du Finn. Retiree du build.
+// `typeof window` et pas seulement DEV : ce bloc s'execute au chargement du
+// module, et les tests unitaires tournent sans DOM.
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as unknown as Record<string, unknown>)['__runStore'] = useRunStore;
+}

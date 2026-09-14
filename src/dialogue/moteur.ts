@@ -169,6 +169,15 @@ export class MoteurDialogue {
       return 0;
     }) as never);
 
+    // Le plan vole est la condition d'entree de l'atelier du Finn : c'est ce
+    // qui relie le pillage a autre chose qu'un solde de credits.
+    lier('a_plan', ((id: string) => useRunStore.getState().plans.includes(String(id))) as never);
+
+    lier('poser_implant', ((id: string) => {
+      useRunStore.getState().acquerir('implants', String(id));
+      return 0;
+    }) as never);
+
     lier('learn', ((id: string) => {
       useProfileStore.getState().apprendre(String(id));
       return 0;

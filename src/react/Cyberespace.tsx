@@ -29,9 +29,10 @@ interface Props {
 export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie }: Props) {
   const competence = useRunStore((e) => e.competences['hacking'] ?? 0);
   const scriptsPossedes = useRunStore((e) => e.scripts);
+  const implantsPoses = useRunStore((e) => e.implants);
 
   const [etat, setEtat] = useState<EtatSession>(() =>
-    demarrer(genererGraphe(idPointAcces, graine), competence, scriptsPossedes),
+    demarrer(genererGraphe(idPointAcces, graine), competence, scriptsPossedes, implantsPoses),
   );
   const [cible, setCible] = useState<string | null>(null);
   const [encaisse, setEncaisse] = useState(false);
@@ -98,7 +99,7 @@ export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie }: Prop
   );
 
   const cyclesConsommes =
-    donnees.coutCycles.base + Math.floor(etat.ticks / donnees.coutCycles.parTicks);
+    donnees.coutCycles.base + Math.floor(etat.ticks / etat.cyclesParTicks);
 
   // Le butin n'entre dans la partie qu'a la deconnexion : un flatline emporte
   // tout ce qui n'a pas ete ramene. C'est ce qui rend le choix de partir tendu.
@@ -116,7 +117,7 @@ export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie }: Prop
   }, [encaisse, etat.sac, etat.statut, cyclesConsommes, onSortie]);
 
   const region = pointAcces(idPointAcces);
-  const pctTrace = Math.round((etat.trace / donnees.trace.max) * 100);
+  const pctTrace = Math.round((etat.trace / etat.traceMax) * 100);
   const alerte = etat.trace >= donnees.trace.seuilAlerte;
 
   return (

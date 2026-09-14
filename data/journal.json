@@ -20,6 +20,7 @@
   "script_indisponible": "Script en recharge : {ticks} ticks.",
   "script_absent": "Script absent du deck : {id}.",
   "script_hors_portee": "Cible invalide pour ce script.",
+  "filtre_absorbe": "Le filtre a tenu. Il en reste {restants}.",
   "riposte": "GLACE NOIRE. Integrite {integrite}.",
   "alerte_trace": "Trace a {trace}. Ils remontent la ligne.",
   "deconnexion": "Deconnexion. {butin} objet(s) rapporte(s).",

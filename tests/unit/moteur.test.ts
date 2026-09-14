@@ -347,3 +347,82 @@ describe('acte III — les frictions par paire', () => {
     expect(lu).not.toContain('je te coupe les mains');
   });
 });
+
+// --- L'atelier du Finn -----------------------------------------------------
+//
+// C'est la seule chose qui relie un plan vole a autre chose qu'une ligne
+// d'inventaire. Le recit lit `a_plan()`, paie en clair, et appelle
+// `poser_implant()` : les trois maillons se testent ensemble, parce qu'il
+// suffit qu'un seul lache pour que le butin redevienne mort.
+describe('acte II — la pose d’implants', () => {
+  beforeEach(() => {
+    useRunStore.getState().nouvellePartie();
+    useProfileStore.getState().reinitialiser();
+  });
+
+  /** Amene le moteur devant la paillasse du Finn. */
+  function aLAtelier(m: MoteurDialogue): void {
+    m.demarrer();
+    m.reprendre('finn');
+    epuiser(m);
+    m.choisir(choixNomme(m, 'Faire poser'));
+    epuiser(m);
+  }
+
+  it('sans plan volé, la paillasse ne propose rien', () => {
+    const m = neuf();
+    aLAtelier(m);
+    expect(m.lire().choix).toHaveLength(1);
+    expect(m.lire().choix[0]?.texte).toContain('rhabiller');
+  });
+
+  it('le plan volé ouvre la pose, et la pose écrit dans la partie', () => {
+    const run = useRunStore.getState();
+    run.acquerir('plans', 'coprocesseur');
+    useRunStore.setState({ credits: 5000 });
+
+    const m = neuf();
+    aLAtelier(m);
+    const humaniteAvant = useRunStore.getState().humanite;
+    m.choisir(choixNomme(m, 'Coprocesseur'));
+    epuiser(m);
+
+    const apres = useRunStore.getState();
+    expect(apres.implants).toContain('coprocesseur');
+    expect(apres.credits).toBe(5000 - 2400);
+    expect(apres.humanite).toBe(humaniteAvant - 8);
+    // Un plan reste au dossier : c'est de l'information, pas une piece.
+    expect(apres.plans).toContain('coprocesseur');
+  });
+
+  it('un implant déjà posé ne se repropose pas', () => {
+    useRunStore.getState().acquerir('plans', 'coprocesseur');
+    useRunStore.getState().acquerir('implants', 'coprocesseur');
+    useRunStore.setState({ credits: 5000 });
+
+    const m = neuf();
+    aLAtelier(m);
+    expect(m.lire().choix.map((c) => c.texte).join(' ')).not.toContain('Coprocesseur');
+  });
+
+  // L'etiquette IMPLANT decrit une porte que seul un implant DEJA pose ouvre
+  // (data/gloses.json). Elle est restee longtemps sans emploi dans le recit.
+  it('l’implant posé ouvre une réplique que rien d’autre n’ouvre', () => {
+    const m = neuf();
+    m.demarrer();
+    m.reprendre('approche');
+    epuiser(m);
+    const sans = m.lire().choix.map((c) => c.texte).join(' ');
+    expect(sans).not.toContain('sans regarder personne');
+
+    useRunStore.getState().acquerir('implants', 'lentilles_molly');
+    const n = neuf();
+    n.demarrer();
+    n.reprendre('approche');
+    epuiser(n);
+    const avec = n.lire().choix;
+    const i = avec.findIndex((c) => c.texte.includes('sans regarder personne'));
+    expect(i).toBeGreaterThanOrEqual(0);
+    expect(avec[i]?.etiquette).toBe('IMPLANT');
+  });
+});

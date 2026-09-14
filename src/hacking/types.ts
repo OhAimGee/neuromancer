@@ -55,8 +55,17 @@ export interface Evenement {
 export interface EtatSession {
   graphe: Graphe;
   position: string;
-  /** Competence de hacking figee au branchement. */
+  /** Competence de hacking figee au branchement, implants compris. */
   competence: number;
+  /**
+   * Plafond de trace de cette plongee : au-dela, la glace noire riposte.
+   * Dans l'etat et non dans data/ parce qu'un implant le repousse.
+   */
+  traceMax: number;
+  /** Ticks par cycle consomme. Repousse par la bande passante. */
+  cyclesParTicks: number;
+  /** Frappes de glace noire encore absorbables. */
+  filtres: number;
   trace: number;
   integrite: number;
   ticks: number;

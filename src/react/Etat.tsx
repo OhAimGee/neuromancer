@@ -1,5 +1,6 @@
 import equipage from '@data/equipage.json';
 import hackingData from '@data/hacking.json';
+import { IMPLANTS } from '@/hacking/implants';
 import { SCRIPTS } from '@/hacking/session';
 import { useProfileStore } from '@/stores/profileStore';
 import { MEMBRES_MAX, useRunStore } from '@/stores/runStore';
@@ -19,6 +20,8 @@ const NOM_SCRIPT = new Map(SCRIPTS.map((s) => [s.id, s.nom]));
 // donnee sans reordonner la planche donnerait le mauvais dessin, en silence.
 const RANG_SCRIPT = new Map(SCRIPTS.map((s, i) => [s.id, i]));
 const RANG_PLAN = new Map(hackingData.plans.map((id, i) => [id, i]));
+const RANG_IMPLANT = new Map(IMPLANTS.map((i, rang) => [i.id, rang]));
+const NOM_IMPLANT = new Map(IMPLANTS.map((i) => [i.id, i.nom]));
 
 /** Une case d'une planche d'icones de 16x16, designee par son rang. */
 function Vignette({ planche, rang }: { planche: string; rang: number }) {
@@ -101,19 +104,40 @@ export function Etat({ onFermer }: { onFermer: () => void }) {
         ))}
       </ul>
 
-      {run.plans.length > 0 && (
+      {run.implants.length > 0 && (
+        <>
+          <p className="etat__section">
+            <i className="icone icone--plans" aria-hidden="true" />
+            <span>IMPLANTS POSÉS</span>
+          </p>
+          <ul className="etat__objets">
+            {run.implants.map((id) => (
+              <li key={id}>
+                <Vignette planche="items_implants" rang={RANG_IMPLANT.get(id) ?? 0} />
+                {NOM_IMPLANT.get(id) ?? id.replace(/_/g, ' ')}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {/* Un plan deja pose reste au dossier : c'est de l'information volee, pas
+        * une piece consommee. Le montrer deux fois serait faux, d'ou le filtre. */}
+      {run.plans.some((id) => !run.implants.includes(id)) && (
         <>
           <p className="etat__section">
             <i className="icone icone--plans" aria-hidden="true" />
             <span>PLANS</span>
           </p>
           <ul className="etat__objets">
-            {run.plans.map((id) => (
-              <li key={id}>
-                <Vignette planche="items_plans" rang={RANG_PLAN.get(id) ?? 0} />
-                {id.replace(/_/g, ' ')}
-              </li>
-            ))}
+            {run.plans
+              .filter((id) => !run.implants.includes(id))
+              .map((id) => (
+                <li key={id}>
+                  <Vignette planche="items_plans" rang={RANG_PLAN.get(id) ?? 0} />
+                  {NOM_IMPLANT.get(id) ?? id.replace(/_/g, ' ')}
+                </li>
+              ))}
           </ul>
         </>
       )}

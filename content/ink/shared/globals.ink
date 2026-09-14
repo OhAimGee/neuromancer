@@ -79,6 +79,19 @@ EXTERNAL acquerir_script(id)
 === function acquerir_script(id) ===
 ~ return 0
 
+// Vrai quand le plan d'implant a ete vole dans une base de donnees. Un plan
+// reste au dossier une fois l'implant pose : c'est de l'information, pas une
+// piece. C'est has_implant() qui empeche de le poser deux fois.
+EXTERNAL a_plan(id)
+=== function a_plan(id) ===
+~ return false
+
+// Pose un implant. Le prix est preleve dans le corps du choix, en clair, pour
+// que le cout affiche et l'arithmetique restent verifiables par le validateur.
+EXTERNAL poser_implant(id)
+=== function poser_implant(id) ===
+~ return 0
+
 // Recrute un equipier. Sans effet si les trois places sont prises : le recit
 // doit donc verifier places_libres() avant de proposer.
 EXTERNAL recruter(id)

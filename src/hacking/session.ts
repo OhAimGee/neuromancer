@@ -1,5 +1,6 @@
 import donnees from '@data/hacking.json';
 import { pointAcces } from './graphe';
+import { effetsCumules } from './implants';
 import type { Butin, EtatSession, Evenement, Graphe, Noeud } from './types';
 
 export interface Script {
@@ -34,11 +35,26 @@ const evt = (code: string, valeurs: Record<string, string | number> = {}): Evene
   valeurs,
 });
 
-export function demarrer(graphe: Graphe, competence: number, scripts: string[]): EtatSession {
+/**
+ * Ouvre une session. Les implants sont lus ici et nulle part ailleurs : leurs
+ * effets sont figes dans l'etat au branchement, comme la competence. Se faire
+ * poser un implant au milieu d'une plongee n'a pas de sens, et l'etat reste
+ * rejouable a l'identique.
+ */
+export function demarrer(
+  graphe: Graphe,
+  competence: number,
+  scripts: string[],
+  implants: readonly string[] = [],
+): EtatSession {
+  const bonus = effetsCumules(implants);
   return {
     graphe: structuredClone(graphe),
     position: graphe.entree,
-    competence,
+    competence: competence + bonus.competence,
+    traceMax: donnees.trace.max + bonus.traceMax,
+    cyclesParTicks: donnees.coutCycles.parTicks + bonus.cyclesParTicks,
+    filtres: bonus.filtres,
     trace: 0,
     integrite: donnees.integrite.max,
     ticks: 0,
@@ -86,12 +102,18 @@ function reperer(e: EtatSession): void {
 function tracer(e: EtatSession, delta: number): void {
   if (delta > 0 && e.traceGelee > 0) return;
   const avant = e.trace;
-  e.trace = Math.max(0, Math.min(donnees.trace.max, e.trace + delta));
+  e.trace = Math.max(0, Math.min(e.traceMax, e.trace + delta));
 
   if (avant < donnees.trace.seuilAlerte && e.trace >= donnees.trace.seuilAlerte) {
     e.journal.push(evt('alerte_trace', { trace: e.trace }));
   }
-  if (e.trace >= donnees.trace.max) {
+  if (e.trace >= e.traceMax) {
+    // Le filtre noir encaisse la frappe entiere, une fois par filtre pose.
+    if (e.filtres > 0) {
+      e.filtres -= 1;
+      e.journal.push(evt('filtre_absorbe', { restants: e.filtres }));
+      return;
+    }
     e.integrite -= donnees.trace.riposte;
     e.journal.push(evt('riposte', { integrite: Math.max(0, e.integrite) }));
     if (e.integrite <= 0) {
