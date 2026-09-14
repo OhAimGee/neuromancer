@@ -91,10 +91,16 @@ function build({ quiet = false } = {}) {
   return true;
 }
 
-const isWatch = process.argv.includes('--watch');
-const ok = build();
+// compileInk() est importe par tools/validate-narrative.mjs : sans cette garde,
+// un simple import declencherait une compilation complete puis un process.exit.
+const executeDirectement = process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename;
 
-if (!isWatch) {
+const isWatch = process.argv.includes('--watch');
+const ok = executeDirectement ? build() : true;
+
+if (!executeDirectement) {
+  // rien : le module a ete importe
+} else if (!isWatch) {
   process.exit(ok ? 0 : 1);
 } else {
   const { default: chokidar } = await import('chokidar');

@@ -27,7 +27,13 @@ Boucle de 60-90 min, horloge de 12 cycles, 8 fins, forte rejouabilité.
 - Aucun nombre d'équilibrage codé en dur : tout vit dans `data/*.json`.
 - Pas de commentaires de code sauf si le *pourquoi* est non évident.
 - Anglicismes cyberpunk conservés : deck, glace/ICE, matrice, cowboy, flatline, simstim.
-- `npm run validate:narrative` doit passer avant tout commit touchant à `content/`.
+- `npm run validate:narrative` doit passer avant tout commit touchant à `content/`. Il fait deux
+  passes : une **statique** sur les sources `.ink` (crochets dans un choix, tags inconnus,
+  étiquettes invalides, `EXTERNAL` déclaré mais non lié dans `moteur.ts`, et **coût affiché qui
+  ne correspond pas à l'arithmétique Ink du corps du choix** — l'interface mentirait au joueur
+  sans jamais planter), et une **dynamique** de 500 parties à choix aléatoires (plantages
+  d'exécution, fins déclarées jamais atteintes). Les cinq contrôles ont été vérifiés contre des
+  fautes introduites volontairement.
 - Les fichiers `.ink` sont écrits en **français typographique complet** : accents et majuscules
   accentuées. Vérifié sur inkjs 2.4.0 — l'UTF-8 traverse le compilateur, les choix et les tags
   sans altération.
@@ -67,6 +73,12 @@ comportement voulu — c'est la réplique prononcée par Sable. Ne jamais redupl
 | `# bg:<id>` `# musique:<id>` `# sfx:<id>` | ligne | Pilotage audiovisuel |
 | `# speaker:<id>` `# portrait:<id>:<expression>` | ligne | Portrait et locuteur |
 | `# ending:<id>` `# hub` | knot | Lu par le validateur narratif |
+| `# horloge:demarrer` | ligne | **Réservé** — écrit dans le contenu, pas encore consommé par `tags.ts` |
+
+Le vocabulaire ci-dessus fait foi : `npm run validate:narrative` rejette tout autre tag. Ink
+accepte n'importe quelle étiquette et le moteur ignore celles qu'il ne connaît pas — une faute
+de frappe comme `# etiq:` ne se verrait donc jamais à l'exécution. Ajouter un tag au jeu, c'est
+l'ajouter aux trois endroits : ce tableau, `TAGS_CONNUS` dans le validateur, et `tags.ts`.
 
 ---
 
