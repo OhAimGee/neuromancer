@@ -27,15 +27,22 @@ Boucle de 60-90 min, horloge de 12 cycles, 8 fins, forte rejouabilité.
 - Aucun nombre d'équilibrage codé en dur : tout vit dans `data/*.json`.
 - Pas de commentaires de code sauf si le *pourquoi* est non évident.
 - Anglicismes cyberpunk conservés : deck, glace/ICE, matrice, cowboy, flatline, simstim.
-- `npm run validate:narrative` doit passer avant tout commit touchant à `content/`. Il fait deux
-  passes : une **statique** sur les sources `.ink` (crochets dans un choix, tags inconnus,
-  étiquettes invalides, `EXTERNAL` déclaré mais non lié dans `moteur.ts`, et **coût affiché qui
-  ne correspond pas à l'arithmétique Ink du corps du choix** — l'interface mentirait au joueur
-  sans jamais planter), et une **dynamique** de 500 parties à choix aléatoires (plantages
-  d'exécution, fins déclarées jamais atteintes). La passe statique refuse aussi une **réplique
-  de plus de 180 signes** : la boîte de dialogue en montre une à la fois et ne défile pas, donc
-  au-delà le texte sortirait du cadre. Les six contrôles ont été vérifiés contre des fautes
-  introduites volontairement.
+- `npm run validate:narrative` doit passer avant tout commit touchant à `content/`. Il fait une
+  passe **statique** sur les sources `.ink` (crochets dans un choix, tags inconnus, étiquettes
+  invalides, `EXTERNAL` déclaré mais non lié dans `moteur.ts`, **coût affiché qui ne correspond
+  pas à l'arithmétique Ink du corps du choix** — l'interface mentirait au joueur sans jamais
+  planter — et **réplique de plus de 180 signes**, que la boîte de dialogue ne saurait pas
+  afficher), puis une passe **dynamique en deux temps** :
+  **(a)** 500 parties à choix aléatoires, conditions tirées au sort, pour les plantages
+  d'exécution ; **(b)** un rattrapage **toutes portes ouvertes** (`knows` vrai, `crew_present`
+  vrai, `parties()` à 5) pour chaque fin que (a) n'a pas atteinte.
+  Le rattrapage n'est pas un confort. Un marcheur uniforme n'atteignait l'acte III que 10 fois
+  sur 500 — il faut y enchaîner quatre bons choix parmi cinq à sept — et déclarait donc
+  inatteignables trois fins qui étaient seulement improbables : le faux positif qui apprend à
+  ignorer un validateur. Le marcheur préfère désormais les choix qu'il a le moins pris, et ce
+  qu'il ne trouve toujours pas est rejoué sans condition. **« Jamais atteinte » veut de nouveau
+  dire « inatteignable ».** Tous les contrôles ont été vérifiés contre des fautes introduites
+  volontairement.
 - Le validateur refuse aussi la **dette narrative** : une info pillable dans une BDD
   (`data/hacking.json`) qu'aucun `knows()` ne consulte est un butin mort. C'est précisément ce
   qui sépare le hacking d'un mini-jeu décoratif. C'était un avertissement tant que la tranche
@@ -116,7 +123,9 @@ npm test
 # Verification visuelle autonome (serveur de dev requis)
 node tools/screenshot.mjs capture.png
 node tools/jouer.mjs captures hasard  # joue une partie ENTIERE jusqu'a une fin
+node tools/acte3.mjs captures      # joue l'acte III jusqu'a une fin
 node tools/plonger.mjs captures    # prologue + branchement + plongee au hasard
+node tools/vitrine.mjs             # refait les captures du README
 ```
 
 ### Outillage — capture d'écran
@@ -135,6 +144,47 @@ dpkg -x libasound2t64_*.deb extracted
 ```
 
 `tools/screenshot.mjs` ajoute ce chemin à `LD_LIBRARY_PATH` tout seul s'il le trouve.
+
+---
+
+## La mise en scene — ce qui colle et ce qui ne colle pas
+
+Les tags ne sont poses qu'a la premiere ligne d'un knot, donc `moteur.consommer()` conserve la
+mise en scene d'une replique a la suivante. Tout ne doit pas survivre a cette conservation :
+
+| Cle | Duree |
+|---|---|
+| `locuteur` `decor` `musique` `fin` | **collante** — elle decrit la scene |
+| `portrait` `expression` | collante, mais **annulee des qu'un nouveau `# speaker:` arrive** |
+| `sfx` `entracte` `glose` | **une replique, pas une de plus** |
+
+Les deux exceptions ont ete des bugs reels, muets, et longs a voir :
+
+- le `# portrait:port_molly` du prologue restait colle jusqu'a la fin de la partie. La boite
+  affichait la plaque MAELCUM et le visage de Molly ; aucune erreur nulle part. **Un portrait
+  appartient a qui parle, pas a la scene.** `ligne.portrait` est une *derogation* : le portrait
+  par defaut vient de `data/personnages.json` et se resout dans `Boite.tsx`.
+- le `# sfx:jack_in` de la cabine se rejouait sur toutes les repliques suivantes, parce que
+  `Dialogue.tsx` declenche l'effet a chaque changement de `ligne`.
+
+Les deux sont couverts par `tests/unit/moteur.test.ts`, et les deux tests ont ete verifies en
+reintroduisant la faute. Attention au parcours : un test qui deroule le recit depuis le hub ne
+voit jamais la faute du portrait, faute d'avoir joue le prologue qui la pose.
+
+## Les scenes en tunnel — un candidat, plusieurs lieux
+
+Un recrutement est un TUNNEL (`-> riviera ->`, termine par `->->`) : il rend la main la ou on
+l'a appele, donc la scene n'a pas a savoir dans quel lieu elle se joue, et le meme candidat peut
+se presenter ailleurs sans qu'on touche a son texte.
+
+**Tous les choix d'une scene reentrante doivent etre COLLES (`+`).** Un choix a usage unique
+(`*`) disparait apres avoir ete pris ; une scene reentrante dont tous les choix sont epuises n'a
+plus aucun contenu, Ink sort du knot et remonte jusqu'a la fin du fichier. Cela se lit
+« unexpectedly reached end of content. Do you need a '->->'? » et plantait 127 parties sur 500
+au fuzzing.
+
+Les places d'equipage sont comptees par le jeu (`places_libres()`), jamais par une variable Ink :
+le magasin d'equipage est l'etat de la partie.
 
 ---
 
@@ -271,6 +321,14 @@ ressemble à aucune conversation.
 - `tools/jouer.mjs` et `tools/plonger.mjs` passent par `derouler()` (`tools/lib-jeu.mjs`), qui
   fait défiler la boîte avant de chercher des boutons. Un outil qui cherche directement
   `.dlg__bouton` ne trouve plus rien.
+- `tools/acte3.mjs` pose un profil de joueur expérimenté dans `localStorage` puis suit un
+  itinéraire décrit par des motifs sur les libellés de choix. Sans cela l'acte III reste hors
+  d'atteinte d'un outil qui joue au hasard : il faut y enchaîner quatre bons choix parmi cinq
+  à sept.
+- `tools/vitrine.mjs` refait `docs/images/*.png`. **Les captures du README se reprennent avec cet
+  outil, jamais à la main** — celles prises à la main vieillissent en silence, et la première
+  version du README a montré pendant des semaines une boîte de dialogue plein écran qui
+  n'existait plus.
 - `node tools/jouer.mjs captures hasard` joue **une partie entière jusqu'à une fin**, plongées
   comprises, et sort en code non nul si aucune fin n'est atteinte. C'est la vérification qui
   prouve que la boucle se ferme. Son harnais de plongée pille dès qu'il le peut : une marche

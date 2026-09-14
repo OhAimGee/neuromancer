@@ -43,7 +43,7 @@ const ITINERAIRE = [
   [/Demander ce qu'il y a après/, null],
   [/Accepter\. Monter/, 'freeside'],
   [/gaine de service/, null],
-  [/ce qu'il veut en échange|Se brancher sans rien/, 'straylight'],
+  [/ce qu'il veut en échange|Se brancher sans rien/, null],
 ];
 
 function verifier(erreurs) {

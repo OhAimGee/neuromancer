@@ -1,0 +1,41 @@
+{
+  "_note": "La bande de Ninsei, devant le Chatsubo. Il pleut toujours : c'est pour ca que la moitie basse est de l'asphalte et des flaques, et que le neon n'est net que dedans.",
+  "tileset": "ts_street",
+  "legende": {
+    "#": "ciel",
+    "K": "cables",
+    "M": "mur_tole",
+    "m": "mur_tole_b",
+    "R": "mur_brique",
+    "S": "store",
+    "P": "porte",
+    "G": "grille",
+    "C": "climatiseur",
+    "H": "bache",
+    "V": "neon_vertical",
+    "r": "enseigne_rose",
+    "c": "enseigne_cyan",
+    "o": "enseigne_ambre",
+    "B": "bordure",
+    "T": "trottoir",
+    "t": "trottoir_b",
+    "A": "asphalte",
+    "a": "asphalte_b",
+    "F": "flaque",
+    "D": "poubelle"
+  },
+  "lignes": [
+    "##KK####KK##KKKK####",
+    "MmMmMRRMmMmMMRRMmMmM",
+    "MrrMMRRMccMMMRRMooMM",
+    "MmMGMRRMmMMVMRRMmCMM",
+    "MVMmMRRHHHMMMRRMmMmM",
+    "MSSMMRRPPMMSSRRMPPMM",
+    "BBBBBBBBBBBBBBBBBBBB",
+    "TtTtTDtTtTtTtTtDTtTt",
+    "tTtTtTtTtTtTtTtTtTtT",
+    "AaAFAaAaAaAFAaAaAaAa",
+    "aAaAaAaAaFAaAaAaAFAa",
+    "AaAaAaAaAaAaAaAaAaAa"
+  ]
+}

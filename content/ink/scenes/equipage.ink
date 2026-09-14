@@ -146,7 +146,9 @@ Il ne se souvenait pas de la dernière fois. Il ne se souviendrait pas de celle-
 // --- MAELCUM : le port. Il ne se paie pas et il ne se menace pas.
 
 === maelcum ===
-# bg:aucun # musique:ambiance_ninsei
+# bg:map_ninsei # musique:ambiance_ninsei
+Le port était au bout de Ninsei, là où le néon s'arrête et où l'eau commence. Il pleuvait dessus depuis toujours.
+Amarré entre deux cargos, un remorqueur peint de vert, d'or et de rouge, et qui n'essayait pas de se cacher.
 Le remorqueur de Zion sentait la ganja, l'huile et le métal chaud. Le dub sortait des cloisons comme si le bateau le fabriquait lui-même.
 # speaker:maelcum
 — Babylone t'a mis quelque chose dans le sang, mon frère. Ça se voit à la façon dont tu comptes les heures.

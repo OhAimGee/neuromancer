@@ -231,3 +231,66 @@ describe('MoteurDialogue', () => {
     expect(useRunStore.getState().competence('hacking')).toBe(avant + 1);
   });
 });
+
+describe('mise en scene — ce qui colle et ce qui ne colle pas', () => {
+  beforeEach(() => {
+    useRunStore.getState().nouvellePartie();
+    useProfileStore.getState().reinitialiser();
+  });
+
+  /** Deroule tout le recit accessible en prenant toujours le premier choix. */
+  function parcourir(m: MoteurDialogue, visiter: (e: ReturnType<MoteurDialogue['lire']>) => void) {
+    m.demarrer();
+    for (let pas = 0; pas < 400; pas++) {
+      visiter(m.lire());
+      if (m.lire().peutContinuer) {
+        m.continuer();
+        continue;
+      }
+      if (m.lire().choix.length === 0) break;
+      m.choisir(0);
+    }
+  }
+
+  // Le portrait appartient a qui parle, jamais a la scene. Un `# portrait:`
+  // pose dans le prologue restait colle jusqu'a la fin de la partie : la
+  // plaque affichait MAELCUM et la boite montrait le visage de Molly.
+  //
+  // Le parcours compte : il faut d'abord traverser une scene qui impose un
+  // portrait, puis changer de locuteur. Un test qui se contente de dérouler le
+  // recit depuis le hub ne voit jamais la faute, faute d'avoir joue le
+  // prologue — verifie en reintroduisant la faute a la main.
+  it('un changement de locuteur annule le portrait impose au precedent', () => {
+    const m = neuf();
+    let impose: string | null = null;
+    parcourir(m, (e) => {
+      if (e.ligne?.portrait) impose = e.ligne.portrait;
+    });
+    // Le dernier portrait impose du prologue. C'est celui qui restait colle.
+    expect(impose).toBe('port_molly');
+
+    m.reprendre('hub');
+    epuiser(m);
+    m.choisir(choixNomme(m, 'Ratz'));
+    epuiser(m);
+    const l = m.lire().ligne;
+    expect(l?.locuteur).toBe('ratz');
+    // `ligne.portrait` est une DEROGATION, pas le portrait par defaut : celui-ci
+    // vient de data/personnages.json et se resout dans la boite. Ratz ne
+    // deroge a rien, donc null — et surtout pas le portrait de Molly.
+    expect(l?.portrait).toBeNull();
+  });
+
+  // Un son est un evenement, pas un decor : le garder dans la mise en scene
+  // faisait rejouer le declic de branchement sur toutes les repliques suivantes.
+  it('un son ne vaut que pour la replique qui le porte', () => {
+    const m = neuf();
+    let suites = 0;
+    let precedent = false;
+    parcourir(m, (e) => {
+      if (e.sfx !== null && precedent) suites++;
+      precedent = e.sfx !== null;
+    });
+    expect(suites).toBe(0);
+  });
+});

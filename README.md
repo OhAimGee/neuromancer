@@ -29,15 +29,57 @@ qu'elle en sacrifie un autre.
 ### La boucle
 
 Entre deux plongées, Ninsei est un hub : le Chatsubo et sa cabine, la boutique du Finn,
-l'hôtel-cercueil, Molly au bout d'une ligne. Se déplacer coûte des cycles, dormir coûte des
-cycles, plonger coûte des cycles. **L'horloge n'attend pas**, et quand elle tombe à zéro les
+l'hôtel-cercueil, le port, Molly au bout d'une ligne. Se déplacer coûte des cycles, dormir coûte
+des cycles, plonger coûte des cycles. **L'horloge n'attend pas**, et quand elle tombe à zéro les
 quinze poches cèdent à peu près en même temps.
 
-Pour s'en sortir il faut un nom — celui de l'homme qui a payé pour te retrouver — et ce nom
-dort derrière de la glace. Deux façons de finir : on rapporte le nom et on obtient l'antidote,
-ou on ne le rapporte pas.
-
 ![Le hub de Ninsei](docs/images/hub.png)
+
+Pour s'en sortir il faut un nom — celui de l'homme qui a payé pour te retrouver — et ce nom dort
+derrière de la glace. Le rapporter ouvre un rendez-vous, et le rendez-vous ouvre le vrai travail.
+
+| Acte | Ce qui s'y joue |
+|---|---|
+| **Prologue — Ninsei** | Le Chatsubo, Ratz, l'offre de Molly, la toxine. |
+| **Acte I — l'équipage** | Six candidats, **trois places**. Vingt combinaisons. |
+| **Acte II — la préparation** | Le hub ouvert, limité par l'horloge. Le cœur du jeu. |
+| **Acte III — le run** | Freeside, la Villa Straylight. Approche, percée, le cœur. |
+
+![Freeside, rue Jules-Verne](docs/images/freeside.png)
+
+### L'équipage
+
+Six personnes acceptent de monter, on en emmène trois, et chacune ouvre des portes que les
+autres ferment. Le choix se paie à l'acte III : c'est là que les loyautés se résolvent.
+
+| | Apport | Ce qui la retourne |
+|---|---|---|
+| **Molly** | Samouraï des rues | Lui mentir sur le fragment |
+| **Le Finn** | Receleur, marché noir | Une meilleure offre |
+| **Riviera** | Illusionniste holographique | Rien. C'est un poison qui ouvre des portes. |
+| **Dixie Flatline** | Construct ROM, bonus de hacking massif | Tu promets de l'effacer à la fin |
+| **Maelcum** | Pilote de Zion | La non-violence. Il refuse de continuer si tu tues. |
+| **Yonderboy** | Panther Modern, diversions | L'ennui |
+
+![La fiche de partie](docs/images/etat.png)
+
+### Les huit fins
+
+Aucune n'est la bonne. Ce sont huit lectures du même événement, et le jeu ne dit jamais laquelle
+a raison.
+
+| Fin | Ce qu'elle coûte |
+|---|---|
+| **FLATLINE** | Mort. Glace noire, toxine, ou pire. |
+| **LA RUE** | Humain, payé, petit. Tu ne sauras jamais ce qui s'est passé derrière toi. |
+| **LA CAGE** | On te soigne. On te garde. |
+| **LA FUSION** | Tu cesses d'être Sable. |
+| **LE FANTÔME** | Immortel, pas vivant. |
+| **BLACKOUT** | Un trou froid dans la matrice, et la police Turing derrière. |
+| **ZION / LES LOA** | Une chose nommée doit répondre quand on l'appelle. |
+| **L'ÉCHO** | Secrète. Elle exige d'avoir déjà terminé trois parties. |
+
+![La Villa Straylight](docs/images/coeur.png)
 
 ### Les conversations ont un prix
 
@@ -55,6 +97,11 @@ nature sans en révéler l'effet :
 | `[ACTION]` | Tu ne réponds pas : tu agis. |
 
 ![Le Chatsubo](docs/images/dialogue.png)
+
+Un saut dans le temps se dit par un carton plein écran, et il bloque la scène tant qu'il n'est
+pas lu — c'est la seule chose du jeu qui refuse d'être ignorée.
+
+![Un entracte](docs/images/entracte.png)
 
 ### Le cyberespace
 
@@ -74,6 +121,8 @@ Quatre types de butin, dont un seul compte vraiment :
 - **PLANS** — prototypes d'implants volés aux méga-corpos
 - **SCRIPTS** — nouveaux logiciels, pour percer des bases mieux gardées
 - **INFOS** — **des données narratives, qui débloquent des options de dialogue et des fins**
+
+![La bande de Ninsei](docs/images/ninsei.png)
 
 Le quatrième est la clé de voûte : c'est lui qui empêche le hacking d'être un mini-jeu
 décoratif. Voler un dossier médical débloque l'option de confronter quelqu'un avec.
@@ -142,14 +191,25 @@ Le choix du web s'est fait en grande partie pour ça : le jeu se teste sans inte
 
 ```bash
 node tools/jouer.mjs captures hasard  # joue une partie ENTIERE jusqu'à une fin
+node tools/acte3.mjs captures         # joue l'acte III jusqu'à une fin
 node tools/plonger.mjs captures       # une plongée détaillée dans le cyberespace
+node tools/vitrine.mjs                # refait les captures de ce README
 node tools/screenshot.mjs vue.png     # une capture et les erreurs console
 ```
 
 `jouer.mjs` joue vraiment la boucle complète — ouverture, prologue, hub, plongées, fin — en
 capturant chaque réplique et chaque palette de choix. Il **sort en code non nul si aucune fin
-n'est atteinte** : c'est la vérification qui prouve que la boucle se ferme. Tous rendent un code
-non nul si la console du navigateur a remonté une erreur.
+n'est atteinte** : c'est la vérification qui prouve que la boucle se ferme.
+
+`acte3.mjs` pose un profil de joueur expérimenté dans `localStorage` — exactement ce que le jeu
+écrit après quelques parties — puis suit un itinéraire décrit par des motifs sur les libellés de
+choix. Sans cela l'acte III resterait hors d'atteinte d'un outil qui joue au hasard.
+
+`vitrine.mjs` reprend les captures de ce fichier toujours au même endroit du récit. Les prendre à
+la main garantissait de les laisser vieillir : celles du premier README montraient encore une
+boîte de dialogue qui occupait tout l'écran.
+
+Tous rendent un code non nul si la console du navigateur a remonté une erreur.
 
 ---
 
@@ -218,10 +278,18 @@ ASCII plus une légende vers des noms de tuiles, jamais des images plein écran.
 - **dette narrative** : une info pillable dans une base de données qu'aucun `knows()` ne consulte
   est un butin mort. C'est précisément ce qui sépare le hacking d'un mini-jeu décoratif.
 
-**Dynamique** : 500 parties à choix aléatoires, pour les plantages d'exécution et les fins
-devenues inatteignables. Le harnais rejoue la boucle entière, plongées comprises — sans cela une
-partie s'arrêterait au premier branchement et « aucune fin n'est inatteignable » ne voudrait
-rien dire.
+**Dynamique**, en deux temps, parce que les deux questions ne sont pas la même :
+
+- **500 parties à choix aléatoires**, conditions tirées au sort, pour les plantages d'exécution.
+  Le harnais rejoue la boucle entière, plongées comprises — sans cela une partie s'arrêterait au
+  premier branchement.
+- **un rattrapage toutes portes ouvertes** pour chaque fin que la première passe n'a pas
+  atteinte. Un marcheur uniforme n'arrivait à l'acte III que dix fois sur cinq cents : il faut y
+  enchaîner quatre bons choix parmi cinq à sept. Trois fins étaient donc déclarées inatteignables
+  alors qu'elles étaient seulement improbables — exactement le faux positif qui apprend à ignorer
+  un validateur. Le marcheur préfère maintenant les choix qu'il a le moins pris, et ce qu'il ne
+  trouve toujours pas est rejoué avec toutes les conditions vraies. « Jamais atteinte » veut de
+  nouveau dire « inatteignable ».
 
 Chaque contrôle a été vérifié contre une faute introduite volontairement.
 
@@ -239,12 +307,17 @@ Tranche verticale en cours. Ce qui tourne aujourd'hui :
 - [x] Cyberespace jouable : génération, trace, scripts, quatre types de butin
 - [x] Validateurs de trame et d'assets, vérification navigateur autonome
 - [x] Boîte de dialogue façon RPG au tour par tour, portraits nominatifs
-- [x] **Boucle complète et fermée** : hub, horloge qui tue, deux fins atteignables
+- [x] Boucle complète et fermée : hub, horloge qui tue
 - [x] Machine à écrire, options en jeu, bascules d'accessibilité
 - [x] Bus audio piloté par le récit (banque sonore à télécharger séparément)
-- [ ] Recrutement d'équipage (6 candidats, 3 places)
-- [ ] Les six autres fins
-- [ ] Tilesets extérieurs, interface et effets en pixel art
+- [x] **Acte I — recrutement d'équipage** : six candidats, trois places, bonus appliqués
+- [x] **Acte III — le run** : Freeside, la Villa Straylight, approche / percée / le cœur
+- [x] **Les huit fins**, dont une secrète qui exige d'avoir déjà joué
+- [x] Tileset extérieur (`ts_street`), décors de Ninsei, Freeside et Straylight
+- [ ] Interface en pixel art (cadre 9-slice, boutons, jauges, icônes de butin)
+- [ ] Objets : planches d'implants et de scripts
+- [ ] Effets : glitch, pluie, transition de branchement, logo-titre
+- [ ] Scènes de friction par paire d'équipiers (Riviera + Molly, Maelcum + Riviera)
 
 ---
 

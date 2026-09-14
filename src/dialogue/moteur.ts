@@ -64,6 +64,9 @@ interface Plongee {
  * knot de retour. Un flatline fait exception, parce qu'il n'y a plus personne
  * pour choisir.
  */
+/** Cles de mise en scene qui ne valent que pour la replique qui les porte. */
+const EPHEMERES: readonly (keyof MiseEnScene)[] = ['sfx', 'entracte', 'glose'];
+
 const KNOT_FLATLINE = 'fin_flatline_reseau';
 const KNOT_HUB = 'hub';
 
@@ -280,10 +283,24 @@ export class MoteurDialogue {
       const texte = (this.story.Continue() ?? '').trim();
       const tags = this.story.currentTags ?? [];
 
+      // Un son, un carton d'entracte et une glose valent pour UNE replique.
+      // Les garder dans la mise en scene les rejouait a chaque ligne suivante :
+      // le declic de branchement revenait sur tout le reste de la partie.
+      for (const cle of EPHEMERES) this.miseEnScene[cle] = null;
+
       if (tags.length > 0) {
         const maj = parseTagsLigne(tags);
-        // Les tags ne sont poses qu'a la premiere ligne d'un knot ; la mise en
-        // scene reste donc valable pour les lignes suivantes.
+        // Nommer un locuteur annule le portrait impose au precedent. Un
+        // portrait appartient a qui parle, pas a la scene : sans cette remise a
+        // zero, le `# portrait:port_molly` du prologue restait colle sur tous
+        // les personnages du reste de la partie, plaque de nom d'un cote et
+        // visage de Molly de l'autre.
+        if (maj.locuteur !== null && maj.locuteur !== this.miseEnScene.locuteur) {
+          this.miseEnScene.portrait = null;
+          this.miseEnScene.expression = null;
+        }
+        // Les autres tags ne sont poses qu'a la premiere ligne d'un knot ; la
+        // mise en scene reste valable pour les lignes suivantes.
         for (const cle of Object.keys(maj) as (keyof MiseEnScene)[]) {
           if (maj[cle] !== null) this.miseEnScene[cle] = maj[cle];
         }

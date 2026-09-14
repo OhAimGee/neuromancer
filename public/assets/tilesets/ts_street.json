@@ -1,0 +1,27 @@
+{
+  "tuile": 16,
+  "colonnes": 21,
+  "noms": [
+    "ciel",
+    "mur_tole",
+    "mur_tole_b",
+    "mur_brique",
+    "grille",
+    "store",
+    "porte",
+    "climatiseur",
+    "cables",
+    "bache",
+    "enseigne_rose",
+    "enseigne_cyan",
+    "enseigne_ambre",
+    "neon_vertical",
+    "bordure",
+    "trottoir",
+    "trottoir_b",
+    "asphalte",
+    "asphalte_b",
+    "flaque",
+    "poubelle"
+  ]
+}
