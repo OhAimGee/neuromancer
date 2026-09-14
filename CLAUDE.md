@@ -408,6 +408,23 @@ banque sonore en parallèle.
 
 - `data/audio.json` : identifiant → fichier, bus, boucle, volume. Aucun chemin en dur ailleurs.
 - Le récit pilote le son par les tags `# musique:<id>` et `# sfx:<id>`, déjà dans le vocabulaire.
+- **`npm run validate:narrative` refuse un `# musique:` ou un `# sfx:` absent de la table.**
+  `matrice_froide` et `porte_pluie` y ont vécu plusieurs lots sans exister, et le silence n'était
+  pas le pire : `musique()` coupe l'ambiance en cours **avant** de découvrir qu'il ne connaît pas
+  la suivante. Une faute de frappe rendait donc la scène muette, pas seulement inchangée —
+  l'ouverture jouait `# musique:nappe_matrice` puis `# musique:matrice_froide` sur la ligne
+  suivante, et n'avait aucune musique.
+- **Format obligatoire : OGG Vorbis.** Vérifié dans Chromium — un AIFF n'est ni décodable par
+  Web Audio (`Unable to decode audio data`) ni lisible par `<audio>` (`MEDIA_ERR_SRC_NOT_SUPPORTED`),
+  et `canPlayType('audio/aiff')` répond la chaîne vide. Un mauvais format est indiscernable d'un
+  fichier absent : la même ligne de console, le même silence. La commande de conversion est dans
+  `docs/audio.md`.
+- **Howler boucle un son HTML5 par un `setTimeout` calculé au `play()`, pas sur l'événement
+  `ended`** (`html5: true` est posé pour toutes les boucles). Conséquence pour qui teste :
+  déplacer `currentTime` à la main depuis Playwright ne prouve rien — le minuteur de Howler reste
+  calé sur l'heure d'origine, le média s'arrête à sa fin naturelle et la boucle a l'air cassée
+  alors qu'elle ne l'est pas. Tester avec un fichier court **servi à la place** du vrai
+  (`page.route`), et regarder `currentTime` repasser à zéro.
 - `public/assets/audio/` est **ignoré par git** : ce sont des archives CC0 téléchargées par
   l'utilisateur. La liste de ce qu'il faut, et le registre recherché, vivent dans `docs/audio.md`.
 - Les navigateurs refusent le son avant une interaction : le bus met l'ambiance demandée de côté

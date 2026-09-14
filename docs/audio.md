@@ -22,8 +22,10 @@ environ pour les ambiances et -10 LUFS pour les effets, sinon les effets passent
 | `ambiance_ninsei` | 60-120 s, bouclable | Pluie sur béton, foule lointaine étouffée, bourdonnement de néon. Aucune voix identifiable. |
 | `ambiance_chatsubo` | 60-120 s, bouclable | Intérieur de bar : rumeur basse, verres, un ventilateur. Plus sourd que Ninsei. |
 | `nappe_matrice` | 90-180 s, bouclable | Drone synthétique froid, très peu d'événements. Ne doit pas avoir de pulsation : la tension vient de la trace, pas de la musique. |
+| `matrice_froide` | 90-180 s, bouclable | Plus nu et plus haut que `nappe_matrice`. Sert au flashback du flatline et à la percée de la Villa — deux fois où la matrice n'est pas un terrain de jeu. |
 | `nappe_fin` | 40-90 s | Nappe descendante, résignée. Sert aux deux fins — la même musique pour mourir et pour partir, c'est voulu. |
 | `jack_in` | < 1,5 s | Connexion : claquement sec puis montée courte. |
+| `porte_pluie` | < 2 s | Une porte qui s'ouvre sur la pluie du dehors, puis se referme. L'entrée de Molly au Chatsubo. |
 | `trace_alerte` | < 1 s | Alarme unique, grave. Tirée une seule fois au franchissement du seuil. |
 | `trace_monte` | < 0,5 s | Tick discret, réservé aux montées de trace. |
 | `glace_noire` | 1-3 s | La riposte létale. Impact bas, saturé, qui s'arrête net. |
@@ -36,13 +38,29 @@ environ pour les ambiances et -10 LUFS pour les effets, sinon les effets passent
 Déposer les fichiers sous `public/assets/audio/` avec **exactement** le nom donné dans
 `data/audio.json`. Rien d'autre à faire : ils sont pris en compte au rechargement de la page.
 
+**Le format compte, et OGG Vorbis n'est pas une préférence.** Vérifié dans Chromium : un AIFF
+n'est ni décodable par Web Audio (`Unable to decode audio data`) ni lisible par un élément
+`<audio>` (`MEDIA_ERR_SRC_NOT_SUPPORTED`) — `canPlayType('audio/aiff')` répond la chaîne vide.
+Un fichier au mauvais format se comporte exactement comme un fichier absent : une ligne dans la
+console, et le silence. Convertir avant de déposer :
+
+```bash
+ffmpeg -i source.aiff -c:a libvorbis -q:a 4 -ar 44100 -ac 2 public/assets/audio/<identifiant>.ogg
+```
+
+L'écart de poids n'est pas anecdotique : une ambiance d'une minute passe de 19 Mo en PCM 24 bits
+à moins de 800 ko en Vorbis `-q:a 4`. Tout ce qui traîne dans `public/` est recopié tel quel dans
+`dist/` au build, y compris les sources non converties.
+
 ```
 public/assets/audio/
   ambiance_ninsei.ogg
   ambiance_chatsubo.ogg
   nappe_matrice.ogg
+  matrice_froide.ogg
   nappe_fin.ogg
   jack_in.ogg
+  porte_pluie.ogg
   trace_alerte.ogg
   trace_monte.ogg
   glace_noire.ogg

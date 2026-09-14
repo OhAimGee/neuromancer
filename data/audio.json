@@ -6,9 +6,11 @@
     "ambiance_ninsei":  { "bus": "musique", "fichier": "ambiance_ninsei.ogg",  "boucle": true,  "volume": 0.6 },
     "ambiance_chatsubo":{ "bus": "musique", "fichier": "ambiance_chatsubo.ogg","boucle": true,  "volume": 0.5 },
     "nappe_matrice":    { "bus": "musique", "fichier": "nappe_matrice.ogg",    "boucle": true,  "volume": 0.7 },
+    "matrice_froide":   { "bus": "musique", "fichier": "matrice_froide.ogg",   "boucle": true,  "volume": 0.7 },
     "nappe_fin":        { "bus": "musique", "fichier": "nappe_fin.ogg",        "boucle": true,  "volume": 0.8 },
 
     "jack_in":          { "bus": "effets",  "fichier": "jack_in.ogg",          "boucle": false, "volume": 0.9 },
+    "porte_pluie":      { "bus": "effets",  "fichier": "porte_pluie.ogg",      "boucle": false, "volume": 0.7 },
     "trace_alerte":     { "bus": "effets",  "fichier": "trace_alerte.ogg",     "boucle": false, "volume": 0.8 },
     "trace_monte":      { "bus": "effets",  "fichier": "trace_monte.ogg",      "boucle": false, "volume": 0.5 },
     "glace_noire":      { "bus": "effets",  "fichier": "glace_noire.ogg",      "boucle": false, "volume": 1.0 },

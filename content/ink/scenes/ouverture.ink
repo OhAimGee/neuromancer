@@ -9,8 +9,7 @@
 // apparaissent ici, dans une scène dont l'issue est déjà écrite.
 
 === ouverture ===
-# bg:matrice # musique:nappe_matrice
-# musique:matrice_froide
+# bg:matrice # musique:matrice_froide
 # entracte:CHIBA CITY — IL Y A TROIS ANS
 
 La matrice n'est pas un lieu. C'est une convention : une hallucination consensuelle, vécue chaque jour par des milliards d'opérateurs légitimes, dans tous les pays du monde.

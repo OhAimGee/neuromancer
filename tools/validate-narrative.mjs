@@ -190,6 +190,27 @@ if (implantsOrphelins.length > 0) {
   );
 }
 
+// --- Sons : un identifiant que la table ne connait pas est un silence ------
+//
+// `# musique:` et `# sfx:` ne plantent rien : le bus ecrit une ligne dans la
+// console et ne joue pas. Deux identifiants ont vecu ainsi plusieurs lots
+// (`matrice_froide`, `porte_pluie`), et le pire n'est pas le son manquant —
+// `musique()` coupe l'ambiance en cours AVANT de decouvrir qu'il ne connait pas
+// la suivante. Un identifiant mal orthographie rend donc la scene muette, pas
+// seulement inchangee.
+const audioData = JSON.parse(fs.readFileSync(path.join(RACINE, 'data/audio.json'), 'utf-8'));
+const sonsDeclares = new Set(Object.keys(audioData.sons));
+const sonsDemandes = new Map();
+for (const f of fichiersInk(INK)) {
+  const texte = fs.readFileSync(f, 'utf-8');
+  for (const m of texte.matchAll(/#\s*(?:musique|sfx):([a-zA-Z0-9_]+)/g)) {
+    if (!sonsDeclares.has(m[1])) sonsDemandes.set(m[1], path.relative(RACINE, f));
+  }
+}
+for (const [id, fichier] of sonsDemandes) {
+  erreurs.push(`son inconnu de data/audio.json : ${id} (demande par ${fichier})`);
+}
+
 // --- Passe dynamique : fuzzing --------------------------------------------
 
 const { json, errors, warnings } = compileInk();
