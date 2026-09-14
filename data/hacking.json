@@ -3,6 +3,9 @@
 
   "trace": { "max": 100, "seuilAlerte": 60, "riposte": 4 },
   "integrite": { "max": 10 },
+
+  "_coutCycles": "Une plongee consomme des cycles de l'horloge de toxine : un de base, plus un par tranche de ticks.",
+  "coutCycles": { "base": 1, "parTicks": 12 },
   "vol": { "base": 0.15, "parNiveau": 0.05, "max": 0.5 },
 
   "_noeuds": "traceEntree : cout de trace pour entrer. traceEchec / degatsEchec : sanction d'un script rate.",
@@ -30,7 +33,7 @@
 
   "_pointsAcces": "Le jack physique determine la region atteinte. Plus on se branche pres d'une corpo, plus les BDD sont grasses et plus on meurt vite.",
   "pointsAcces": [
-    { "id": "chatsubo",       "nom": "Cabine du Chatsubo",   "profondeur": 2, "richesse": 0, "danger": 0 },
+    { "id": "chatsubo",       "nom": "Cabine du Chatsubo",   "profondeur": 3, "richesse": 0, "danger": 0 },
     { "id": "hotel_cercueil", "nom": "Hotel-cercueil",       "profondeur": 3, "richesse": 0, "danger": 1 },
     { "id": "ninsei_public",  "nom": "Borne publique Ninsei","profondeur": 3, "richesse": 1, "danger": 1 },
     { "id": "boutique_finn",  "nom": "Arriere-boutique Finn","profondeur": 4, "richesse": 2, "danger": 1 },

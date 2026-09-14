@@ -22,6 +22,7 @@ interface RunEtat {
   soupcon: number;
   competences: Record<string, number>;
   implants: string[];
+  plans: string[];
   scripts: string[];
   equipage: string[];
   drapeaux: Record<string, boolean>;
@@ -42,6 +43,8 @@ interface RunActions {
   enregistrerIssue: (scene: string, palier: Palier) => void;
   consommerCycles: (n: number) => void;
   recruter: (id: string) => void;
+  gagnerCredits: (n: number) => void;
+  acquerir: (categorie: 'plans' | 'scripts' | 'implants', id: string) => void;
   terminer: () => void;
 }
 
@@ -53,6 +56,7 @@ const ETAT_INITIAL: RunEtat = {
   soupcon: 0,
   competences: { hacking: 1, social: 1, combat: 1 },
   implants: [],
+  plans: [],
   scripts: ['perce_glace'],
   equipage: [],
   drapeaux: {},
@@ -72,6 +76,7 @@ export const useRunStore = create<RunEtat & RunActions>()(
           competences: { ...ETAT_INITIAL.competences },
           scripts: [...ETAT_INITIAL.scripts],
           implants: [],
+          plans: [],
           equipage: [],
           drapeaux: {},
           issues: {},
@@ -107,6 +112,11 @@ export const useRunStore = create<RunEtat & RunActions>()(
 
       recruter: (id) =>
         set((e) => (e.equipage.includes(id) ? e : { equipage: [...e.equipage, id] })),
+
+      gagnerCredits: (n) => set((e) => ({ credits: e.credits + n })),
+
+      acquerir: (categorie, id) =>
+        set((e) => (e[categorie].includes(id) ? e : { [categorie]: [...e[categorie], id] })),
 
       terminer: () => set({ terminee: true }),
     }),

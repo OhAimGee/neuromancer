@@ -98,6 +98,8 @@ npm test
 
 # Verification visuelle autonome (serveur de dev requis)
 node tools/screenshot.mjs capture.png
+node tools/jouer.mjs captures      # joue le prologue et capture chaque palette de choix
+node tools/plonger.mjs captures    # prologue + branchement + plongee au hasard
 ```
 
 ### Outillage — capture d'écran
@@ -164,6 +166,16 @@ d'annuler une action sans machinerie.
   (`src/engine/tileset.ts`). Une texture chargée ailleurs sans ce réglage sera interpolée.
 - `pixi.js@8.20` livre un `.d.ts` qui ne passe pas en `strict` — d'où `skipLibCheck` dans
   `tsconfig.json`. Rien à corriger côté projet.
+- **Un `stroke` de 1 px avec `antialias: false` disparaît dès que le segment est oblique.**
+  Vérifié à l'écran : seuls les liens horizontaux du graphe s'affichaient, les diagonales étaient
+  purement absentes — aucune erreur, aucun avertissement. Les traits se posent donc pixel par
+  pixel (Bresenham + `rect(x, y, 1, 1)` puis un seul `fill`), voir `segment()` dans
+  `src/hacking/rendu.ts`. C'est de toute façon la bonne réponse en pixel art.
+- `Tileset.charger(nom, sousDossier)` : le second argument doit être celui passé à
+  `L.enregistrer` côté Lua (`tilesets`, `sprites`…). L'oublier donne un 404 déguisé en
+  « source image could not be decoded ».
+- En développement, le rendu du cyberespace publie `window.__noeudsVisibles` : les nœuds vivent
+  sur un canvas, que Playwright ne sait pas interroger autrement. Sonde retirée du build.
 - `profileStore.knowledge` est un `Set` : `JSON.stringify` ne sait pas le sérialiser. Voir le
   `replacer`/`reviver` dans `src/save/`.
 - Le projet vit sur `/mnt/c` (disque Windows monté dans WSL) : inotify n'y est pas fiable,

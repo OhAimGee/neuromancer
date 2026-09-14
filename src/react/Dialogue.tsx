@@ -12,7 +12,13 @@ const COULEUR_ETIQUETTE: Record<Etiquette, string> = {
   ACTION: 'var(--g0)',
 };
 
-export function Dialogue({ moteur }: { moteur: MoteurDialogue }) {
+interface Props {
+  moteur: MoteurDialogue;
+  /** Propose de se brancher une fois la scene close. */
+  onBrancher?: () => void;
+}
+
+export function Dialogue({ moteur, onBrancher }: Props) {
   const etat = useSyncExternalStore(moteur.souscrire, moteur.lire);
   const cycles = useRunStore((e) => e.cycles);
   const humanite = useRunStore((e) => e.humanite);
@@ -81,7 +87,16 @@ export function Dialogue({ moteur }: { moteur: MoteurDialogue }) {
             </div>
           )}
 
-          {etat.termine && <p className="dlg__fin">— FIN DE SCÈNE —</p>}
+          {etat.termine && (
+            <div className="dlg__fin">
+              <p>— FIN DE SCÈNE —</p>
+              {onBrancher && (
+                <button className="net__bouton" onClick={onBrancher}>
+                  SE BRANCHER
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

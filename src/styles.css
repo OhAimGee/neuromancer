@@ -326,8 +326,11 @@ body {
 }
 
 .dlg__fin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(4 * var(--px));
   margin-top: calc(8 * var(--px));
-  text-align: center;
   font-family: 'Silkscreen', monospace;
   font-size: calc(8 * var(--px));
   color: var(--n4);
@@ -362,4 +365,130 @@ body {
   .boot__caret::after {
     animation: none;
   }
+}
+
+/* --- Cyberespace -------------------------------------------------------- */
+
+.net {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at 50% 40%, var(--n2) 0%, var(--n0) 100%);
+}
+
+.net__hud {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  padding: calc(3 * var(--px)) calc(5 * var(--px));
+  border-bottom: var(--px) solid var(--c0);
+  background: var(--n0);
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  line-height: calc(11 * var(--px));
+  color: var(--g0);
+}
+.net__hud b {
+  color: var(--c2);
+  font-weight: normal;
+}
+.net__alerte,
+.net__alerte b {
+  color: var(--r2);
+}
+
+/* Le canvas du graphe occupe tout l'espace libre ; le HUD est en DOM au-dessus
+ * pour garder le texte pixel-parfait (voir la note sur transform: scale). */
+.net__carte {
+  position: absolute;
+  inset: 0;
+}
+
+.net__jauge {
+  position: relative;
+  margin-top: auto;
+  flex: 0 0 auto;
+  height: calc(3 * var(--px));
+  background: var(--n2);
+}
+.net__jauge i {
+  display: block;
+  height: 100%;
+  background: var(--c1);
+}
+.net__jauge i.net__jauge--chaud {
+  background: var(--r1);
+}
+
+.net__bas {
+  position: relative;
+  flex: 0 0 auto;
+  border-top: var(--px) solid var(--n3);
+  background: color-mix(in srgb, var(--n0) 88%, transparent);
+}
+
+.net__journal {
+  padding: calc(2 * var(--px)) calc(5 * var(--px)) 0;
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(7 * var(--px));
+  line-height: calc(9 * var(--px));
+  color: var(--g1);
+}
+
+.net__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--px);
+  align-items: center;
+  padding: calc(3 * var(--px)) calc(5 * var(--px)) calc(4 * var(--px));
+}
+
+.net__bouton {
+  padding: var(--px) calc(3 * var(--px));
+  border: var(--px) solid var(--c0);
+  background: var(--n1);
+  color: var(--c3);
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(7 * var(--px));
+  line-height: calc(9 * var(--px));
+  cursor: pointer;
+}
+.net__bouton:hover:not(:disabled),
+.net__bouton:focus-visible {
+  border-color: var(--c2);
+  background: var(--c0);
+  color: var(--w0);
+  outline: none;
+}
+.net__bouton:disabled {
+  border-color: var(--n3);
+  color: var(--n4);
+  cursor: not-allowed;
+}
+.net__bouton--sortie {
+  margin-left: auto;
+  border-color: var(--m1);
+  color: var(--m3);
+}
+.net__bouton--sortie:hover:not(:disabled) {
+  border-color: var(--m2);
+  background: var(--m0);
+}
+
+.net__bilan {
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(7 * var(--px));
+  color: var(--o2);
+}
+
+.net__cible {
+  padding: var(--px) calc(5 * var(--px));
+  border-bottom: var(--px) solid var(--n2);
+  background: var(--n1);
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(7 * var(--px));
+  line-height: calc(9 * var(--px));
+  color: var(--c2);
 }

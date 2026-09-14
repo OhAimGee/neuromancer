@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { MoteurDialogue } from '@/dialogue/moteur';
 import { useRunStore } from '@/stores/runStore';
 import { useUiStore } from '@/stores/uiStore';
+import { Cyberespace } from './Cyberespace';
 import { Decor } from './Decor';
 import { Dialogue } from './Dialogue';
 import { useIntegerScale, VIEWPORT_W, VIEWPORT_H } from './useIntegerScale';
@@ -22,6 +23,8 @@ export function App() {
   const [lignes, setLignes] = useState<Ligne[]>([]);
   const [moteur, setMoteur] = useState<MoteurDialogue | null>(null);
   const [lance, setLance] = useState(false);
+  const [plongee, setPlongee] = useState(0);
+  const [dansLeReseau, setDansLeReseau] = useState(false);
   const demarre = useRef(false);
 
   useEffect(() => {
@@ -70,10 +73,22 @@ export function App() {
         className={scanlines ? 'viewport scanlines' : 'viewport'}
         style={{ '--s': scale } as React.CSSProperties}
       >
-        {lance && moteur ? (
+        {dansLeReseau ? (
+          <Cyberespace
+            pointAcces="chatsubo"
+            graine={`plongee-${plongee}`}
+            onSortie={() => setDansLeReseau(false)}
+          />
+        ) : lance && moteur ? (
           <>
             <Decor moteur={moteur} />
-            <Dialogue moteur={moteur} />
+            <Dialogue
+              moteur={moteur}
+              onBrancher={() => {
+                setPlongee((n) => n + 1);
+                setDansLeReseau(true);
+              }}
+            />
           </>
         ) : (
           <div className="boot">

@@ -2,10 +2,13 @@ import donnees from '@data/hacking.json';
 import { alea, entier, tirage } from './alea';
 import type { Butin, Graphe, Noeud, TypeButin, TypeNoeud } from './types';
 
+// Bande de jeu utile du canvas : le bandeau du haut et le panneau du bas sont
+// en DOM par-dessus, et un noeud pose dessous serait injouable.
 const LARGEUR = 320;
-const HAUTEUR = 180;
+export const BANDE_HAUT = 30;
+export const BANDE_BAS = 104;
 const MARGE_X = 28;
-const MARGE_Y = 26;
+const MILIEU = (BANDE_HAUT + BANDE_BAS) / 2;
 
 export interface PointAcces {
   id: string;
@@ -102,7 +105,7 @@ export function genererGraphe(idPointAcces: string, graine: string): Graphe {
   const entree = 'n0';
   noeuds[entree] = {
     id: entree, type: 'relais', couche: 0,
-    x: MARGE_X, y: HAUTEUR / 2, rang: 0, butin: null,
+    x: MARGE_X, y: MILIEU, rang: 0, butin: null,
     voisins: [], repere: true, franchi: true,
   };
 
@@ -163,11 +166,11 @@ export function genererGraphe(idPointAcces: string, graine: string): Graphe {
       if (a !== b && !noeuds[a]?.voisins.includes(b)) noeuds[a]?.voisins.push(b);
     }
 
-    const pasY = (HAUTEUR - 2 * MARGE_Y) / Math.max(1, enfants.length - 1);
+    const pasY = (BANDE_BAS - BANDE_HAUT) / Math.max(1, enfants.length - 1);
     enfants.forEach((id, i) => {
       const n = noeuds[id];
       if (!n) return;
-      n.y = enfants.length === 1 ? HAUTEUR / 2 : Math.round(MARGE_Y + i * pasY);
+      n.y = enfants.length === 1 ? MILIEU : Math.round(BANDE_HAUT + i * pasY);
     });
 
     couchePrecedente = enfants;

@@ -1,0 +1,14 @@
+{
+  "tuile": 24,
+  "colonnes": 8,
+  "noms": [
+    "relais",
+    "bdd",
+    "glace",
+    "glace_noire",
+    "leurre",
+    "sanctuaire",
+    "coeur",
+    "avatar"
+  ]
+}

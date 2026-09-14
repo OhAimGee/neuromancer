@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import donnees from '@data/hacking.json';
 import journal from '@data/journal.json';
-import { genererGraphe, POINTS_ACCES } from '@/hacking/graphe';
+import { BANDE_BAS, BANDE_HAUT, genererGraphe, POINTS_ACCES } from '@/hacking/graphe';
 import {
   courant,
   deconnecter,
@@ -56,13 +56,15 @@ describe('génération du graphe', () => {
     }
   });
 
-  it('tient les nœuds dans le cadre 320x180', () => {
+  it('tient les nœuds dans la bande jouable, hors HUD et panneau', () => {
     for (const p of POINTS_ACCES) {
-      for (const n of Object.values(genererGraphe(p.id, 'cadre').noeuds)) {
-        expect(n.x).toBeGreaterThanOrEqual(0);
-        expect(n.x).toBeLessThanOrEqual(320);
-        expect(n.y).toBeGreaterThanOrEqual(0);
-        expect(n.y).toBeLessThanOrEqual(180);
+      for (let i = 0; i < 20; i++) {
+        for (const n of Object.values(genererGraphe(p.id, `cadre-${i}`).noeuds)) {
+          expect(n.x).toBeGreaterThanOrEqual(12);
+          expect(n.x).toBeLessThanOrEqual(308);
+          expect(n.y).toBeGreaterThanOrEqual(BANDE_HAUT);
+          expect(n.y).toBeLessThanOrEqual(BANDE_BAS);
+        }
       }
     }
   });

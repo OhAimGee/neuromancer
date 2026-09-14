@@ -22,8 +22,9 @@ export class Tileset {
     this.taille = taille;
   }
 
-  static async charger(nom: string): Promise<Tileset> {
-    const base = `/assets/tilesets/${nom}`;
+  /** `sousDossier` doit correspondre a celui passe a L.enregistrer cote Lua. */
+  static async charger(nom: string, sousDossier = 'tilesets'): Promise<Tileset> {
+    const base = `/assets/${sousDossier}/${nom}`;
     const [planche, manifeste] = await Promise.all([
       Assets.load<Texture>(`${base}.png`),
       fetch(`${base}.json`).then((r) => {

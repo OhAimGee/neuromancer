@@ -41,6 +41,18 @@ export class SceneJeu {
     }
   }
 
+  /** Racine du canvas, pour les couches que la scene ne gere pas elle-meme. */
+  racine(): Container | null {
+    return this.app?.stage ?? null;
+  }
+
+  /** Attache une couche construite ailleurs (le graphe du cyberespace). */
+  poser(couche: Container): boolean {
+    if (!this.app || this.detruit) return false;
+    this.app.stage.addChild(couche);
+    return true;
+  }
+
   async afficherDecor(id: string | null): Promise<void> {
     if (id === this.decorActuel) return;
     this.decorActuel = id;
