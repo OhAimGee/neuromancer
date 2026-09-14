@@ -110,6 +110,12 @@ body {
   overflow: hidden;
 }
 
+/* Le decor Pixi occupe tout le viewport, sous la couche DOM. */
+.decor {
+  position: absolute;
+  inset: 0;
+}
+
 /* Le canvas Pixi, lui, rend bien en 320x180 et se laisse agrandir par le
  * navigateur en plus proche voisin. */
 .viewport canvas {
@@ -185,7 +191,9 @@ body {
   inset: 0;
   display: flex;
   flex-direction: column;
-  background: var(--n1);
+  /* Transparent : le decor Pixi est dessous. Seuls le bandeau et le journal
+   * posent un fond, pour que le texte reste lisible par-dessus les tuiles. */
+  background: transparent;
 }
 
 .dlg__hud {
@@ -210,10 +218,14 @@ body {
   display: flex;
   flex: 1 1 auto;
   min-height: 0;
+  /* Le journal est cale en bas : sinon il occupe toute la hauteur et le decor
+   * n'existe qu'a travers la transparence du panneau. */
+  align-items: flex-end;
 }
 
 .dlg__portrait {
   flex: 0 0 calc(48 * var(--px));
+  align-self: flex-start;
   height: calc(60 * var(--px));
   margin: calc(5 * var(--px)) 0 0 calc(5 * var(--px));
   display: grid;
@@ -230,6 +242,10 @@ body {
   flex: 1 1 auto;
   min-width: 0;
   overflow-y: auto;
+  max-height: calc(122 * var(--px));
+  margin: calc(5 * var(--px));
+  border: var(--px) solid var(--n3);
+  background: color-mix(in srgb, var(--n0) 80%, transparent);
   padding: calc(4 * var(--px)) calc(6 * var(--px)) calc(6 * var(--px));
   font-size: calc(10 * var(--px));
   line-height: calc(12 * var(--px));

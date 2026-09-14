@@ -76,12 +76,29 @@ function L.ligneH(img, ox, oy, y, x1, x2, cle)
   end
 end
 
---- Enregistre le sprite et exporte le PNG a cote.
-function L.enregistrer(sprite, cheminAseprite, cheminPng)
-  sprite:saveAs(cheminAseprite)
-  app.command.SaveFileCopyAs{ filename = cheminPng }
-  print(string.format("  %s  (%dx%d, %d calque(s))",
-    app.fs.fileName(cheminAseprite), sprite.width, sprite.height, #sprite.layers))
+--- Trace une ligne verticale dans une tuile.
+function L.ligneV(img, ox, oy, x, y1, y2, cle)
+  for y = y1, y2 do
+    img:drawPixel(ox + x, oy + y, P.rgba(cle))
+  end
+end
+
+--- Enregistre la source .aseprite et exporte le PNG servi a l'execution.
+--
+-- Les deux ne vivent pas au meme endroit : Vite ne sert que public/, et il n'y
+-- a aucune raison d'embarquer les sources editables dans le build.
+--   assets/tilesets/<nom>.aseprite   source, versionnee, non servie
+--   public/assets/tilesets/<nom>.png  runtime, servi
+function L.enregistrer(sprite, nom, sousDossier)
+  local source = RACINE_PROJET .. '/assets/' .. sousDossier .. '/' .. nom .. '.aseprite'
+  local runtime = RACINE_PROJET .. '/public/assets/' .. sousDossier .. '/' .. nom .. '.png'
+
+  sprite:saveAs(source)
+  app.command.SaveFileCopyAs{ filename = runtime }
+
+  print(string.format("  %s.aseprite + %s.png  (%dx%d, %d calque(s))",
+    nom, nom, sprite.width, sprite.height, #sprite.layers))
+  return runtime:gsub('%.png$', '.json')
 end
 
 return L

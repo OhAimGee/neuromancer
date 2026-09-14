@@ -76,6 +76,7 @@ comportement voulu — c'est la réplique prononcée par Sable. Ne jamais redupl
 npm run dev               # compile Ink en watch + serveur Vite
 npm run ink:build         # compile content/ink -> public/content/main.ink.json
 npm run validate:narrative
+npm run validate:assets    # tilemaps vs manifestes de tilesets
 npm run typecheck
 npm test
 
@@ -117,9 +118,15 @@ dpkg -x libasound2t64_*.deb extracted
 
 - Le JSON Ink compilé se charge par `fetch()` depuis `public/`, **jamais par un `import`
   statique** — sinon il gonfle le bundle initial.
-- Les filtres CRT/glitch doivent s'appliquer sur une `RenderTexture` **en 320×180**, puis être
-  agrandis. Les appliquer sur le stage plein écran les exécute en résolution écran, sur des
-  pixels déjà agrandis, et adoucit le pixel art malgré `nearest`.
+- L'`Application` Pixi est initialisée en **320×180 avec `resolution: 1`** ; c'est le navigateur
+  qui agrandit le canvas en `image-rendering: pixelated`. Un filtre CRT/glitch posé sur le stage
+  s'exécute donc déjà sur 320×180 pixels. Ne jamais passer l'`Application` en taille écran : les
+  filtres tourneraient alors sur des pixels déjà agrandis et adouciraient le pixel art malgré
+  `nearest`.
+- `scaleMode = 'nearest'` est posé sur la `source` de chaque planche au chargement
+  (`src/engine/tileset.ts`). Une texture chargée ailleurs sans ce réglage sera interpolée.
+- `pixi.js@8.20` livre un `.d.ts` qui ne passe pas en `strict` — d'où `skipLibCheck` dans
+  `tsconfig.json`. Rien à corriger côté projet.
 - `profileStore.knowledge` est un `Set` : `JSON.stringify` ne sait pas le sérialiser. Voir le
   `replacer`/`reviver` dans `src/save/`.
 - Le projet vit sur `/mnt/c` (disque Windows monté dans WSL) : inotify n'y est pas fiable,
@@ -218,17 +225,47 @@ tools/aseprite.sh tools/aseprite/ts_interior.lua
 - `tools/aseprite/lib.lua` — art ASCII, matière procédurale, enregistrement
 - `tools/aseprite/<nom>.lua` — un générateur par asset
 
-Chaque générateur produit `.aseprite` (éditable à la main), `.png` et un `.json` de manifeste.
+Chaque générateur produit `.aseprite` (éditable à la main), `.png` et un `.json` de manifeste,
+**dans deux emplacements distincts** — Vite ne sert que `public/`, et il n'y a aucune raison
+d'embarquer les sources éditables dans le build :
+
+| Chemin | Rôle |
+|---|---|
+| `assets/<sous-dossier>/<nom>.aseprite` | source éditable, versionnée, **non servie** |
+| `public/assets/<sous-dossier>/<nom>.png` + `.json` | runtime, versionné, servi par Vite |
+
+C'est `L.enregistrer(sprite, nom, sousDossier)` qui écrit les deux et retourne le chemin du
+manifeste. Un PNG laissé dans `assets/` est invisible au jeu.
 **Les générateurs doivent être déterministes** : toute matière procédurale passe par
 `L.rng(graine)` et des listes ordonnées, jamais `pairs()`, dont l'ordre n'est pas garanti en
 Lua. Vérification : deux exécutions successives donnent le même MD5.
 
-L'ordre des tuiles dans un générateur fait foi — les tilemaps s'y réfèrent par index. Ajouter
-en fin de liste, ne jamais réordonner.
+L'ordre des tuiles dans un générateur fait foi. **Ajouter en fin de liste, ne jamais réordonner** —
+mais on peut retoucher librement les pixels d'une tuile existante, sa position ne bouge pas.
+
+### Tilemaps — de la donnée, jamais du pixel
+
+Un décor est un `public/assets/tilemaps/<id>.json` : des rangées d'art ASCII plus une légende
+qui associe chaque caractère à un **nom** de tuile. Jamais un index brut : une tilemap d'index
+devient illisible et se casse au premier ajout mal placé.
+
+```json
+{ "tileset": "ts_interior",
+  "legende": { "#": "mur_beton", "~": "neon_magenta" },
+  "lignes": ["####", "#~~#"] }
+```
+
+`npm run validate:assets` vérifie que chaque légende pointe sur une tuile existante et que les
+rangées sont rectangulaires. Sans lui, une tuile renommée ne se voit qu'à l'exécution, sous la
+forme d'un décor vide.
+
+**Deux variantes valent mieux qu'une tuile parfaite** : vingt copies d'une même tuile de sol sur
+une rangée se lisent immédiatement comme un motif. `sol_beton` / `sol_beton_b` et `etagere` /
+`etagere_b` alternent pour cette seule raison.
 
 Aperçu agrandi pour inspection :
 ```bash
-~/.local/aseprite/squashfs-root/usr/bin/aseprite --batch assets/tilesets/ts_interior.png \
+~/.local/aseprite/squashfs-root/usr/bin/aseprite --batch public/assets/tilesets/ts_interior.png \
   --scale 8 --save-as /tmp/apercu.png
 ```
 

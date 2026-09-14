@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { MoteurDialogue } from '@/dialogue/moteur';
 import { useRunStore } from '@/stores/runStore';
 import { useUiStore } from '@/stores/uiStore';
+import { Decor } from './Decor';
 import { Dialogue } from './Dialogue';
 import { useIntegerScale, VIEWPORT_W, VIEWPORT_H } from './useIntegerScale';
 
@@ -70,7 +71,10 @@ export function App() {
         style={{ '--s': scale } as React.CSSProperties}
       >
         {lance && moteur ? (
-          <Dialogue moteur={moteur} />
+          <>
+            <Decor moteur={moteur} />
+            <Dialogue moteur={moteur} />
+          </>
         ) : (
           <div className="boot">
             {lignes.map((l, i) => (

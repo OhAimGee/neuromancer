@@ -1,6 +1,6 @@
 {
   "tuile": 16,
-  "colonnes": 8,
+  "colonnes": 14,
   "noms": [
     "mur_beton",
     "mur_tache",
@@ -9,6 +9,12 @@
     "comptoir",
     "etagere",
     "neon_magenta",
-    "terminal"
+    "terminal",
+    "comptoir_face",
+    "etagere_b",
+    "mur_tuyaux",
+    "sol_beton_b",
+    "neon_bout_g",
+    "neon_bout_d"
   ]
 }

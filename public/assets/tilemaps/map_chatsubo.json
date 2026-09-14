@@ -1,0 +1,33 @@
+{
+  "tileset": "ts_interior",
+  "legende": {
+    "#": "mur_beton",
+    "%": "mur_tache",
+    "P": "mur_tuyaux",
+    ".": "sol_beton",
+    ",": "sol_beton_b",
+    "_": "plinthe",
+    "=": "comptoir",
+    "F": "comptoir_face",
+    "B": "etagere",
+    "b": "etagere_b",
+    "<": "neon_bout_g",
+    "~": "neon_magenta",
+    ">": "neon_bout_d",
+    "T": "terminal"
+  },
+  "lignes": [
+    "################PP##",
+    "###<~~~~~>######PP##",
+    "#%##############PP##",
+    "###BbBbBb#######PP##",
+    "################PP##",
+    "#############T##PP##",
+    "____________________",
+    ".,.,.,.,.,.,.,.,.,.,",
+    "============.,.,.,.,",
+    "FFFFFFFFFFFF.,.,.,.,",
+    ".,.,.,.,.,.,.,.,.,.,",
+    ".,.,.,.,.,.,.,.,.,.,"
+  ]
+}

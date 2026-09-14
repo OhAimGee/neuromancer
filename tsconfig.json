@@ -13,6 +13,10 @@
     "jsx": "react-jsx",
 
     "strict": true,
+    // pixi.js 8.20 livre un .d.ts qui ne passe pas en strict
+    // (AbstractBitmapFont.distanceField optionnel face a une interface qui ne
+    // l'est pas). Rien a corriger de notre cote.
+    "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
