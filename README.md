@@ -374,6 +374,7 @@ initial branchés les uns aux autres. Ce qui tourne aujourd'hui :
 - [x] Transition de branchement et carton de mort par glace noire
 - [x] Scènes de friction par paire d'équipiers — six paires écrites, une par partie
 - [x] **Les implants** : plans volés posés chez le Finn, effets en plongée, répliques `[IMPLANT]`
+- [x] L'horloge de toxine ne démarre qu'au moment où le récit la pose
 
 ---
 

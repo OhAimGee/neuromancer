@@ -426,3 +426,40 @@ describe('acte II — la pose d’implants', () => {
     expect(avec[i]?.etiquette).toBe('IMPLANT');
   });
 });
+
+// --- L'horloge de toxine ---------------------------------------------------
+//
+// `# horloge:demarrer` a vecu plusieurs lots dans le contenu sans que rien ne
+// le lise : le tableau des tags de CLAUDE.md le donnait « reserve ». Pendant
+// ce temps l'ouverture — un flashback de trois ans avant la toxine — affichait
+// une fiole pleine et douze cycles.
+describe('l’horloge ne part qu’au moment où le récit la lance', () => {
+  beforeEach(() => {
+    useRunStore.getState().nouvellePartie();
+    useProfileStore.getState().reinitialiser();
+  });
+
+  it('reste à l’arrêt pendant toute l’ouverture', () => {
+    const m = neuf();
+    m.demarrer();
+    for (let garde = 0; garde < 60 && m.lire().peutContinuer; garde++) m.continuer();
+    expect(useRunStore.getState().horlogeLancee).toBe(false);
+  });
+
+  it('démarre quand le prologue pose la toxine', () => {
+    const m = neuf();
+    m.demarrer();
+    m.reprendre('prologue');
+    let garde = 0;
+    while (garde++ < 400 && !useRunStore.getState().horlogeLancee) {
+      if (m.lire().peutContinuer) {
+        m.continuer();
+        continue;
+      }
+      const choix = m.lire().choix;
+      if (choix.length === 0) break;
+      m.choisir(0);
+    }
+    expect(useRunStore.getState().horlogeLancee).toBe(true);
+  });
+});

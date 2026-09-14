@@ -65,7 +65,7 @@ interface Plongee {
  * pour choisir.
  */
 /** Cles de mise en scene qui ne valent que pour la replique qui les porte. */
-const EPHEMERES: readonly (keyof MiseEnScene)[] = ['sfx', 'entracte', 'glose'];
+const EPHEMERES: readonly (keyof MiseEnScene)[] = ['sfx', 'entracte', 'glose', 'horloge'];
 
 const KNOT_FLATLINE = 'fin_flatline_reseau';
 const KNOT_HUB = 'hub';
@@ -92,6 +92,7 @@ export class MoteurDialogue {
     entracte: null,
     fin: null,
     glose: null,
+    horloge: null,
   };
   /**
    * La replique affichee, et celle d'apres, deja lue.
@@ -313,6 +314,10 @@ export class MoteurDialogue {
         for (const cle of Object.keys(maj) as (keyof MiseEnScene)[]) {
           if (maj[cle] !== null) this.miseEnScene[cle] = maj[cle];
         }
+        // L'horloge est un evenement, pas un decor : elle s'applique ici, au
+        // fil de la lecture, comme les effets `~` du recit. Le tag est ensuite
+        // ephemere, sans quoi il se redeclencherait a chaque replique.
+        if (maj.horloge === 'demarrer') useRunStore.getState().demarrerHorloge();
       }
 
       // Les lignes vides ne sont pas des repliques : on les saute sans compter.

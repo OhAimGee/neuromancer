@@ -26,6 +26,12 @@ interface RunEtat {
   soupcon: number;
   competences: Record<string, number>;
   implants: string[];
+  /**
+   * Faux tant que la toxine n'a pas ete posee. L'ouverture est un flashback de
+   * trois ans plus tot : y afficher une fiole pleine et douze cycles annonce un
+   * compte a rebours qui n'a pas commence.
+   */
+  horlogeLancee: boolean;
   plans: string[];
   scripts: string[];
   equipage: string[];
@@ -52,6 +58,7 @@ interface RunActions {
   placesLibres: () => number;
   gagnerCredits: (n: number) => void;
   acquerir: (categorie: 'plans' | 'scripts' | 'implants', id: string) => void;
+  demarrerHorloge: () => void;
   terminer: () => void;
 }
 
@@ -63,6 +70,7 @@ const ETAT_INITIAL: RunEtat = {
   soupcon: 0,
   competences: { hacking: 1, social: 1, combat: 1 },
   implants: [],
+  horlogeLancee: false,
   plans: [],
   scripts: ['perce_glace'],
   equipage: [],
@@ -83,6 +91,7 @@ export const useRunStore = create<RunEtat & RunActions>()(
           competences: { ...ETAT_INITIAL.competences },
           scripts: [...ETAT_INITIAL.scripts],
           implants: [],
+          horlogeLancee: false,
           plans: [],
           equipage: [],
           drapeaux: {},
@@ -144,13 +153,19 @@ export const useRunStore = create<RunEtat & RunActions>()(
       acquerir: (categorie, id) =>
         set((e) => (e[categorie].includes(id) ? e : { [categorie]: [...e[categorie], id] })),
 
+      demarrerHorloge: () => set({ horlogeLancee: true }),
+
       terminer: () => set({ terminee: true }),
     }),
     {
       name: 'neuromancer-run',
       version: VERSION_RUN,
       storage: createJSONStorage(() => localStorage, { replacer, reviver }),
-      migrate: (etat) => ({ ...ETAT_INITIAL, ...(etat as Partial<RunEtat>) }) as RunEtat & RunActions,
+      // `horlogeLancee: true` en repli : une partie sauvegardee avant ce champ
+      // a forcement passe le prologue, donc son horloge tourne deja.
+      migrate: (etat) =>
+        ({ ...ETAT_INITIAL, horlogeLancee: true, ...(etat as Partial<RunEtat>) }) as RunEtat &
+          RunActions,
     },
   ),
 );

@@ -54,8 +54,14 @@ export function Etat({ onFermer }: { onFermer: () => void }) {
       <p className="etat__titre">SABLE</p>
 
       <div className="etat__grille">
-        <span className="etat__cle">CYCLES</span>
-        <span className="etat__val">{run.cycles}</span>
+        {/* Meme regle que le HUD : pas d'horloge avant que le recit ne la
+          * lance. La fiche est atteignable des l'ouverture. */}
+        {run.horlogeLancee && (
+          <>
+            <span className="etat__cle">CYCLES</span>
+            <span className="etat__val">{run.cycles}</span>
+          </>
+        )}
         <span className="etat__cle">HUMANITÉ</span>
         <span className="etat__val">{run.humanite}</span>
         <span className="etat__cle">CRÉDITS</span>

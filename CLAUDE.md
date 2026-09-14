@@ -99,7 +99,7 @@ comportement voulu — c'est la réplique prononcée par Sable. Ne jamais redupl
 | `# glose:<id>` | ligne | Demande l'explication de règle `<id>` de `data/gloses.json` |
 | `# hub` | knot | Lu par le validateur narratif |
 | `# entracte:<texte libre>` | ligne | Carton plein écran bloquant — saut dans le temps |
-| `# horloge:demarrer` | ligne | **Réservé** — écrit dans le contenu, pas encore consommé par `tags.ts` |
+| `# horloge:demarrer` | ligne | Lance le compte à rebours de toxine. **Éphémère**, comme `sfx` |
 
 Deux valeurs de `# bg:` ne désignent pas une tilemap : **`aucun`** vide le décor (sans lui, une
 scène sans tag hériterait du décor précédent, faute de pouvoir l'effacer) et **`matrice`**
@@ -159,7 +159,7 @@ mise en scene d'une replique a la suivante. Tout ne doit pas survivre a cette co
 |---|---|
 | `locuteur` `decor` `musique` `fin` | **collante** — elle decrit la scene |
 | `portrait` `expression` | collante, mais **annulee des qu'un nouveau `# speaker:` arrive** |
-| `sfx` `entracte` `glose` | **une replique, pas une de plus** |
+| `sfx` `entracte` `glose` `horloge` | **une replique, pas une de plus** |
 
 Les deux exceptions ont ete des bugs reels, muets, et longs a voir :
 
@@ -327,6 +327,11 @@ chemins que le moteur emprunte de sa propre initiative sont nommés en tête de 
 - **Le knot de retour doit être un chemin Ink complet.** `hub.retour` et non `retour` : un stitch
   n'est pas joignable par son nom seul, et `ChoosePathString` échoue à l'exécution — pas à la
   compilation.
+- **L'horloge ne démarre pas avec la partie.** `# horloge:demarrer`, posé à la fin du prologue
+  quand Molly annonce les sacs de toxine, lève `runStore.horlogeLancee` ; avant ce signal, ni le
+  HUD ni la fiche n'affichent de cycles. L'ouverture est un flashback de trois ans plus tôt : y
+  montrer une fiole pleine et douze cycles annonçait un compte à rebours qui n'avait pas
+  commencé. Le tag vivait dans le contenu depuis plusieurs lots sans que rien ne le lise.
 - **L'horloge est relue à chaque passage par `hub`.** C'est le seul endroit où la toxine tue ;
   ailleurs, `cycles_restants` descend sans conséquence immédiate.
 - **`cycles_restants` est observé dans les deux sens.** Sans l'observateur ajouté au lot J, un

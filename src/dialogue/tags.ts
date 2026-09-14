@@ -27,6 +27,11 @@ export interface MiseEnScene {
   fin: string | null;
   /** Explication de regle que le recit demande a montrer ici. */
   glose: string | null;
+  /**
+   * `demarrer` quand le recit vient de poser la toxine. Avant ce signal, le
+   * compte a rebours n'existe pas dans la fiction et le HUD ne le montre pas.
+   */
+  horloge: string | null;
 }
 
 export function parseTagsLigne(tags: readonly string[]): MiseEnScene {
@@ -40,6 +45,7 @@ export function parseTagsLigne(tags: readonly string[]): MiseEnScene {
     entracte: null,
     fin: null,
     glose: null,
+    horloge: null,
   };
 
   for (const tag of tags) {
@@ -71,6 +77,9 @@ export function parseTagsLigne(tags: readonly string[]): MiseEnScene {
         break;
       case 'glose':
         mes.glose = a ?? null;
+        break;
+      case 'horloge':
+        mes.horloge = a ?? null;
         break;
     }
   }

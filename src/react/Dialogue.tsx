@@ -28,6 +28,7 @@ export function Dialogue({ moteur }: Props) {
   const etat = useSyncExternalStore(moteur.souscrire, moteur.lire);
   const cycles = useRunStore((e) => e.cycles);
   const humanite = useRunStore((e) => e.humanite);
+  const horlogeLancee = useRunStore((e) => e.horlogeLancee);
   const vitesseTexte = useUiStore((e) => e.vitesseTexte);
 
   const { affiche, complet, toutReveler } = useMachineAEcrire(
@@ -111,15 +112,25 @@ export function Dialogue({ moteur }: Props) {
   return (
     <div className="dlg">
       <div className="dlg__hud">
+        {/* L'ouverture est un flashback de trois ans plus tot : la toxine n'y
+            est pas encore posee. Afficher une fiole pleine et douze cycles y
+            annoncerait un compte a rebours qui n'a pas commence — c'est le
+            recit qui le lance, par `# horloge:demarrer`. */}
         <span>
-          {/* La fiole se vide avant que le chiffre n'inquiete. C'est le
-              minuteur de la partie : il merite d'etre vu, pas lu. */}
-          <i
-            className="hud__fiole"
-            style={{ backgroundPositionX: `calc(${-12 * Math.max(0, Math.min(12, cycles))} * var(--px))` }}
-            aria-hidden="true"
-          />
-          CYCLES <b>{cycles}</b>
+          {horlogeLancee && (
+            <>
+              {/* La fiole se vide avant que le chiffre n'inquiete. C'est le
+                  minuteur de la partie : il merite d'etre vu, pas lu. */}
+              <i
+                className="hud__fiole"
+                style={{
+                  backgroundPositionX: `calc(${-12 * Math.max(0, Math.min(12, cycles))} * var(--px))`,
+                }}
+                aria-hidden="true"
+              />
+              CYCLES <b>{cycles}</b>
+            </>
+          )}
         </span>
         <span>
           HUMANITÉ <b>{humanite}</b>

@@ -23,7 +23,11 @@ let beats = 0;
 let plongees = 0;
 let fin = null;
 
-while (etape < 60) {
+// 120 palettes et non 60 : l'atelier du Finn est un menu reentrant, et un
+// marcheur aleatoire y tourne longtemps avant d'en ressortir. A 60, une partie
+// sur cinq epuisait le budget et se declarait « boucle non fermee » alors que
+// le recit allait tres bien.
+while (etape < 120) {
   if (await dansLeReseau(page)) {
     plongees++;
     const bilan = await plongerAuHasard(page);
