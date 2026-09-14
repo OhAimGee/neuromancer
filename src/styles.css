@@ -568,6 +568,79 @@ body {
   margin-top: auto;
 }
 
+.opt__ouvrir--fiche {
+  right: calc(13 * var(--px));
+}
+
+/* --- Fiche de partie ----------------------------------------------------- */
+
+.etat {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  overflow-y: auto;
+  padding: calc(8 * var(--px)) calc(10 * var(--px)) calc(6 * var(--px));
+  background: var(--n0);
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  line-height: calc(11 * var(--px));
+  color: var(--g2);
+  scrollbar-width: none;
+}
+.etat::-webkit-scrollbar {
+  display: none;
+}
+.etat__titre {
+  margin: 0 0 calc(4 * var(--px));
+  font-size: calc(16 * var(--px));
+  letter-spacing: calc(2 * var(--px));
+  color: var(--c3);
+}
+.etat__section {
+  margin: calc(5 * var(--px)) 0 calc(2 * var(--px));
+  border-bottom: var(--px) solid var(--n3);
+  font-size: calc(7 * var(--px));
+  color: var(--n4);
+}
+.etat__grille {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(3 * var(--px)) calc(8 * var(--px));
+}
+.etat__paire {
+  display: flex;
+  gap: calc(3 * var(--px));
+}
+.etat__cle {
+  color: var(--n4);
+}
+.etat__val {
+  color: var(--c2);
+}
+.etat__liste {
+  margin: 0;
+  padding-left: calc(8 * var(--px));
+  list-style: none;
+}
+.etat__liste li::before {
+  content: '· ';
+  color: var(--n4);
+}
+.etat__liste b {
+  color: var(--w0);
+  font-weight: normal;
+}
+.etat__ligne,
+.etat__vide {
+  margin: 0;
+}
+.etat__vide {
+  color: var(--n4);
+}
+.etat__fermer {
+  margin-top: calc(6 * var(--px));
+}
+
 /* Glitch — la chose dans le crane ne parle pas comme les autres. Lent et de
  * faible contraste : l'effet doit se sentir, pas clignoter. Coupe par les
  * options (risque photosensible reel). */

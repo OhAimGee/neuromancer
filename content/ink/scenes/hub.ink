@@ -28,6 +28,15 @@
     ~ cycles_restants -= 1
     -> cercueil
 
++ Descendre au port de Ninsei. # cout_cycles:1
+    ~ cycles_restants -= 1
+    -> maelcum ->
+    -> hub
+
++ { not crew_present("riviera") } Traverser la salle vers l'homme qui projette.
+    -> riviera ->
+    -> hub
+
 + Appeler Molly.
     -> molly_appel
 

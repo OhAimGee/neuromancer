@@ -6,6 +6,7 @@ import { Cyberespace } from './Cyberespace';
 import { Decor } from './Decor';
 import { Dialogue } from './Dialogue';
 import { Fin } from './Fin';
+import { Etat } from './Etat';
 import { Options } from './Options';
 import { useIntegerScale, VIEWPORT_W, VIEWPORT_H } from './useIntegerScale';
 
@@ -24,6 +25,7 @@ export function App() {
   const scanlines = useUiStore((e) => e.scanlines);
   const glitch = useUiStore((e) => e.glitch);
   const [options, setOptions] = useState(false);
+  const [fiche, setFiche] = useState(false);
   const [lignes, setLignes] = useState<Ligne[]>([]);
   const [moteur, setMoteur] = useState<MoteurDialogue | null>(null);
   const [lance, setLance] = useState(false);
@@ -72,7 +74,7 @@ export function App() {
     const onTouche = (e: Event) => {
       // Le bouton d'options est au-dessus de l'ecran de demarrage : y cliquer
       // ne doit pas lancer la partie par la meme occasion.
-      if (e.target instanceof Element && e.target.closest('.opt, .opt__ouvrir')) return;
+      if (e.target instanceof Element && e.target.closest('.opt, .opt__ouvrir, .etat')) return;
       demarrer();
     };
     window.addEventListener('keydown', onTouche);
@@ -83,12 +85,17 @@ export function App() {
     };
   }, [moteur, lance, demarrer]);
 
-  // Echap ouvre et ferme les options, y compris en pleine scene.
+  // Echap ouvre les options, Tab la fiche de partie — l'une comme l'autre en
+  // pleine scene, sans quitter la partie.
   useEffect(() => {
     const onTouche = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
-      e.preventDefault();
-      setOptions((v) => !v);
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setOptions((v) => !v);
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        setFiche((v) => !v);
+      }
     };
     window.addEventListener('keydown', onTouche);
     return () => window.removeEventListener('keydown', onTouche);
@@ -121,6 +128,16 @@ export function App() {
           </div>
         )}
 
+        {lance && (
+          <button
+            className="opt__ouvrir opt__ouvrir--fiche"
+            onClick={() => setFiche(true)}
+            aria-label="Fiche de partie"
+            title="Fiche de partie (Tab)"
+          >
+            ▤
+          </button>
+        )}
         <button
           className="opt__ouvrir"
           onClick={() => setOptions(true)}
@@ -130,6 +147,7 @@ export function App() {
           ⚙
         </button>
 
+        {fiche && lance && <Etat onFermer={() => setFiche(false)} />}
         {options && <Options onFermer={() => setOptions(false)} />}
       </div>
 

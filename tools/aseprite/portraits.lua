@@ -348,4 +348,200 @@ local function armitage()
   return L.enregistrer(sprite, 'port_armitage', 'portraits')
 end
 
-for _, faire in ipairs({ sable, molly, ratz, fragment, finn, armitage }) do faire() end
+-- -------------------------------------------------------------- RIVIERA ----
+-- Beau, et c'est le probleme. Paupieres basses : il vous regarde deja depuis
+-- un moment. Le sourire est asymetrique — un sourire regulier n'inquiete
+-- personne.
+
+local function riviera()
+  local sprite, img = creer()
+  fond(img)
+  buste(img, '2', '4', 'y', 'x')
+  patch(img, 14, 41, { '444444444444zzzz444', '.4444444444444444.' })  -- col blanc
+  crane(img, '1', 'y', 'x', 'z', 1)
+
+  patch(img, 12, 9, {                      -- cheveux noirs, coiffes, une meche
+    '...1111111111111111...',
+    '..111111111111111111..',
+    '.1111111111111111111.1',
+    '1111.11111111.111111.1',
+    '.11...11111....11111..',
+    '..1....111......111...',
+  })
+
+  patch(img, 15, 20, {
+    '1111111.....1111111',              -- sourcils nets
+    '.4444..w...w..4444.',              -- paupiere abaissee
+    '.4z04..w...w..40z4.',              -- l'oeil, juste une fente
+    '..444..w...w..444..',
+  })
+
+  patch(img, 23, 26, { '.x4', '.x4', 'xx4', '4x4' })     -- nez droit
+
+  patch(img, 19, 33, {                     -- le sourire, dents visibles
+    '4xwwwwwx4',
+    '.4zzzzz4.',
+    '..44444..',
+  })
+  pt(img, 28, 32, 'x')                     -- coin releve, d'un seul cote
+  pt(img, 29, 33, 'x')
+
+  patch(img, 34, 27, { '.h.', 'hgh', '.h.' })            -- une lueur d'hologramme
+
+  return L.enregistrer(sprite, 'port_riviera', 'portraits')
+end
+
+-- ---------------------------------------------------------------- DIXIE ----
+-- Un construct ROM. Pas un visage : l'enregistrement d'un visage, rejoue sur
+-- un moniteur qui a vingt ans. Il ne se souvient pas de la derniere fois.
+
+local function dixie()
+  local sprite, img = creer()
+  local hasard = L.rng(31337)
+
+  plein(img, 0, 0, N - 1, N - 1, '0')
+
+  ovale(img, 24, 20, 13, 14, 'q')          -- la masse est pleine, mais verte
+  ovale(img, 24, 27, 10, 11, 'q')
+  plein(img, 20, 34, 27, 44, 'q')          -- cou
+  plein(img, 7, 43, 40, 47, 'q')           -- epaules
+
+  L.cercle(img, 0, 0, 24, 20, 13, 'r', N)  -- le contour, seul trait vif
+  L.cercle(img, 0, 0, 24, 27, 10, 'r', N)
+  L.rect(img, 0, 0, 7, 43, 40, 47, 'r', N)
+
+  patch(img, 14, 19, {                     -- orbites : deux trous, pas des yeux
+    'rrrrrr.....rrrrrrr',
+    'r0000r.....r0000r.',
+    'r0s00r..r..r00s0r.',
+    'r0000r..r..r0000r.',
+    '.rrrr...r...rrrr..',
+  })
+  patch(img, 22, 26, { '.r.', '.r.', 'rr.' })            -- arete du nez
+  patch(img, 17, 32, { 'rrrrrrrrrrrrrr' })               -- bouche : une ligne
+
+  -- Le balayage du moniteur passe par-dessus tout : c'est ce qui empeche le
+  -- portrait de se lire comme une tete et le force a se lire comme un signal.
+  for y = 0, N - 1, 3 do plein(img, 0, y, N - 1, y, '0') end
+  plein(img, 0, 12, N - 1, 13, '0')        -- decrochage de synchro
+
+  -- Le trace plat qui lui donne son nom. Un seul soubresaut, puis plus rien.
+  plein(img, 0, 40, 17, 40, 's')
+  plein(img, 18, 38, 18, 40, 's')
+  plein(img, 19, 40, 19, 43, 's')
+  plein(img, 20, 33, 20, 43, 's')
+  plein(img, 21, 33, 21, 40, 's')
+  plein(img, 22, 40, N - 1, 40, 's')
+
+  for _ = 1, 20 do                         -- neige de lecture
+    pt(img, hasard(N), hasard(N), ({ 'q', 'r', 's' })[1 + hasard(3)])
+  end
+
+  return L.enregistrer(sprite, 'port_dixie', 'portraits')
+end
+
+-- -------------------------------------------------------------- MAELCUM ----
+-- Zion. Le seul du lot qui ne veut rien prendre a personne.
+
+local function maelcum()
+  local sprite, img = creer()
+  fond(img)
+  buste(img, '2', '3', 'w', 'm')
+  patch(img, 13, 41, {                     -- laine tricotee sur les epaules
+    '4444444444444444444444',
+    'rrqqrroonnooqqrrqqrrqq',
+    '4444444444444444444444',
+  })
+  crane(img, '1', 'w', 'm', 'x', 2)
+
+  -- Les locks : quatre meches qui s'ecartent en tombant. Des colonnes droites
+  -- et serrees se lisaient comme deux barres noires posees sur le portrait —
+  -- il leur faut de l'ecart, une derive, et un cote eclaire pour se detacher
+  -- du fond, qui est sombre lui aussi.
+  local LOCKS = {
+    { 13, 14, 42, -7 }, { 11, 16, 37, -3 },
+    { 34, 16, 38, 3 }, { 32, 14, 42, 7 },
+  }
+  for _, lock in ipairs(LOCKS) do
+    local x0, y1, y2, derive = lock[1], lock[2], lock[3], lock[4]
+    for y = y1, y2 do
+      local t = (y - y1) / (y2 - y1)
+      local x = x0 + math.floor(derive * t * t)
+      plein(img, x, y, x + 2, y, '1')
+      pt(img, derive < 0 and x + 2 or x, y, '0')
+      if (y - y1) % 3 ~= 0 then pt(img, derive < 0 and x or x + 2, y, '4') end
+    end
+  end
+  patch(img, 11, 6, {                      -- la couronne, d'ou tout retombe
+    '..11111111111111111111..',
+    '.111111111111111111111..',
+    '11411411411411411411411.',
+    '1.41..411..411..411..41.',
+  })
+
+  patch(img, 15, 20, {                     -- regard calme
+    'mmmmmmm.....mmmmmmm',
+    'm4444m.w...w.m4444m',
+    '.4z04..w...w..40z4.',
+    '..444..w...w..444..',
+  })
+
+  patch(img, 22, 26, { '.mx4', '.mx4', 'mm44', '4mm4' })  -- nez large
+
+  patch(img, 18, 34, { '4mmmmmmmmm4', '.444444444.' })    -- bouche fermee, sereine
+
+  return L.enregistrer(sprite, 'port_maelcum', 'portraits')
+end
+
+-- ------------------------------------------------------------ YONDERBOY ----
+-- Panther Modern. Polycarbone mimetique : la moitie du visage prend la couleur
+-- de ce qu'il y a derriere. On ne se souvient jamais de sa tete.
+
+local function yonderboy()
+  local sprite, img = creer()
+  local hasard = L.rng(7777)
+  fond(img)
+  buste(img, '2', '3', 'x', 'w')
+  crane(img, '0', 'x', 'w', 'y', 2)
+
+  -- La crete monte, elle n'est pas posee a plat : une barre horizontale se
+  -- lisait comme un bandeau.
+  for x = 17, 31 do
+    local haut = 4 + math.floor(math.abs(x - 24) / 2)
+    plein(img, x, haut, x, 13, '0')
+    plein(img, x, haut, x, haut + 2, (x % 3 == 0) and 'j' or 'k')
+    if x % 4 == 0 then pt(img, x, haut, 'l') end
+  end
+
+  patch(img, 15, 20, {                     -- un oeil humain, un oeil couvert
+    'wwwwwww.....kkkkkkk',
+    'w4www4w.w...kiiiiik',
+    '.4z04..w...wkilikkk',
+    '..444..w...wkkkkkkk',
+    '...w...w....4kkkkk4',
+  })
+
+  patch(img, 22, 26, { '.wy4', '.wy4', 'ww44' })          -- nez
+
+  patch(img, 19, 33, { '4wwwwwww4', '.4444444.' })        -- bouche
+
+  -- Le mimetique : la moitie droite se dissout dans le fond. Un damier
+  -- irregulier, pas un degrade — c'est une texture qui copie, pas une
+  -- transparence.
+  for y = 14, 40 do
+    for x = 27, 37 do
+      if (x - 24) * (x - 24) / 100 + (y - 24) * (y - 24) / 144 <= 1.0
+        or (x - 24) * (x - 24) / 64 + (y - 29) * (y - 29) / 64 <= 1.0 then
+        if hasard(100) < (x - 27) * 9 then
+          pt(img, x, y, (y < 26) and '2' or '3')
+        end
+      end
+    end
+  end
+
+  return L.enregistrer(sprite, 'port_yonderboy', 'portraits')
+end
+
+for _, faire in ipairs({
+  sable, molly, ratz, fragment, finn, armitage, riviera, dixie, maelcum, yonderboy,
+}) do faire() end

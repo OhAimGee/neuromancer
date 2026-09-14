@@ -1,3 +1,4 @@
+import equipage from '@data/equipage.json';
 import equilibrage from '@data/equilibrage.json';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
@@ -8,6 +9,9 @@ export const VERSION_RUN = 1;
 
 /** Horloge de depart. Les sacs de toxine se dissolvent au bout de 12 cycles. */
 export const CYCLES_DEPART = equilibrage.run.cyclesDepart;
+
+/** Trois places pour six candidats : c'est la que se joue la rejouabilite. */
+export const MEMBRES_MAX = equipage.places;
 
 /**
  * Etat de la partie en cours. Jetable : remis a zero a chaque nouvelle partie.
@@ -44,6 +48,8 @@ interface RunActions {
   enregistrerIssue: (scene: string, palier: Palier) => void;
   consommerCycles: (n: number) => void;
   recruter: (id: string) => void;
+  /** Places d'equipage encore libres. Lu par le recit avant de proposer. */
+  placesLibres: () => number;
   gagnerCredits: (n: number) => void;
   acquerir: (categorie: 'plans' | 'scripts' | 'implants', id: string) => void;
   terminer: () => void;
@@ -114,8 +120,24 @@ export const useRunStore = create<RunEtat & RunActions>()(
 
       consommerCycles: (n) => set((e) => ({ cycles: Math.max(0, e.cycles - n) })),
 
+      // Recruter applique l'apport du membre : un equipier n'est pas un nom sur
+      // une liste, il change ce que Sable sait faire — et cela se voit dans la
+      // matrice comme dans les dialogues.
       recruter: (id) =>
-        set((e) => (e.equipage.includes(id) ? e : { equipage: [...e.equipage, id] })),
+        set((e) => {
+          if (e.equipage.includes(id) || e.equipage.length >= MEMBRES_MAX) return e;
+          const m = (equipage.membres as Record<string, { competence: string; bonus: number }>)[id];
+          if (!m) return { equipage: [...e.equipage, id] };
+          return {
+            equipage: [...e.equipage, id],
+            competences: {
+              ...e.competences,
+              [m.competence]: (e.competences[m.competence] ?? 0) + m.bonus,
+            },
+          };
+        }),
+
+      placesLibres: () => Math.max(0, MEMBRES_MAX - get().equipage.length),
 
       gagnerCredits: (n) => set((e) => ({ credits: e.credits + n })),
 

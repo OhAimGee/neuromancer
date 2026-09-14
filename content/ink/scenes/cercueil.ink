@@ -15,6 +15,10 @@ Le cercueil faisait deux mètres sur un, et le tarif se payait à l'heure. Sable
     ~ humanite -= 10
     -> cercueil_fragment
 
++ { not crew_present("yonderboy") } Répondre à l'écran qui s'allume tout seul.
+    -> yonderboy ->
+    -> cercueil_menu
+
 + Se brancher sur le jack mural.
     -> cercueil_cabine
 

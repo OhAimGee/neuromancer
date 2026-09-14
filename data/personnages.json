@@ -27,5 +27,21 @@
   "armitage": {
     "nom": "ARMITAGE",
     "portrait": "port_armitage"
+  },
+  "riviera": {
+    "nom": "RIVIERA",
+    "portrait": "port_riviera"
+  },
+  "dixie": {
+    "nom": "DIXIE",
+    "portrait": "port_dixie"
+  },
+  "maelcum": {
+    "nom": "MAELCUM",
+    "portrait": "port_maelcum"
+  },
+  "yonderboy": {
+    "nom": "YONDERBOY",
+    "portrait": "port_yonderboy"
   }
 }

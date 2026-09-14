@@ -153,6 +153,13 @@ export class MoteurDialogue {
       return 0;
     }) as never);
 
+    lier('recruter', ((id: string) => {
+      useRunStore.getState().recruter(String(id));
+      return 0;
+    }) as never);
+
+    lier('places_libres', (() => useRunStore.getState().placesLibres()) as never);
+
     lier('acquerir_script', ((id: string) => {
       useRunStore.getState().acquerir('scripts', String(id));
       return 0;

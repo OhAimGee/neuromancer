@@ -30,6 +30,14 @@ La boutique du Finn tenait dans un couloir. Des étagères, un comptoir, et derr
     — Trois ticks où la trace oublie de compter. Trois. Pas quatre. Les gens meurent sur le quatrième.
     -> finn_menu
 
++ { not crew_present("finn") } Lui proposer de fermer boutique.
+    -> finn_recrutement ->
+    -> finn_menu
+
++ { not crew_present("dixie") } Parler d'un mort qui se souvient.
+    -> dixie ->
+    -> finn_menu
+
 + Se brancher sur l'arrière-boutique.
     -> finn_cabine
 

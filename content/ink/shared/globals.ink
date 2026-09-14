@@ -69,6 +69,16 @@ EXTERNAL acquerir_script(id)
 === function acquerir_script(id) ===
 ~ return 0
 
+// Recrute un equipier. Sans effet si les trois places sont prises : le recit
+// doit donc verifier places_libres() avant de proposer.
+EXTERNAL recruter(id)
+=== function recruter(id) ===
+~ return 0
+
+EXTERNAL places_libres()
+=== function places_libres() ===
+~ return 3
+
 EXTERNAL boost_competence(nom)
 === function boost_competence(nom) ===
 ~ return 0

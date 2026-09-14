@@ -8,6 +8,7 @@ INCLUDE shared/globals.ink
 INCLUDE scenes/ouverture.ink
 INCLUDE scenes/prologue.ink
 INCLUDE scenes/hub.ink
+INCLUDE scenes/equipage.ink
 INCLUDE scenes/finn.ink
 INCLUDE scenes/cercueil.ink
 INCLUDE scenes/molly.ink

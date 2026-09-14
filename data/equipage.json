@@ -1,0 +1,50 @@
+{
+  "_note": "Les six candidats. On en emmene trois : c'est la que se joue la rejouabilite (20 combinaisons). `competence` et `bonus` sont l'apport mecanique ; la loyaute et la trahison vivent dans content/ink.",
+
+  "places": 3,
+
+  "membres": {
+    "molly": {
+      "nom": "MOLLY",
+      "role": "Samouraï des rues",
+      "competence": "combat",
+      "bonus": 2,
+      "loyaute": "La franchise. Lui mentir sur le fragment la retourne."
+    },
+    "finn": {
+      "nom": "LE FINN",
+      "role": "Receleur",
+      "competence": "social",
+      "bonus": 1,
+      "loyaute": "Les crédits. Une meilleure offre le retourne."
+    },
+    "riviera": {
+      "nom": "RIVIERA",
+      "role": "Illusionniste",
+      "competence": "social",
+      "bonus": 3,
+      "loyaute": "Aucune. C'est un poison qui ouvre des portes."
+    },
+    "dixie": {
+      "nom": "DIXIE FLATLINE",
+      "role": "Construct ROM",
+      "competence": "hacking",
+      "bonus": 3,
+      "loyaute": "Tu promets de l'effacer à la fin. Tenir ou rompre décide d'une fin."
+    },
+    "maelcum": {
+      "nom": "MAELCUM",
+      "role": "Pilote de Zion",
+      "competence": "combat",
+      "bonus": 1,
+      "loyaute": "La foi et la non-violence. Il refuse de continuer si tu tues."
+    },
+    "yonderboy": {
+      "nom": "YONDERBOY",
+      "role": "Panther Modern",
+      "competence": "hacking",
+      "bonus": 1,
+      "loyaute": "Le spectacle. Il s'ennuie et il part."
+    }
+  }
+}
