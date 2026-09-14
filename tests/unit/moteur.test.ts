@@ -294,3 +294,56 @@ describe('mise en scene — ce qui colle et ce qui ne colle pas', () => {
     expect(suites).toBe(0);
   });
 });
+
+describe('acte III — les frictions par paire', () => {
+  beforeEach(() => {
+    useRunStore.getState().nouvellePartie();
+    useProfileStore.getState().reinitialiser();
+  });
+
+  /** Toutes les repliques lues depuis le knot donne, en prenant le choix i. */
+  function lireDepuis(m: MoteurDialogue, knot: string, choix = 0): string {
+    m.demarrer();
+    m.reprendre(knot);
+    const lues: string[] = [];
+    for (let pas = 0; pas < 60; pas++) {
+      const e = m.lire();
+      if (e.ligne) lues.push(e.ligne.texte);
+      if (e.peutContinuer) {
+        m.continuer();
+        continue;
+      }
+      if (e.choix.length === 0) break;
+      m.choisir(Math.min(choix, e.choix.length - 1));
+    }
+    return lues.join('\n');
+  }
+
+  // Six candidats pour trois places font vingt equipes : une scene par PAIRE
+  // couvre beaucoup plus de terrain qu'une scene par personne. Encore faut-il
+  // qu'elle se declenche, et un outil qui joue au hasard ne recrute personne.
+  it('une paire embarquee declenche sa scene a Freeside', () => {
+    const r = useRunStore.getState();
+    r.recruter('riviera');
+    r.recruter('molly');
+    const m = neuf();
+    expect(lireDepuis(m, 'freeside')).toContain('je te coupe les mains');
+  });
+
+  it('une autre paire donne une autre scene', () => {
+    const r = useRunStore.getState();
+    r.recruter('finn');
+    r.recruter('yonderboy');
+    const m = neuf();
+    expect(lireDepuis(m, 'freeside')).toContain('Une émeute');
+  });
+
+  // Deux disputes d'affilee feraient une sitcom : `friction_jouee` verrouille.
+  it('une equipe sans paire ecrite traverse sans friction', () => {
+    useRunStore.getState().recruter('molly');
+    const m = neuf();
+    const lu = lireDepuis(m, 'freeside');
+    expect(lu).toContain('rue Jules-Verne');
+    expect(lu).not.toContain('je te coupe les mains');
+  });
+});

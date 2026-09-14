@@ -23,6 +23,7 @@ Au bout du fuseau, là où la lumière artificielle n'allait plus, il y avait la
   - else:
     Sable n'avait aucun plan. Il avait une adresse et quinze poches de toxine, et l'une des deux était plus pressante que l'autre.
 }
+-> frictions ->
 -> approche
 
 // --- ETAPE 1 : l'approche ---------------------------------------------------

@@ -24,6 +24,8 @@ VAR approche_mode = ""
 VAR sang_verse = false
 VAR kuang_en_main = false
 VAR promesse_dixie = false
+// Une seule dispute par partie : deux d'affilee feraient une sitcom.
+VAR friction_jouee = false
 
 // --- Identite du fragment --------------------------------------------------
 // "" tant que le joueur ne sait rien. Valeurs possibles :

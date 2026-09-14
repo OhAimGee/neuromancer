@@ -191,6 +191,30 @@ const KNOT_FLATLINE = 'fin_flatline_reseau';
 // moins visite. Les conditions (knows, crew_present, parties) restent tirees au
 // sort a chaque partie : c'est la variete des ETATS qui doit venir du hasard,
 // pas celle des CHEMINS.
+// Le hasard du fuzzing est ENSEMENCE.
+//
+// Il ne l'etait pas, et le validateur passait au vert une fois sur trois sans
+// qu'une ligne du recit ait bouge. Un controle intermittent ne dit plus rien :
+// il apprend a relancer jusqu'a ce que ça passe. Avec une graine fixe, un echec
+// est reproductible et un succes veut dire quelque chose. `--graine=N` permet
+// de balayer d'autres tirages a la main quand on soupconne un coup de chance.
+const GRAINE = Number(
+  process.argv.find((a) => a.startsWith('--graine='))?.slice(9) ?? 20260914,
+);
+
+function alea(graine) {
+  let etat = graine >>> 0;
+  return () => {
+    etat = (etat + 0x6d2b79f5) >>> 0;
+    let t = etat;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const dé = alea(GRAINE);
+
 const choixVus = new Map();
 
 function choisirNouveau(story) {
@@ -203,7 +227,7 @@ function choisirNouveau(story) {
     const vu = choixVus.get(cle) ?? 0;
     // Le bruit departage les ex aequo : sans lui, le marcheur reprendrait
     // toujours le meme chemin dans le meme ordre et n'explorerait qu'un peigne.
-    const score = vu + Math.random() * 0.5;
+    const score = vu + dé() * 0.5;
     if (score < minimum) {
       minimum = score;
       meilleur = i;
@@ -220,7 +244,12 @@ let plongees = 0;
 const PLONGEES_PAR_FLATLINE = 5;
 
 // Parties rejouees par fin manquante, portes ouvertes. Voir la seconde passe.
-const ESSAIS_PERMISSIFS = 300;
+//
+// 2500 et non 300 : atteindre la fin BLACKOUT demande treize bons choix
+// d'affilee, dont plusieurs parmi sept. Le marcheur balaye l'arbre au lieu de
+// le tirer au sort, mais un arbre de cette profondeur reste large. Mesure :
+// 7,6 s pour l'ensemble du validateur.
+const ESSAIS_PERMISSIFS = 2500;
 
 function jouerUnePartie(permissif = false) {
   const story = new Story(json);
@@ -233,19 +262,19 @@ function jouerUnePartie(permissif = false) {
   lier('knows', (id) => {
     if (permissif) return true;
     const cle = String(id);
-    if (!su.has(cle)) su.set(cle, Math.random() < 0.5);
+    if (!su.has(cle)) su.set(cle, dé() < 0.5);
     return su.get(cle);
   });
-  lier('skill', () => (permissif ? 3 : 1 + Math.floor(Math.random() * 3)));
-  lier('has_implant', () => (permissif ? true : Math.random() < 0.3));
-  lier('crew_present', () => (permissif ? true : Math.random() < 0.3));
+  lier('skill', () => (permissif ? 3 : 1 + Math.floor(dé() * 3)));
+  lier('has_implant', () => (permissif ? true : dé() < 0.3));
+  lier('crew_present', () => (permissif ? true : dé() < 0.3));
   lier('learn', () => 0);
   lier('resolve_scene', () => 0);
   lier('boost_competence', () => 0);
   lier('acquerir_script', () => 0);
   // Le compte de parties est tire au sort : la fin secrete l'exige, et un
   // harnais qui repondrait toujours zero la declarerait inatteignable.
-  lier('parties', () => (permissif ? 5 : Math.floor(Math.random() * 6)));
+  lier('parties', () => (permissif ? 5 : Math.floor(dé() * 6)));
 
   let retourDePlongee = null;
   lier('plonger', (_point, retour) => {
@@ -277,7 +306,7 @@ function jouerUnePartie(permissif = false) {
     // Une plongee consomme des cycles : sans cela l'horloge ne tomberait jamais
     // a zero et la fin par la toxine serait declaree inatteignable a tort.
     const reste = Number(story.variablesState['cycles_restants']);
-    story.variablesState['cycles_restants'] = Math.max(0, reste - 1 - Math.floor(Math.random() * 2));
+    story.variablesState['cycles_restants'] = Math.max(0, reste - 1 - Math.floor(dé() * 2));
     story.ChoosePathString(retour);
   }
 }
@@ -302,6 +331,11 @@ if (json) {
   // les portes ouvertes : si une fin reste hors d'atteinte ici, elle est
   // vraiment inatteignable, et c'est un defaut d'ecriture.
   for (const id of finsDeclarees.keys()) {
+    // Le compteur de choix repart de zero pour chaque fin manquante : garder
+    // celui de la premiere passe ferait commencer l'exploration a mi-chemin
+    // d'un peigne deja parcouru, et une fin profonde n'aurait pas le temps
+    // d'etre atteinte dans son budget d'essais.
+    if (!finsAtteintes.has(id)) choixVus.clear();
     for (let essai = 0; essai < ESSAIS_PERMISSIFS && !finsAtteintes.has(id); essai++) {
       try {
         jouerUnePartie(true);

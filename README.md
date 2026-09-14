@@ -61,6 +61,11 @@ autres ferment. Le choix se paie à l'acte III : c'est là que les loyautés se 
 | **Maelcum** | Pilote de Zion | La non-violence. Il refuse de continuer si tu tues. |
 | **Yonderboy** | Panther Modern, diversions | L'ennui |
 
+Six candidats pour trois places font vingt équipes. Chaque **paire** a sa scène de friction,
+jouée une seule fois par partie, pendant les trois jours de navette vers Freeside : c'est
+beaucoup de variété pour peu de texte, et c'est là qu'on apprend des choses sur eux qui restent
+acquises d'une partie à l'autre.
+
 ![La fiche de partie](docs/images/etat.png)
 
 ### Les huit fins
@@ -291,6 +296,10 @@ ASCII plus une légende vers des noms de tuiles, jamais des images plein écran.
   trouve toujours pas est rejoué avec toutes les conditions vraies. « Jamais atteinte » veut de
   nouveau dire « inatteignable ».
 
+Le hasard est **ensemencé** (`--graine=N`). Il ne l'était pas, et le validateur passait au vert
+une fois sur trois sans qu'une ligne du récit ait bougé — un contrôle intermittent n'apprend
+qu'à relancer jusqu'à ce que ça passe.
+
 Chaque contrôle a été vérifié contre une faute introduite volontairement.
 
 ---
@@ -317,7 +326,7 @@ Tranche verticale en cours. Ce qui tourne aujourd'hui :
 - [ ] Interface en pixel art (cadre 9-slice, boutons, jauges, icônes de butin)
 - [ ] Objets : planches d'implants et de scripts
 - [ ] Effets : glitch, pluie, transition de branchement, logo-titre
-- [ ] Scènes de friction par paire d'équipiers (Riviera + Molly, Maelcum + Riviera)
+- [x] Scènes de friction par paire d'équipiers — six paires écrites, une par partie
 
 ---
 

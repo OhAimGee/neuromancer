@@ -13,6 +13,7 @@ INCLUDE scenes/finn.ink
 INCLUDE scenes/cercueil.ink
 INCLUDE scenes/molly.ink
 INCLUDE scenes/freeside.ink
+INCLUDE scenes/frictions.ink
 INCLUDE scenes/fins.ink
 
 -> ouverture

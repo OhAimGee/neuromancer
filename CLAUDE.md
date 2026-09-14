@@ -36,6 +36,9 @@ Boucle de 60-90 min, horloge de 12 cycles, 8 fins, forte rejouabilité.
   **(a)** 500 parties à choix aléatoires, conditions tirées au sort, pour les plantages
   d'exécution ; **(b)** un rattrapage **toutes portes ouvertes** (`knows` vrai, `crew_present`
   vrai, `parties()` à 5) pour chaque fin que (a) n'a pas atteinte.
+  **Le hasard du fuzzing est ensemencé** (`--graine=N` pour en essayer un autre). Il ne l'était
+  pas, et le validateur passait au vert une fois sur trois sans qu'une ligne du récit ait bougé :
+  un contrôle intermittent n'apprend qu'à relancer jusqu'à ce que ça passe.
   Le rattrapage n'est pas un confort. Un marcheur uniforme n'atteignait l'acte III que 10 fois
   sur 500 — il faut y enchaîner quatre bons choix parmi cinq à sept — et déclarait donc
   inatteignables trois fins qui étaient seulement improbables : le faux positif qui apprend à
@@ -171,7 +174,7 @@ Les deux sont couverts par `tests/unit/moteur.test.ts`, et les deux tests ont et
 reintroduisant la faute. Attention au parcours : un test qui deroule le recit depuis le hub ne
 voit jamais la faute du portrait, faute d'avoir joue le prologue qui la pose.
 
-## Les scenes en tunnel — un candidat, plusieurs lieux
+## Les scenes en tunnel — un candidat, plusieurs lieux, une paire
 
 Un recrutement est un TUNNEL (`-> riviera ->`, termine par `->->`) : il rend la main la ou on
 l'a appele, donc la scene n'a pas a savoir dans quel lieu elle se joue, et le meme candidat peut
@@ -185,6 +188,13 @@ au fuzzing.
 
 Les places d'equipage sont comptees par le jeu (`places_libres()`), jamais par une variable Ink :
 le magasin d'equipage est l'etat de la partie.
+
+`scenes/frictions.ink` applique le meme motif aux PAIRES d'equipiers. Six candidats pour trois
+places font vingt equipes : une scene par paire couvre beaucoup plus de terrain qu'une scene par
+personne, et c'est l'astuce economique du design. Une seule friction par partie
+(`friction_jouee`) — deux disputes d'affilee feraient une sitcom. Un outil qui joue au hasard ne
+recrute personne, donc ces scenes ne sont vues que par les tests unitaires : ils recrutent la
+paire dans `runStore` puis `reprendre('freeside')`.
 
 ---
 
