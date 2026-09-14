@@ -179,6 +179,25 @@ function Partie({
   const etat = useSyncExternalStore(moteur.souscrire, moteur.lire);
   const numero = useRef(plongee);
 
+  // Le passage d'un cote a l'autre du cable merite d'etre vu. Sans lui, la rue
+  // devient la matrice entre deux images et le joueur ne sait pas ce qui vient
+  // de se produire — c'est le geste central du jeu, il ne doit pas etre gratuit.
+  const dansLaMatrice = etat.plongee !== null;
+  const [branchement, setBranchement] = useState<'entree' | 'sortie' | null>(null);
+  const etaitDedans = useRef(dansLaMatrice);
+  useEffect(() => {
+    if (etaitDedans.current === dansLaMatrice) return;
+    setBranchement(dansLaMatrice ? 'entree' : 'sortie');
+    etaitDedans.current = dansLaMatrice;
+    const t = window.setTimeout(() => setBranchement(null), 620);
+    return () => window.clearTimeout(t);
+  }, [dansLaMatrice]);
+
+  const voile =
+    branchement !== null ? (
+      <div className={`jack jack--${branchement}`} aria-hidden="true" />
+    ) : null;
+
   const sortir = useCallback(
     (flatline: boolean) => {
       surPlongee((n) => n + 1);
@@ -190,11 +209,14 @@ function Partie({
   if (etat.plongee !== null) {
     numero.current = plongee;
     return (
-      <Cyberespace
-        pointAcces={etat.plongee}
-        graine={`plongee-${plongee}`}
-        onSortie={sortir}
-      />
+      <>
+        <Cyberespace
+          pointAcces={etat.plongee}
+          graine={`plongee-${plongee}`}
+          onSortie={sortir}
+        />
+        {voile}
+      </>
     );
   }
 
@@ -205,6 +227,7 @@ function Partie({
       {etat.fin !== null && !etat.peutContinuer && (
         <Fin id={etat.fin} onRejouer={onRejouer} />
       )}
+      {voile}
     </>
   );
 }

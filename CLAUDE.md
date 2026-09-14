@@ -502,6 +502,14 @@ remplacer par du 9-slice ne gagnerait qu'un risque de régression. Les assets d'
 existent (`ui.lua` : logo-titre, fiole de toxine, icônes de butin ; `items.lua` : scripts et
 plans ; `fx.lua` : la pluie) existent parce qu'aucun CSS ne les ferait.
 
+**Le voile de branchement (`.jack`) et le carton de glace noire (`.mort`) suivent la même
+règle.** Le plan prévoyait `fx_jack_in` en planche de douze images plein écran : douze fois
+57 600 pixels pour ce que deux dégradés animés rendent mieux, et la seule planche du jeu qui
+aurait dû suivre l'échelle entière sans être rééchantillonnée. Deux points à ne pas perdre :
+`pointer-events: none` sur `.jack`, sans quoi le voile avale le premier clic du joueur pendant
+six dixièmes de seconde — et celui des outils de vérification ; et `prefers-reduced-motion` sur
+les deux, le carton de mort étant précisément l'écran où l'on serait tenté d'ajouter un flash.
+
 **Une planche d'icônes est indexée par l'ordre de `data/*.json`.** `items_scripts` suit
 `hacking.scripts`, `items_plans` suit `hacking.plans`, `icons_butin` suit les quatre types de
 butin. Réordonner la donnée sans réordonner la planche affiche le mauvais dessin, sans la

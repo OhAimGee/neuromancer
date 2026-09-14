@@ -131,6 +131,13 @@ await panneau(() => page.keyboard.press('Tab'), '.etat', 'etat');
 await panneau(() => page.locator('.opt__ouvrir:not(.opt__ouvrir--fiche)').click(), '.opt', 'options');
 
 // 7. Le cyberespace, une fois branche et deux noeuds plus loin.
+// Le voile de branchement ne dure que six dixiemes de seconde : on ne le
+// capture pas en le poursuivant, on se contente de verifier qu'il est bien
+// apparu, et la capture se prend juste apres sur une copie figee.
+const voileVu = page
+  .waitForSelector('.jack', { timeout: 120_000 })
+  .then(() => true)
+  .catch(() => false);
 await jusqua(async () => dansLeReseau(page));
 if (await dansLeReseau(page)) {
   await page.waitForSelector('.net canvas');
@@ -152,6 +159,58 @@ if (await dansLeReseau(page)) {
     await page.waitForTimeout(180);
   }
   await capturer('cyberespace');
+
+  // 8. Le branchement. Poser le voile nous-memes et arreter son animation sur
+  // une image est le seul moyen d'en avoir une capture stable ; l'assertion
+  // ci-dessus garantit que c'est bien ce que le jeu a joue, et non une classe
+  // CSS restee dans la feuille de style apres que le composant l'a oubliee.
+  if (!(await voileVu)) {
+    console.error('le voile de branchement ne s est pas affiche');
+    process.exitCode = 1;
+  } else {
+    await page.evaluate(() => {
+      const d = document.createElement('div');
+      d.className = 'jack jack--entree';
+      d.id = 'vitrine-jack';
+      d.style.animationDelay = '-0.15s';
+      d.style.animationPlayState = 'paused';
+      document.querySelector('.viewport').appendChild(d);
+    });
+    await page.waitForTimeout(120);
+    await capturer('branchement');
+    await page.evaluate(() => document.getElementById('vitrine-jack')?.remove());
+  }
+
+  // 9. La glace noire. La trace monte d'un point par deplacement : on fait
+  // l'aller-retour entre deux relais jusqu'au plafond, ou la riposte frappe a
+  // chaque tick. C'est la derniere capture : la plongee est finie apres.
+  const carteM = await page.locator('.net__carte canvas').boundingBox();
+  for (let tour = 0; tour < 200 && carteM; tour++) {
+    if ((await page.locator('.mort').count()) > 0) break;
+    // Une glace refuse le passage sans couter un tick : viser les relais.
+    const noeuds = (await page.evaluate(() => window.__noeudsVisibles ?? [])).filter(
+      (n) => n.type === 'relais' || n.type === 'bdd',
+    );
+    let bouge = false;
+    for (const n of noeuds) {
+      await page.mouse.click(carteM.x + n.x * echelle, carteM.y + n.y * echelle);
+      await page.waitForTimeout(35);
+      const aller = page.locator('.net__actions .net__bouton:not([disabled])', { hasText: 'ALLER' });
+      if ((await aller.count()) === 0) continue;
+      await aller.first().click();
+      await page.waitForTimeout(45);
+      bouge = true;
+      break;
+    }
+    if (!bouge) break;
+  }
+  if ((await page.locator('.mort').count()) > 0) {
+    await page.waitForTimeout(1100);
+    await capturer('glace-noire');
+  } else {
+    console.error('flatline jamais atteint');
+    process.exitCode = 1;
+  }
 } else {
   console.error('cyberespace jamais atteint');
   process.exitCode = 1;

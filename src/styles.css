@@ -1000,3 +1000,144 @@ body {
   line-height: calc(16 * var(--px));
   color: var(--c2);
 }
+
+/* --- Le branchement ------------------------------------------------------ */
+
+/* Le passage d'un cote a l'autre du cable. Un voile de bandes horizontales qui
+ * se referme puis s'ouvre : c'est l'image d'un signal qui se synchronise, et
+ * c'est ce que le jeu raconte a cet instant.
+ *
+ * En CSS et non en planche de 12 images : une transition plein ecran en 320x180
+ * couterait douze fois 57 600 pixels pour un effet que deux degrades animes
+ * rendent mieux, et qui suit l'echelle entiere sans etre re-echantillonne.
+ *
+ * `pointer-events: none` est indispensable : le voile couvre toute la vue
+ * pendant six dixiemes de seconde, et sans cela il avalerait le premier clic
+ * du joueur — et celui des outils de verification. */
+.jack {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      var(--c0) 0,
+      var(--c0) var(--px),
+      transparent var(--px),
+      transparent calc(3 * var(--px))
+    ),
+    var(--n0);
+}
+.jack--entree {
+  animation: jack-entree 0.6s steps(12) forwards;
+}
+.jack--sortie {
+  animation: jack-sortie 0.6s steps(12) forwards;
+}
+
+/* L'ecran se pince vers la ligne mediane, puis s'ouvre en grand : on tombe
+ * dedans. Le trajet inverse pour ressortir. */
+@keyframes jack-entree {
+  0% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  55% {
+    opacity: 1;
+    clip-path: inset(48% 0 48% 0);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(50% 0 50% 0);
+  }
+}
+@keyframes jack-sortie {
+  0% {
+    opacity: 1;
+    clip-path: inset(50% 0 50% 0);
+  }
+  45% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Meme regle que la pluie : ce qui bouge vite se coupe avec les scanlines. */
+@media (prefers-reduced-motion: reduce) {
+  .jack {
+    animation-duration: 0.01s;
+  }
+}
+
+/* --- La glace noire ------------------------------------------------------ */
+
+/* Mourir dans la matrice ne doit pas ressembler a un bilan de plongee reussie.
+ * Le carton couvre le reseau, en rouge, et ne propose qu'une chose : sortir.
+ *
+ * Pas de flash : le fond monte en une seconde, sans clignotement, et l'effet
+ * s'annule sous `prefers-reduced-motion`. Le risque photosensible est reel,
+ * et c'est precisement l'ecran ou l'on serait tente d'en faire trop. */
+.mort {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(4 * var(--px));
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgb(224 43 50 / 12%) 0,
+      rgb(224 43 50 / 12%) var(--px),
+      transparent var(--px),
+      transparent calc(3 * var(--px))
+    ),
+    radial-gradient(ellipse at center, var(--r0) 0%, var(--n0) 70%);
+  font-family: 'Silkscreen', monospace;
+  text-align: center;
+  animation: mort-montee 0.9s ease-out both;
+}
+.mort__etiquette {
+  margin: 0;
+  font-size: calc(8 * var(--px));
+  letter-spacing: calc(2 * var(--px));
+  color: var(--r1);
+}
+.mort__nom {
+  margin: 0;
+  font-size: calc(24 * var(--px));
+  line-height: calc(28 * var(--px));
+  letter-spacing: calc(3 * var(--px));
+  color: var(--r2);
+}
+.mort__sous {
+  margin: 0 0 calc(6 * var(--px));
+  font-size: calc(8 * var(--px));
+  color: var(--g1);
+}
+/* Le bouton de sortie est cale a droite dans la barre d'actions : centre ici,
+ * il doit oublier cette marge. */
+.mort .net__bouton--sortie {
+  margin-left: 0;
+}
+@keyframes mort-montee {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mort {
+    animation: none;
+  }
+}

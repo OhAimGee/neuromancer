@@ -136,6 +136,19 @@ décoratif. Voler un dossier médical débloque l'option de confronter quelqu'un
 
 ![Le cyberespace](docs/images/cyberespace.png)
 
+Le passage d'un côté à l'autre du câble se voit : un voile de bandes horizontales pince l'image
+vers sa ligne médiane à l'entrée, et l'ouvre en grand à la sortie. Sans lui, la rue devenait la
+matrice entre deux images.
+
+![Le branchement](docs/images/branchement.png)
+
+Mourir dans la matrice n'est pas un bilan de plongée d'une autre couleur. Quand la trace atteint
+son plafond, la glace noire riposte à chaque tick, et l'intégrité tombe : le réseau disparaît
+sous un carton rouge, le butin est perdu, et le récit reprend à `fin_flatline_reseau` — une fin
+comme une autre, pas un écran de game over.
+
+![La glace noire](docs/images/glace-noire.png)
+
 ### La progression n'est pas une statistique
 
 Une information découverte dans **n'importe quelle partie** débloque définitivement les options
@@ -265,6 +278,11 @@ avec `--px`, et les remplacer par du 9-slice ne gagnerait qu'un risque de régre
 d'interface qui existent — le logo, la fiole de toxine, les icônes — existent parce qu'aucun CSS
 ne les ferait.
 
+Le voile de branchement relève de la même décision : une planche de douze images en 320×180
+coûterait douze fois 57 600 pixels pour ce que deux dégradés animés rendent mieux, et une planche
+plein écran serait la seule image du jeu à devoir suivre l'échelle entière sans être
+rééchantillonnée. Il est donc en CSS, comme le carton de glace noire.
+
 ```bash
 tools/aseprite.sh tools/aseprite/ts_interior.lua
 ```
@@ -334,7 +352,7 @@ Tranche verticale en cours. Ce qui tourne aujourd'hui :
 - [x] Interface dessinée : logo-titre, fiole de toxine à treize états, icônes de butin
 - [x] Objets : planches des cinq scripts et des six plans d'implants
 - [x] La pluie de Ninsei — une tuile de 16 px, déplacée au pixel par le CSS
-- [ ] Transition de branchement (`fx_jack_in`) et écran de mort par glace noire
+- [x] Transition de branchement et carton de mort par glace noire
 - [x] Scènes de friction par paire d'équipiers — six paires écrites, une par partie
 
 ---

@@ -90,6 +90,7 @@ export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie }: Prop
   const voisin = cible !== null && ici ? ici.voisins.includes(cible) : false;
   const noeudCible = cible !== null ? etat.graphe.noeuds[cible] : undefined;
   const enCours = etat.statut === 'en_cours';
+  const mort = etat.statut === 'flatline';
 
   const scripts = useMemo(
     () => SCRIPTS.filter((s) => scriptsPossedes.includes(s.id)),
@@ -186,12 +187,10 @@ export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie }: Prop
               DÉBRANCHER
             </button>
           </div>
-        ) : (
+        ) : mort ? null : (
           <div className="net__actions">
             <span className="net__bilan">
-              {etat.statut === 'flatline'
-                ? 'FLATLINE — butin perdu'
-                : `${etat.sac.length} objet(s) · ${cyclesConsommes} cycle(s)`}
+              {`${etat.sac.length} objet(s) · ${cyclesConsommes} cycle(s)`}
             </span>
             <button className="net__bouton net__bouton--sortie" onClick={encaisser}>
               SORTIR
@@ -200,6 +199,20 @@ export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie }: Prop
         )}
       </div>
 
+      {/* La glace noire tue : elle merite autre chose qu'une ligne de bilan de
+        * la meme couleur qu'un butin ramene. Le carton couvre la matrice, donc
+        * le bilan du bas n'est pas rendu en meme temps — un seul bouton SORTIR,
+        * et pas de piege au clavier. */}
+      {mort && (
+        <div className="mort" role="alertdialog" aria-label="Flatline">
+          <p className="mort__etiquette">RIPOSTE</p>
+          <p className="mort__nom">GLACE NOIRE</p>
+          <p className="mort__sous">INTEGRITE 0 &middot; BUTIN PERDU</p>
+          <button className="net__bouton net__bouton--sortie" onClick={encaisser}>
+            SORTIR
+          </button>
+        </div>
+      )}
     </div>
   );
 }
