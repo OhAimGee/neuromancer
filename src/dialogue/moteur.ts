@@ -159,6 +159,7 @@ export class MoteurDialogue {
     }) as never);
 
     lier('places_libres', (() => useRunStore.getState().placesLibres()) as never);
+    lier('parties', (() => useProfileStore.getState().parties) as never);
 
     lier('acquerir_script', ((id: string) => {
       useRunStore.getState().acquerir('scripts', String(id));

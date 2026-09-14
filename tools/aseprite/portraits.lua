@@ -542,6 +542,54 @@ local function yonderboy()
   return L.enregistrer(sprite, 'port_yonderboy', 'portraits')
 end
 
+-- ---------------------------------------------------------------- 3JANE ----
+-- Elle a l'air d'avoir trente ans. Elle en a peut-etre quatre-vingts, et c'est
+-- la seule chose qu'on remarque au bout d'un moment : rien dans ce visage n'a
+-- jamais eu a s'user.
+
+local function troisjane()
+  local sprite, img = creer()
+  fond(img)
+  buste(img, '1', '4', 'y', 'x')
+  patch(img, 13, 41, { '4444zzzzzzzzzz4444444', '.44444444444444444.' })   -- col haut
+
+  crane(img, '1', 'y', 'x', 'z', 1)
+
+  -- Cheveux releves : le chignon monte au lieu de tomber. C'est ce qui la
+  -- separe de tout ce qui se passe en bas — personne sur Ninsei ne se coiffe.
+  patch(img, 14, 4, {
+    '....111111111....',
+    '..1111111111111..',
+    '.111111111111111.',
+    '11111111111111111',
+    '11111111111111111',
+    '11111111111111111',
+  })
+  patch(img, 19, 1, { '..1111..', '.111111.', '11111111', '11111111' })   -- le chignon
+  plein(img, 10, 11, 11, 21, '1')
+  plein(img, 36, 11, 37, 21, '1')
+
+  patch(img, 15, 20, {                     -- sourcils hauts, regard immobile
+    'x.xxxxx.....xxxxx.x',
+    '.4444..w...w..4444.',
+    '.4z04..w...w..40z4.',
+    '.4x44..w...w..44x4.',
+    '..44...w...w...44..',
+  })
+
+  patch(img, 23, 26, { '.x4', '.x4', 'xx4' })            -- nez court
+
+  patch(img, 20, 33, { '4wxxxw4', '.44444.' })           -- bouche petite, fermee
+  pt(img, 19, 33, 'x')                                   -- un pli a chaque commissure
+  pt(img, 27, 33, 'x')
+
+  patch(img, 12, 23, { 'g', 'h', 'g' })                  -- une boucle d'oreille
+  patch(img, 35, 23, { 'g', 'h', 'g' })
+
+  return L.enregistrer(sprite, 'port_3jane', 'portraits')
+end
+
 for _, faire in ipairs({
-  sable, molly, ratz, fragment, finn, armitage, riviera, dixie, maelcum, yonderboy,
+  sable, molly, ratz, fragment, finn, armitage,
+  riviera, dixie, maelcum, yonderboy, troisjane,
 }) do faire() end

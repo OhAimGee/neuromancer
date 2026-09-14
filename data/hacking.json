@@ -38,7 +38,8 @@
     { "id": "ninsei_public",  "nom": "Borne publique Ninsei","profondeur": 3, "richesse": 1, "danger": 1 },
     { "id": "boutique_finn",  "nom": "Arriere-boutique Finn","profondeur": 4, "richesse": 2, "danger": 1 },
     { "id": "sense_net",      "nom": "Hall Sense/Net",       "profondeur": 5, "richesse": 3, "danger": 3 },
-    { "id": "maas_biolabs",   "nom": "Maas Biolabs",         "profondeur": 6, "richesse": 4, "danger": 4 }
+    { "id": "maas_biolabs",   "nom": "Maas Biolabs",         "profondeur": 6, "richesse": 4, "danger": 4 },
+    { "id": "villa_straylight", "nom": "Villa Straylight", "profondeur": 8, "richesse": 5, "danger": 5 }
   ],
 
   "_butin": "Chaque BDD tire un type selon son poids. Le poids des credits baisse avec la profondeur, celui des plans et des infos monte.",

@@ -17,6 +17,14 @@ VAR credits = 0
 // un antidote se fabrique a chaque partie, il ne s'apprend pas a vie.
 VAR antidote_en_poche = false
 
+// --- Acte III --------------------------------------------------------------
+// Comment on est entre dans la Villa, et ce qu'on a laisse derriere soi. Ces
+// quatre variables sont l'unique memoire du run : les fins les relisent.
+VAR approche_mode = ""
+VAR sang_verse = false
+VAR kuang_en_main = false
+VAR promesse_dixie = false
+
 // --- Identite du fragment --------------------------------------------------
 // "" tant que le joueur ne sait rien. Valeurs possibles :
 // wintermute | neuromancer | construct | demon_ta | rien
@@ -78,6 +86,14 @@ EXTERNAL recruter(id)
 EXTERNAL places_libres()
 === function places_libres() ===
 ~ return 3
+
+// Nombre de parties deja terminees, toutes fins confondues. Sert a une seule
+// chose : la fin secrete, qui doit exiger d'avoir joue plusieurs fois. Une
+// connaissance persistante ne suffirait pas — rien n'interdit de les reunir
+// toutes dans la meme partie.
+EXTERNAL parties()
+=== function parties() ===
+~ return 0
 
 EXTERNAL boost_competence(nom)
 === function boost_competence(nom) ===

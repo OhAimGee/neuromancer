@@ -7,5 +7,29 @@
   "flatline": {
     "nom": "FLATLINE",
     "sous_titre": "Le rien n'est pas noir."
+  },
+  "la_cage": {
+    "nom": "LA CAGE",
+    "sous_titre": "On t'a soigné. On t'a gardé."
+  },
+  "la_fusion": {
+    "nom": "LA FUSION",
+    "sous_titre": "Tu cesses d'être Sable."
+  },
+  "le_fantome": {
+    "nom": "LE FANTÔME",
+    "sous_titre": "Immortel. Pas vivant."
+  },
+  "blackout": {
+    "nom": "BLACKOUT",
+    "sous_titre": "Un trou froid dans la matrice."
+  },
+  "les_loa": {
+    "nom": "ZION / LES LOA",
+    "sous_titre": "Une chose nommée doit répondre."
+  },
+  "l_echo": {
+    "nom": "L'ÉCHO",
+    "sous_titre": "La cassette a déjà tourné."
   }
 }

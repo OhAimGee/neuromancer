@@ -1,0 +1,30 @@
+{
+  "_note": "Freeside, rue Jules-Verne. Un tube qui remonte : le sol du fond est le plafond du premier plan. Le neon court sur toute la longueur parce qu'il n'y a pas de nuit ici.",
+  "tileset": "ts_interior",
+  "legende": {
+    "#": "mur_beton",
+    "%": "mur_tache",
+    "P": "mur_tuyaux",
+    ".": "sol_beton",
+    ",": "sol_beton_b",
+    "_": "plinthe",
+    "T": "terminal",
+    "<": "neon_bout_g",
+    "~": "neon_magenta",
+    ">": "neon_bout_d"
+  },
+  "lignes": [
+    ".,.,.,.,.,.,.,.,.,.,",
+    "..,.,.,.,.,.,.,.,.,.",
+    "####################",
+    "#%#####PP#####P###%#",
+    "#<~~~~~~~~~~~~~~~~>#",
+    "#PPP#####T####PPP###",
+    "####################",
+    "____________________",
+    ".,.,.,.,.,.,.,.,.,.,",
+    "..,.,.,.,.,.,.,.,.,.",
+    ".,.,.,.,.,.,.,.,.,.,",
+    "..,.,.,.,.,.,.,.,.,."
+  ]
+}

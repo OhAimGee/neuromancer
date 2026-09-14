@@ -177,9 +177,52 @@ let etapes = 0;
 // c'est le prix a payer pour que « aucune fin n'est inatteignable » veuille
 // dire quelque chose.
 const KNOT_FLATLINE = 'fin_flatline_reseau';
-const P_FLATLINE = 0.2;
 
-function jouerUnePartie() {
+// Le marcheur prefere ce qu'il a le moins pris.
+//
+// Un tirage uniforme ne suffit pas des que le recit a de la profondeur : pour
+// atteindre l'acte III il faut enchainer quatre bons choix parmi cinq a sept,
+// soit environ une chance sur cinq cents par passage au hub. Mesure sur cette
+// version : 10 parties sur 500 y arrivaient, et trois fins etaient declarees
+// inatteignables alors qu'elles etaient simplement improbables — exactement le
+// faux positif qui apprend a ignorer un validateur.
+//
+// On compte donc les choix deja pris, par signature de palette, et on prend le
+// moins visite. Les conditions (knows, crew_present, parties) restent tirees au
+// sort a chaque partie : c'est la variete des ETATS qui doit venir du hasard,
+// pas celle des CHEMINS.
+const choixVus = new Map();
+
+function choisirNouveau(story) {
+  const choix = story.currentChoices;
+  const palette = choix.map((c) => c.text).join('|');
+  let meilleur = 0;
+  let minimum = Infinity;
+  for (let i = 0; i < choix.length; i++) {
+    const cle = `${palette}#${i}`;
+    const vu = choixVus.get(cle) ?? 0;
+    // Le bruit departage les ex aequo : sans lui, le marcheur reprendrait
+    // toujours le meme chemin dans le meme ordre et n'explorerait qu'un peigne.
+    const score = vu + Math.random() * 0.5;
+    if (score < minimum) {
+      minimum = score;
+      meilleur = i;
+    }
+  }
+  choixVus.set(`${palette}#${meilleur}`, (choixVus.get(`${palette}#${meilleur}`) ?? 0) + 1);
+  return meilleur;
+}
+
+// Une plongee sur cinq se termine en flatline. Un tirage a 20 % tuait quatre
+// parties sur cinq avant l'acte III ; un compteur donne la meme couverture de
+// la fin `flatline` sans etouffer tout ce qui vient apres.
+let plongees = 0;
+const PLONGEES_PAR_FLATLINE = 5;
+
+// Parties rejouees par fin manquante, portes ouvertes. Voir la seconde passe.
+const ESSAIS_PERMISSIFS = 300;
+
+function jouerUnePartie(permissif = false) {
   const story = new Story(json);
   story.allowExternalFunctionFallbacks = true;
 
@@ -188,17 +231,21 @@ function jouerUnePartie() {
   const su = new Map();
   const lier = (nom, fn) => story.BindExternalFunction(nom, fn, false);
   lier('knows', (id) => {
+    if (permissif) return true;
     const cle = String(id);
     if (!su.has(cle)) su.set(cle, Math.random() < 0.5);
     return su.get(cle);
   });
-  lier('skill', () => 1 + Math.floor(Math.random() * 3));
-  lier('has_implant', () => Math.random() < 0.3);
-  lier('crew_present', () => Math.random() < 0.3);
+  lier('skill', () => (permissif ? 3 : 1 + Math.floor(Math.random() * 3)));
+  lier('has_implant', () => (permissif ? true : Math.random() < 0.3));
+  lier('crew_present', () => (permissif ? true : Math.random() < 0.3));
   lier('learn', () => 0);
   lier('resolve_scene', () => 0);
   lier('boost_competence', () => 0);
   lier('acquerir_script', () => 0);
+  // Le compte de parties est tire au sort : la fin secrete l'exige, et un
+  // harnais qui repondrait toujours zero la declarerait inatteignable.
+  lier('parties', () => (permissif ? 5 : Math.floor(Math.random() * 6)));
 
   let retourDePlongee = null;
   lier('plonger', (_point, retour) => {
@@ -216,14 +263,14 @@ function jouerUnePartie() {
       }
     }
     if (story.currentChoices.length > 0) {
-      story.ChooseChoiceIndex(Math.floor(Math.random() * story.currentChoices.length));
+      story.ChooseChoiceIndex(choisirNouveau(story));
       continue;
     }
     if (retourDePlongee === null) break;
 
     const retour = retourDePlongee;
     retourDePlongee = null;
-    if (Math.random() < P_FLATLINE) {
+    if (!permissif && ++plongees % PLONGEES_PAR_FLATLINE === 0) {
       story.ChoosePathString(KNOT_FLATLINE);
       continue;
     }
@@ -244,6 +291,26 @@ if (json) {
       premierPlantage ??= e instanceof Error ? e.message : String(e);
     }
   }
+
+  // Seconde passe : l'atteignabilite, et rien d'autre.
+  //
+  // La premiere passe cherche des plantages, et pour cela ses conditions
+  // doivent etre tirees au sort — un joueur qui sait tout ne visite jamais les
+  // branches du joueur qui ne sait rien. Mais avec des conditions aleatoires,
+  // « fin jamais atteinte » finit par vouloir dire « fin improbable », ce qui
+  // n'est pas la question posee. On rejoue donc les fins manquantes avec toutes
+  // les portes ouvertes : si une fin reste hors d'atteinte ici, elle est
+  // vraiment inatteignable, et c'est un defaut d'ecriture.
+  for (const id of finsDeclarees.keys()) {
+    for (let essai = 0; essai < ESSAIS_PERMISSIFS && !finsAtteintes.has(id); essai++) {
+      try {
+        jouerUnePartie(true);
+      } catch (e) {
+        plantages++;
+        premierPlantage ??= e instanceof Error ? e.message : String(e);
+      }
+    }
+  }
 }
 
 if (plantages > 0) {
@@ -251,7 +318,10 @@ if (plantages > 0) {
 }
 for (const [id, ou] of finsDeclarees) {
   if (!finsAtteintes.has(id)) {
-    erreurs.push(`fin '${id}' (${ou}) jamais atteinte en ${PARTIES} parties aleatoires`);
+    erreurs.push(
+      `fin '${id}' (${ou}) jamais atteinte : ni en ${PARTIES} parties aleatoires, ` +
+      `ni en ${ESSAIS_PERMISSIFS} parties toutes portes ouvertes — elle est inatteignable`,
+    );
   }
 }
 
@@ -268,6 +338,6 @@ const resume = finsDeclarees.size === 0
   ? 'aucune fin declaree pour l\'instant'
   : `${finsAtteintes.size}/${finsDeclarees.size} fins atteintes`;
 console.log(
-  `${C.green}narratif${C.reset} ${PARTIES} parties, ${etapes} lignes jouees, 0 plantage ` +
-  `${C.dim}(${resume})${C.reset}`,
+  `${C.green}narratif${C.reset} ${PARTIES} parties aleatoires + rattrapage permissif, ` +
+  `${etapes} lignes jouees, 0 plantage ${C.dim}(${resume})${C.reset}`,
 );

@@ -200,9 +200,10 @@ body {
   display: flex;
   justify-content: space-between;
   flex: 0 0 auto;
-  /* La gouttiere de droite est reservee au bouton d'options, qui flotte
-   * au-dessus de tout : sans elle il se posait sur la valeur d'HUMANITE. */
-  padding: calc(3 * var(--px)) calc(14 * var(--px)) calc(3 * var(--px)) calc(5 * var(--px));
+  /* La gouttiere de droite est reservee aux DEUX boutons flottants, fiche et
+   * options. Elle valait 14 px du temps ou il n'y en avait qu'un, et la fiche
+   * s'est posee sur la valeur d'HUMANITE des qu'elle est arrivee. */
+  padding: calc(3 * var(--px)) calc(24 * var(--px)) calc(3 * var(--px)) calc(5 * var(--px));
   border-bottom: var(--px) solid var(--n3);
   background: var(--n0);
   font-family: 'Silkscreen', monospace;
@@ -719,8 +720,9 @@ body {
   display: flex;
   justify-content: space-between;
   flex: 0 0 auto;
-  /* Meme gouttiere que le HUD de dialogue, pour le bouton d'options. */
-  padding: calc(3 * var(--px)) calc(14 * var(--px)) calc(3 * var(--px)) calc(5 * var(--px));
+  /* Meme gouttiere que le HUD de dialogue : les deux boutons flottants y sont
+   * aussi pendant une plongee. */
+  padding: calc(3 * var(--px)) calc(24 * var(--px)) calc(3 * var(--px)) calc(5 * var(--px));
   border-bottom: var(--px) solid var(--c0);
   background: var(--n0);
   font-family: 'Silkscreen', monospace;
