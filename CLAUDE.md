@@ -34,6 +34,10 @@ Boucle de 60-90 min, horloge de 12 cycles, 8 fins, forte rejouabilité.
   sans jamais planter), et une **dynamique** de 500 parties à choix aléatoires (plantages
   d'exécution, fins déclarées jamais atteintes). Les cinq contrôles ont été vérifiés contre des
   fautes introduites volontairement.
+- Le validateur signale aussi la **dette narrative** : une info pillable dans une BDD
+  (`data/hacking.json`) qu'aucun `knows()` ne consulte est un butin mort. C'est précisément ce
+  qui sépare le hacking d'un mini-jeu décoratif, donc c'est surveillé. Avertissement tant que
+  la tranche narrative n'est pas écrite ; à passer en erreur au lot J.
 - Les fichiers `.ink` sont écrits en **français typographique complet** : accents et majuscules
   accentuées. Vérifié sur inkjs 2.4.0 — l'UTF-8 traverse le compilateur, les choix et les tags
   sans altération.
@@ -125,6 +129,27 @@ dpkg -x libasound2t64_*.deb extracted
   le paquet `inklecate`**, qui enveloppe un binaire .NET et imposerait mono en CI.
 - **Zustand** — trois stores séparés par cycle de vie : `runStore` (jetable), `profileStore`
   (persistant : les connaissances débloquées à vie), `uiStore` (éphémère, jamais persisté).
+
+### `src/hacking/` — le cyberespace
+
+Aucune classe, aucun état mutable : `session.ts` est une suite de **fonctions pures** qui rendent
+un nouvel `EtatSession`. C'est ce qui permet de fuzzer des milliers de plongées en test, et
+d'annuler une action sans machinerie.
+
+- `alea.ts` — générateur ensemencé par une chaîne. **Une même graine rend toujours le même
+  réseau** : la topologie est régénérée à chaque partie, mais reste reproductible, donc testable
+  et déboguable.
+- `graphe.ts` — le réseau est un **arbre plus quelques raccourcis latéraux**. L'arbre est
+  délibéré : une glace n'est un mur que si elle est le seul passage vers ce qu'elle protège. Les
+  raccourcis rendent parfois un contournement possible — c'est là le jeu.
+- `session.ts` — déplacement, scripts, pillage, trace, riposte.
+- `Noeud.franchi` couvre trois états selon le type : glace percée, BDD vidée, leurre déclenché.
+  Aucun n'est vrai à la génération.
+- **Le moteur n'émet aucune chaîne jouée** : le journal porte des codes, et la formulation vit
+  dans `data/journal.json`. Un test de fuzzing vérifie que tout code émis a une formulation —
+  y compris ceux construits par concaténation (`butin_credits`, `butin_infos`…).
+- Les nombres vivent dans `data/hacking.json`, jamais dans le code. `data/equilibrage.json` ne
+  garde que les paliers de dialogue et l'état de départ d'une partie.
 
 ### Pièges connus
 

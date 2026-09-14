@@ -1,0 +1,28 @@
+{
+  "_note": "Formulation des evenements de plongee. Le moteur n'emet que des codes ; aucune chaine jouee ne vit dans le code.",
+
+  "branchement": "Connexion etablie. {region}.",
+  "deplacement": "Deplacement vers {noeud}.",
+  "deplacement_refuse": "Pas de route directe.",
+  "glace_bloque": "Une glace de rang {rang} barre le passage.",
+  "glace_cassee": "Glace de rang {rang} percee.",
+  "glace_resiste": "La glace tient. Rang {rang}, ton script plafonne a {portee}.",
+  "glace_affaiblie": "Le virus ronge la glace. Rang {rang}.",
+  "leurre": "Pot de miel. La BDD etait un appat.",
+  "sanctuaire": "Zone morte. La trace retombe a zero.",
+  "trace_gelee": "Boucle posee. La trace ne monte plus pendant {ticks} ticks.",
+  "trace_reduite": "Mimic actif. Trace abaissee.",
+  "butin_credits": "Portefeuille ouvert : {solde} cr disponibles, {vol} cr preleves.",
+  "butin_plans": "Plans recuperes : {id}.",
+  "butin_scripts": "Script recupere : {id}.",
+  "butin_infos": "Donnees recuperees : {id}.",
+  "bdd_videe": "Cette base est deja vide.",
+  "script_indisponible": "Script en recharge : {ticks} ticks.",
+  "script_absent": "Script absent du deck : {id}.",
+  "script_hors_portee": "Cible invalide pour ce script.",
+  "riposte": "GLACE NOIRE. Integrite {integrite}.",
+  "alerte_trace": "Trace a {trace}. Ils remontent la ligne.",
+  "deconnexion": "Deconnexion. {butin} objet(s) rapporte(s).",
+  "ejection": "Ejection forcee. Butin perdu.",
+  "flatline": "Flatline."
+}

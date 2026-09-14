@@ -115,6 +115,25 @@ for (const [, nom] of globals.matchAll(/^EXTERNAL\s+(\w+)\s*\(/gm)) {
   }
 }
 
+// --- Dette narrative : les infos volables doivent finir par etre lues ------
+//
+// Une info recuperee dans une BDD qu'aucun knows() ne consulte est un butin
+// mort : elle alimenterait un inventaire que le recit ignore. C'est le point
+// qui separe le hacking d'un mini-jeu decoratif, donc il se surveille.
+
+const hacking = JSON.parse(fs.readFileSync(path.join(RACINE, 'data/hacking.json'), 'utf-8'));
+const sourcesInk = fichiersInk(INK).map((f) => fs.readFileSync(f, 'utf-8')).join('\n');
+const infosLues = new Set(
+  [...sourcesInk.matchAll(/knows\(\s*"([^"]+)"\s*\)/g)].map((m) => m[1]),
+);
+const infosMortes = hacking.infos.filter((id) => !infosLues.has(id));
+if (infosMortes.length > 0) {
+  avertissements.push(
+    `dette narrative : ${infosMortes.length}/${hacking.infos.length} infos pillables ne sont ` +
+    `lues par aucun knows() dans content/ink — ${infosMortes.join(', ')}`,
+  );
+}
+
 // --- Passe dynamique : fuzzing --------------------------------------------
 
 const { json, errors, warnings } = compileInk();

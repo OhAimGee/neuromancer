@@ -7,13 +7,6 @@
     { "palier": "neutre", "confianceMin": 0, "soupconMax": 6 }
   ],
 
-  "hacking": {
-    "volBase": 0.15,
-    "volParNiveau": 0.05,
-    "volMax": 0.5,
-    "traceMax": 100
-  },
-
   "run": {
     "cyclesDepart": 12,
     "humaniteDepart": 100

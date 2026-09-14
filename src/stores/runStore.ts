@@ -1,3 +1,4 @@
+import equilibrage from '@data/equilibrage.json';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { replacer, reviver } from '@/save/serialize';
@@ -6,7 +7,7 @@ import type { Cout, IdentiteFragment, Palier } from '@/types/jeu';
 export const VERSION_RUN = 1;
 
 /** Horloge de depart. Les sacs de toxine se dissolvent au bout de 12 cycles. */
-export const CYCLES_DEPART = 12;
+export const CYCLES_DEPART = equilibrage.run.cyclesDepart;
 
 /**
  * Etat de la partie en cours. Jetable : remis a zero a chaque nouvelle partie.
@@ -46,7 +47,7 @@ interface RunActions {
 
 const ETAT_INITIAL: RunEtat = {
   cycles: CYCLES_DEPART,
-  humanite: 100,
+  humanite: equilibrage.run.humaniteDepart,
   credits: 0,
   confiance: 0,
   soupcon: 0,

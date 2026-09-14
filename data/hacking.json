@@ -1,0 +1,66 @@
+{
+  "_note": "Equilibrage du cyberespace. Aucun de ces nombres ne doit etre duplique dans le code.",
+
+  "trace": { "max": 100, "seuilAlerte": 60, "riposte": 4 },
+  "integrite": { "max": 10 },
+  "vol": { "base": 0.15, "parNiveau": 0.05, "max": 0.5 },
+
+  "_noeuds": "traceEntree : cout de trace pour entrer. traceEchec / degatsEchec : sanction d'un script rate.",
+  "noeuds": {
+    "relais":      { "traceEntree": 1,  "traceEchec": 0,  "degatsEchec": 0 },
+    "bdd":         { "traceEntree": 3,  "traceEchec": 0,  "degatsEchec": 0 },
+    "glace":       { "traceEntree": 2,  "traceEchec": 12, "degatsEchec": 2 },
+    "glace_noire": { "traceEntree": 6,  "traceEchec": 25, "degatsEchec": 7 },
+    "leurre":      { "traceEntree": 35, "traceEchec": 0,  "degatsEchec": 0 },
+    "sanctuaire":  { "traceEntree": 0,  "traceEchec": 0,  "degatsEchec": 0 },
+    "coeur":       { "traceEntree": 10, "traceEchec": 0,  "degatsEchec": 0 }
+  },
+
+  "_pillage": "Cout de trace pour vider une BDD, par type de butin.",
+  "pillage": { "credits": 8, "plans": 10, "scripts": 10, "infos": 6 },
+
+  "_scripts": "rang : niveau de glace que le script casse seul. La competence hacking s'y ajoute.",
+  "scripts": [
+    { "id": "perce_glace", "nom": "PERCE-GLACE", "rang": 1, "recharge": 1, "trace": 4 },
+    { "id": "mimic",       "nom": "MIMIC",       "rang": 0, "recharge": 3, "trace": -15 },
+    { "id": "boucle",      "nom": "BOUCLE",      "rang": 0, "recharge": 4, "trace": 0, "geleTrace": 3 },
+    { "id": "virus_lent",  "nom": "VIRUS LENT",  "rang": 0, "recharge": 2, "trace": 6, "affaiblit": 1 },
+    { "id": "kuang_mk11",  "nom": "KUANG MK11",  "rang": 9, "recharge": 6, "trace": 30 }
+  ],
+
+  "_pointsAcces": "Le jack physique determine la region atteinte. Plus on se branche pres d'une corpo, plus les BDD sont grasses et plus on meurt vite.",
+  "pointsAcces": [
+    { "id": "chatsubo",       "nom": "Cabine du Chatsubo",   "profondeur": 2, "richesse": 0, "danger": 0 },
+    { "id": "hotel_cercueil", "nom": "Hotel-cercueil",       "profondeur": 3, "richesse": 0, "danger": 1 },
+    { "id": "ninsei_public",  "nom": "Borne publique Ninsei","profondeur": 3, "richesse": 1, "danger": 1 },
+    { "id": "boutique_finn",  "nom": "Arriere-boutique Finn","profondeur": 4, "richesse": 2, "danger": 1 },
+    { "id": "sense_net",      "nom": "Hall Sense/Net",       "profondeur": 5, "richesse": 3, "danger": 3 },
+    { "id": "maas_biolabs",   "nom": "Maas Biolabs",         "profondeur": 6, "richesse": 4, "danger": 4 }
+  ],
+
+  "_butin": "Chaque BDD tire un type selon son poids. Le poids des credits baisse avec la profondeur, celui des plans et des infos monte.",
+  "poidsButin": {
+    "credits": [5, 4, 3, 2, 2, 1, 1],
+    "plans":   [0, 1, 2, 3, 3, 4, 4],
+    "scripts": [1, 2, 2, 2, 3, 3, 3],
+    "infos":   [1, 2, 3, 4, 4, 5, 5]
+  },
+
+  "_portefeuilles": "Solde d'un portefeuille crypto : base + parProfondeur * couche, module par la richesse du point d'acces.",
+  "portefeuilles": { "base": 400, "parProfondeur": 650, "parRichesse": 300 },
+
+  "plans":   ["bande_passante", "reflexes_neuraux", "coprocesseur", "filtre_noir", "lentilles_molly", "glandes_toxiques"],
+  "scriptsButin": ["mimic", "boucle", "virus_lent", "kuang_mk11"],
+
+  "_infos": "DETTE NARRATIVE : ces identifiants doivent finir par etre lus par un knows() dans content/ink. validate-narrative le signale tant que ce n'est pas le cas.",
+  "infos": [
+    "dossier_medical_armitage",
+    "operation_poing_hurlant",
+    "wintermute_existe",
+    "neuromancer_existe",
+    "villa_straylight_plan",
+    "lady_3jane_testament",
+    "antidote_formule",
+    "identite_employeur"
+  ]
+}
