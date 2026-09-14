@@ -242,7 +242,11 @@ body {
   flex: 1 1 auto;
   min-width: 0;
   overflow-y: auto;
-  max-height: calc(122 * var(--px));
+  /* Pas de hauteur imposee : le panneau prend ce dont le texte a besoin, cale
+   * en bas. Une scene courte laisse voir le decor, une tirade prend l'ecran.
+   * Le plafond est indispensable — sans lui le journal deborde du viewport au
+   * lieu de defiler. */
+  max-height: calc(100% - 10 * var(--px));
   margin: calc(5 * var(--px));
   border: var(--px) solid var(--n3);
   background: color-mix(in srgb, var(--n0) 80%, transparent);
@@ -259,6 +263,12 @@ body {
   margin-bottom: calc(4 * var(--px));
   color: var(--g2);
   text-wrap: pretty;
+}
+
+/* Une parole s'ouvre par un tiret cadratin — c'est la convention du projet.
+ * La distinguer de la narration a l'oeil evite au joueur de deviner qui parle. */
+.dlg__ligne--dit {
+  color: var(--w0);
 }
 
 /* La replique choisie par le joueur, reaffichee par Ink. Le tiret de dialogue
@@ -323,6 +333,24 @@ body {
   font-family: 'Silkscreen', monospace;
   font-size: calc(7 * var(--px));
   color: var(--o1);
+}
+
+/* Explication de regle, montree une seule fois par profil au moment ou la
+ * notion apparait. Discrete : elle accompagne le choix, elle ne le remplace pas. */
+.dlg__glose {
+  margin: 0 0 calc(3 * var(--px)) calc(10 * var(--px));
+  padding-left: calc(4 * var(--px));
+  border-left: var(--px) solid var(--c0);
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(7 * var(--px));
+  line-height: calc(10 * var(--px));
+  color: var(--c1);
+  text-wrap: pretty;
+}
+.dlg__glose--large {
+  margin-left: 0;
+  max-width: calc(240 * var(--px));
+  text-align: left;
 }
 
 .dlg__fin {
@@ -491,4 +519,77 @@ body {
   font-size: calc(7 * var(--px));
   line-height: calc(9 * var(--px));
   color: var(--c2);
+}
+
+/* Repere de defilement : un pave de recit peut pousser les choix sous le bord
+ * du panneau, et rien n'indiquerait qu'il reste a lire. */
+.dlg__suite {
+  position: absolute;
+  left: calc(6 * var(--px));
+  right: calc(6 * var(--px));
+  bottom: calc(6 * var(--px));
+  height: calc(10 * var(--px));
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--n0));
+}
+.dlg__suite::after {
+  content: '\25BC';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-size: calc(7 * var(--px));
+  color: var(--c2);
+  animation: respire 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dlg__suite::after {
+    animation: none;
+  }
+}
+
+/* --- Entracte : carton de saut dans le temps ----------------------------- */
+
+/* Pleine page et bloquant : c'est une respiration entre deux scenes, pas une
+ * banniere. Le joueur doit le lire avant que le decor ne change sous lui. */
+.entracte {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(10 * var(--px));
+  background: var(--n0);
+  cursor: pointer;
+}
+
+.entracte__texte {
+  max-width: calc(280 * var(--px));
+  text-align: center;
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  line-height: calc(14 * var(--px));
+  letter-spacing: calc(1 * var(--px));
+  color: var(--c3);
+}
+
+.entracte__aide {
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(7 * var(--px));
+  color: var(--n4);
+  animation: respire 2s ease-in-out infinite;
+}
+
+@keyframes respire {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entracte__aide {
+    animation: none;
+  }
 }

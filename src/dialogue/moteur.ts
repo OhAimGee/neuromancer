@@ -9,10 +9,17 @@ export interface EtatDialogue {
   lignes: LigneDialogue[];
   choix: ChoixDialogue[];
   decor: string | null;
+  entracte: string | null;
   termine: boolean;
 }
 
-const ETAT_VIDE: EtatDialogue = { lignes: [], choix: [], decor: null, termine: false };
+const ETAT_VIDE: EtatDialogue = {
+  lignes: [],
+  choix: [],
+  decor: null,
+  entracte: null,
+  termine: false,
+};
 
 /**
  * Pont entre inkjs et les stores.
@@ -33,10 +40,12 @@ export class MoteurDialogue {
     decor: null,
     musique: null,
     sfx: null,
+    entracte: null,
   };
   /** Texte du choix qui vient d'etre pris ; sert a marquer son echo. */
   private repliqueAttendue: string | null = null;
   private sceneAResoudre: string | null = null;
+  private demarre = false;
 
   private constructor(story: Story) {
     this.story = story;
@@ -47,7 +56,13 @@ export class MoteurDialogue {
   static async charger(url = '/content/main.ink.json'): Promise<MoteurDialogue> {
     const reponse = await fetch(url);
     if (!reponse.ok) throw new Error(`Trame narrative introuvable (HTTP ${reponse.status})`);
-    return new MoteurDialogue(new Story(await reponse.json()));
+    return MoteurDialogue.depuisJson(await reponse.json());
+  }
+
+  /** Meme moteur, sans reseau : c'est par la que passent les tests. */
+  static depuisJson(json: string | Record<string, unknown>): MoteurDialogue {
+    // Story surcharge string et objet ; l'union ne resout aucune des deux.
+    return new MoteurDialogue(typeof json === 'string' ? new Story(json) : new Story(json));
   }
 
   // --- Pont Ink -> jeu (lecture) ------------------------------------------
@@ -61,6 +76,14 @@ export class MoteurDialogue {
     lier('has_implant', ((id: string) => useRunStore.getState().aImplant(String(id))) as never);
     lier('crew_present', ((id: string) =>
       useRunStore.getState().equipagePresent(String(id))) as never);
+
+    // L'ouverture laisse le joueur choisir comment il est mort ; ce choix
+    // definit la competence qu'il a gardee. C'est la seule ecriture du recit
+    // vers les competences.
+    lier('boost_competence', ((nom: string) => {
+      useRunStore.getState().ameliorerCompetence(String(nom), 1);
+      return 0;
+    }) as never);
 
     lier('learn', ((id: string) => {
       useProfileStore.getState().apprendre(String(id));
@@ -99,7 +122,15 @@ export class MoteurDialogue {
 
   // --- Boucle -------------------------------------------------------------
 
+  /**
+   * Idempotent, et ce n'est pas un detail : React 19 monte deux fois les effets
+   * en mode strict. Sans cette garde, le second appel remettait `lignes` a vide
+   * alors que l'histoire etait deja arrivee au premier choix — tout le recit
+   * d'ouverture disparaissait de l'ecran sans la moindre erreur.
+   */
   demarrer(): void {
+    if (this.demarre) return;
+    this.demarre = true;
     this.pousserEtatVersInk();
     this.etat = { ...ETAT_VIDE, lignes: [] };
     this.avancer();
@@ -155,6 +186,7 @@ export class MoteurDialogue {
       lignes,
       choix,
       decor: this.miseEnScene.decor,
+      entracte: this.miseEnScene.entracte,
       termine: choix.length === 0 && !this.story.canContinue,
     };
     this.notifier();

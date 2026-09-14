@@ -7,39 +7,15 @@
 // Le serveur de dev doit tourner.
 
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
-import { chromium } from '@playwright/test';
-
-const LIBS = path.join(os.homedir(), '.local/playwright-libs/extracted/usr/lib/x86_64-linux-gnu');
-if (fs.existsSync(LIBS)) {
-  process.env['LD_LIBRARY_PATH'] = `${LIBS}:${process.env['LD_LIBRARY_PATH'] ?? ''}`;
-}
+import { ouvrirJeu, traverserPrologue } from './lib-jeu.mjs';
 
 const dossier = process.argv[2] ?? 'captures';
 const coups = Number(process.argv[3] ?? 14);
 fs.mkdirSync(dossier, { recursive: true });
 
-const navigateur = await chromium.launch();
-const page = await navigateur.newPage({ viewport: { width: 1280, height: 720 } });
-const erreurs = [];
-page.on('console', (m) => {
-  if (m.type() === 'error') erreurs.push(m.text());
-});
-page.on('pageerror', (e) => erreurs.push(`PAGEERROR ${e.message}`));
-
-await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
-await page.waitForSelector('.boot__title', { timeout: 10_000 });
-await page.click('.viewport');
-await page.waitForSelector('.dlg', { timeout: 5_000 });
-
-// Traverser le prologue en prenant toujours le premier choix.
-for (let i = 0; i < 20; i++) {
-  const boutons = page.locator('.dlg__bouton:not([disabled])');
-  if ((await boutons.count()) === 0) break;
-  await boutons.first().click();
-  await page.waitForTimeout(120);
-}
+const { navigateur, page, erreurs } = await ouvrirJeu();
+await traverserPrologue(page);
 
 await page.waitForSelector('.dlg__fin .net__bouton', { timeout: 5_000 });
 await page.click('.dlg__fin .net__bouton');

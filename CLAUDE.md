@@ -77,7 +77,13 @@ comportement voulu — c'est la réplique prononcée par Sable. Ne jamais redupl
 | `# bg:<id>` `# musique:<id>` `# sfx:<id>` | ligne | Pilotage audiovisuel |
 | `# speaker:<id>` `# portrait:<id>:<expression>` | ligne | Portrait et locuteur |
 | `# ending:<id>` `# hub` | knot | Lu par le validateur narratif |
+| `# entracte:<texte libre>` | ligne | Carton plein écran bloquant — saut dans le temps |
 | `# horloge:demarrer` | ligne | **Réservé** — écrit dans le contenu, pas encore consommé par `tags.ts` |
+
+Deux valeurs de `# bg:` ne désignent pas une tilemap : **`aucun`** vide le décor (sans lui, une
+scène sans tag hériterait du décor précédent, faute de pouvoir l'effacer) et **`matrice`**
+construit le fond du cyberespace en géométrie — une perspective n'est pas un assemblage de
+tuiles.
 
 Le vocabulaire ci-dessus fait foi : `npm run validate:narrative` rejette tout autre tag. Ink
 accepte n'importe quelle étiquette et le moteur ignore celles qu'il ne connaît pas — une faute
@@ -180,6 +186,34 @@ d'annuler une action sans machinerie.
   `replacer`/`reviver` dans `src/save/`.
 - Le projet vit sur `/mnt/c` (disque Windows monté dans WSL) : inotify n'y est pas fiable,
   d'où `usePolling` dans `vite.config.ts` et dans la surveillance Ink.
+- **`MoteurDialogue.demarrer()` doit rester idempotent.** React 19 monte deux fois les effets en
+  mode strict ; le second appel remettait `lignes` à vide alors que l'histoire était déjà arrivée
+  au premier choix. Résultat : *tout le récit disparaissait de l'écran*, sans la moindre erreur —
+  seuls les boutons de choix restaient. Couvert par `tests/unit/moteur.test.ts`.
+- **`SceneJeu` doit retenir un décor demandé avant son montage.** `monter()` est asynchrone et
+  React réclame le décor aussitôt ; la demande était perdue, et comme `decorActuel` avait déjà
+  été noté, aucune demande identique ne repassait. D'où `decorEnAttente`.
+- `.dlg__journal` a besoin d'un `max-height` explicite : sans lui, le journal calé en bas déborde
+  du viewport au lieu de défiler.
+
+---
+
+## Pédagogie — expliquer sans écran de tutoriel
+
+Le postulat se pose **en le jouant** : `content/ink/scenes/ouverture.ink` est un flashback du
+flatline. Il existe parce qu'un joueur ne connaît pas forcément le roman et doit savoir, avant le
+Chatsubo, ce qu'est la matrice, ce qu'est un cowboy de console, pourquoi Sable n'en est plus un,
+et ce qui est revenu avec lui. Tout est montré, rien n'est récité. La scène sert aussi de
+tutoriel silencieux : les premières étiquettes apparaissent là, dans une scène dont l'issue est
+déjà écrite.
+
+Les règles s'expliquent **à la première rencontre**, une seule fois par profil :
+`data/gloses.json` porte les formulations, `profileStore.glosesVues` retient ce qui a déjà été
+montré. Une notion nouvelle dans une liste de choix (une étiquette, un coût) affiche sa glose
+sous le bouton concerné. Rien à lire d'avance.
+
+Ajouter une glose, c'est ajouter une entrée dans `data/gloses.json` sous la clé `etq:<NOM>`,
+`cout:<jauge>` ou un identifiant libre déclenché à la main.
 
 ---
 

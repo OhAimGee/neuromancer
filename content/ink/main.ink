@@ -5,6 +5,7 @@
 // de la suite. C'est ce qui rend la structure en hub possible.
 
 INCLUDE shared/globals.ink
+INCLUDE scenes/ouverture.ink
 INCLUDE scenes/prologue.ink
 
--> prologue
+-> ouverture

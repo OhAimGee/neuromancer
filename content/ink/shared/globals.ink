@@ -49,3 +49,9 @@ EXTERNAL resolve_scene(scene_id)
 EXTERNAL learn(info_id)
 === function learn(info_id) ===
 ~ return 0
+
+// Augmente une competence de 1. Utilise par l'ouverture : la facon dont Sable
+// est mort definit ce qu'il a garde.
+EXTERNAL boost_competence(nom)
+=== function boost_competence(nom) ===
+~ return 0

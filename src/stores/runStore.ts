@@ -34,6 +34,7 @@ interface RunEtat {
 interface RunActions {
   nouvellePartie: () => void;
   competence: (nom: string) => number;
+  ameliorerCompetence: (nom: string, n: number) => void;
   aImplant: (id: string) => boolean;
   equipagePresent: (id: string) => boolean;
   peutPayer: (cout: Cout) => boolean;
@@ -83,6 +84,9 @@ export const useRunStore = create<RunEtat & RunActions>()(
         }),
 
       competence: (nom) => get().competences[nom] ?? 0,
+
+      ameliorerCompetence: (nom, n) =>
+        set((e) => ({ competences: { ...e.competences, [nom]: (e.competences[nom] ?? 0) + n } })),
       aImplant: (id) => get().implants.includes(id),
       equipagePresent: (id) => get().equipage.includes(id),
 

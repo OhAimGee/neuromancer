@@ -1,0 +1,17 @@
+{
+  "_note": "Explications montrees UNE SEULE FOIS par profil, au moment ou la notion apparait pour la premiere fois. Rien a lire d'avance : tout arrive quand ca sert.",
+
+  "etq:ACTION": "Tu ne réponds pas : tu agis. Un geste et un silence sont des répliques comme les autres.",
+  "etq:MENSONGE": "Tu mens. Si ça passe, on te donne ce que tu veux. Si ça ne passe pas, le soupçon monte — et le soupçon ne redescend jamais.",
+  "etq:MENACE": "Tu forces la main. Tu obtiens maintenant, et l'autre s'en souviendra plus tard.",
+  "etq:CONNAISSANCE": "Tu sais une chose qu'on ne t'a pas dite — par métier, ou parce qu'une partie précédente te l'a apprise. Ce qui est appris ne s'oublie plus jamais.",
+  "etq:FRAGMENT": "La chose dans ton crâne te souffle une réponse. Elle est souvent la bonne. Elle te coûte toujours quelque chose.",
+  "etq:IMPLANT": "Une porte que seul un implant déjà posé sait ouvrir.",
+
+  "cout:humanite": "HUMANITÉ — ce qu'il reste de toi. Elle ne remonte pas. À zéro, il n'y a plus personne à sauver.",
+  "cout:credits": "CRÉDITS — l'argent. Il se vole dans les portefeuilles crypto, en se branchant.",
+  "cout:cycles": "CYCLES — du temps pris sur l'horloge de la toxine. Tu n'en as que douze.",
+
+  "_horloge": "Montré une seule fois, à la fin du prologue, quand l'horloge démarre vraiment.",
+  "horloge": "Douze cycles avant que les sacs se dissolvent. Douze cycles ne suffisent jamais à tout faire : chaque partie voit un autre morceau de l'histoire, parce qu'elle en sacrifie un autre."
+}

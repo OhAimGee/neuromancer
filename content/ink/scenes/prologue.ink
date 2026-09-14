@@ -13,6 +13,7 @@
 === prologue ===
 # bg:map_chatsubo
 # musique:ambiance_chatsubo
+# entracte:TROIS ANS PLUS TARD
 
 Le ciel au-dessus de Chiba avait la couleur d'un écran mort.
 
@@ -147,6 +148,15 @@ Elle posa un jeton de crédit sur le zinc.
     ~ learn("fragment_a_une_volonte")
 
 -
+    Molly se leva. Elle ne lui laissa pas le temps de décider s'il avait accepté.
+
+    — Première chose. Il me faut un nom : celui de l'homme qui a payé pour te retrouver. Il dort dans les registres d'une corpo de Ninsei, et tu es assis à trente mètres d'un point d'accès.
+
+    Elle désigna le fond de la salle du menton.
+
+    — La cabine, là-bas. Elle est vieille, elle est lente, et elle ne mène pas loin. C'est tout ce que tu as. Rapporte-moi quelque chose avant que je change d'avis sur ton utilité.
+
+    ~ learn("contrat_accepte")
     ~ resolve_scene("prologue")
     # horloge:demarrer
     -> DONE

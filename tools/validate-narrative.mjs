@@ -29,7 +29,7 @@ const avertissements = [];
 const TAGS_CONNUS = new Set([
   'etq', 'cout_credits', 'cout_cycles', 'cout_humanite',
   'bg', 'musique', 'sfx', 'speaker', 'portrait',
-  'ending', 'hub', 'horloge',
+  'ending', 'hub', 'horloge', 'entracte',
 ]);
 const ETIQUETTES = new Set(['MENSONGE', 'MENACE', 'CONNAISSANCE', 'FRAGMENT', 'IMPLANT', 'ACTION']);
 // Tag de cout -> variable Ink que le corps du choix doit reellement decrementer.

@@ -21,6 +21,8 @@ export interface MiseEnScene {
   decor: string | null;
   musique: string | null;
   sfx: string | null;
+  /** Carton plein ecran a lire avant de reprendre (saut dans le temps). */
+  entracte: string | null;
 }
 
 export function parseTagsLigne(tags: readonly string[]): MiseEnScene {
@@ -31,6 +33,7 @@ export function parseTagsLigne(tags: readonly string[]): MiseEnScene {
     decor: null,
     musique: null,
     sfx: null,
+    entracte: null,
   };
 
   for (const tag of tags) {
@@ -51,6 +54,11 @@ export function parseTagsLigne(tags: readonly string[]): MiseEnScene {
         break;
       case 'sfx':
         mes.sfx = a ?? null;
+        break;
+      // Le texte d'un entracte contient des espaces : on reprend le tag entier
+      // apres la premiere ponctuation plutot que le premier segment.
+      case 'entracte':
+        mes.entracte = tag.slice(tag.indexOf(':') + 1).trim() || null;
         break;
     }
   }
