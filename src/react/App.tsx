@@ -118,7 +118,7 @@ export function App() {
             ))}
             {moteur && (
               <>
-                <div className="boot__title">NEUROMANCER</div>
+                <img className="boot__logo" src="/assets/ui/logo_titre.png" alt="NEUROMANCER" />
                 <div className="boot__sub">CHIBA CITY &middot; 12 CYCLES</div>
                 <div className="boot__line boot__caret" style={{ marginTop: 10 }}>
                   {'> '}

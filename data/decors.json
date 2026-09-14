@@ -1,0 +1,4 @@
+{
+  "_note": "Ce que le decor porte en plus de ses tuiles. `pluie` pose la nappe de pluie par-dessus le canvas. Freeside n'en a pas : c'est un cylindre ferme, il y fait toujours le meme temps, et c'est precisement ce qui le rend sinistre.",
+  "map_ninsei": { "pluie": true }
+}

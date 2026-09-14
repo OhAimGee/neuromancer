@@ -156,13 +156,15 @@ body {
   color: var(--n4);
 }
 
-.boot__title {
-  margin: calc(14 * var(--px)) 0 calc(2 * var(--px));
-  font-family: 'Jersey 10', monospace;
-  font-size: calc(30 * var(--px));
-  line-height: calc(32 * var(--px));
-  letter-spacing: calc(2 * var(--px));
-  color: var(--m3);
+/* Le titre est une image et non du texte : les jambages, l'ombre portee et le
+ * soulignement sont dessines au pixel, ce qu'aucune police ne rendrait. Sa
+ * taille est un MULTIPLE ENTIER de ses 96x19 pixels, sinon il baverait. */
+.boot__logo {
+  display: block;
+  width: calc(192 * var(--px));
+  height: calc(38 * var(--px));
+  margin: calc(14 * var(--px)) 0 calc(4 * var(--px));
+  image-rendering: pixelated;
 }
 
 .boot__sub {
@@ -191,6 +193,10 @@ body {
 .dlg {
   position: absolute;
   inset: 0;
+  /* Au-dessus de la nappe de pluie (z-index 1) : il pleut sur la rue, pas sur
+   * le texte. Sans cette valeur, l'ordre du DOM suffisait a faire passer la
+   * pluie par-dessus le HUD et la boite de dialogue. */
+  z-index: 2;
   display: flex;
   flex-direction: column;
   background: transparent;
@@ -215,6 +221,20 @@ body {
 .dlg__hud b {
   color: var(--c2);
   font-weight: normal;
+}
+
+/* La fiole de toxine. Une planche de treize etats de 12x16 : la position de
+ * fond designe le nombre de cycles restants. Voir tools/aseprite/ui.lua. */
+.hud__fiole {
+  display: inline-block;
+  width: calc(12 * var(--px));
+  height: calc(16 * var(--px));
+  margin-right: calc(3 * var(--px));
+  vertical-align: calc(-4 * var(--px));
+  background-image: url('/assets/ui/ui_horloge_toxine.png');
+  background-size: calc(156 * var(--px)) calc(16 * var(--px));
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
 }
 
 /* Le bas de l'ecran, pousse tout en bas : boite de dialogue et, juste
@@ -597,11 +617,23 @@ body {
   letter-spacing: calc(2 * var(--px));
   color: var(--c3);
 }
+/* Les icones de butin font 16 px et le libelle 7 : sans alignement centre,
+ * l'icone pousse le texte vers le bas de la ligne et le filet sous le titre
+ * part de travers. En flex, la ligne fait la hauteur de l'icone et le libelle
+ * se cale dessus. */
 .etat__section {
+  display: flex;
+  align-items: center;
+  gap: calc(2 * var(--px));
   margin: calc(5 * var(--px)) 0 calc(2 * var(--px));
   border-bottom: var(--px) solid var(--n3);
   font-size: calc(7 * var(--px));
+  line-height: calc(16 * var(--px));
   color: var(--n4);
+}
+.etat__section .icone {
+  margin-right: 0;
+  vertical-align: 0;
 }
 .etat__grille {
   display: flex;
@@ -883,4 +915,88 @@ body {
   .entracte__aide {
     animation: none;
   }
+}
+
+/* Icones de butin : une planche de quatre pictogrammes de 16x16, dans l'ordre
+ * de data/hacking.json — credits, plans, scripts, infos. */
+.icone {
+  display: inline-block;
+  width: calc(16 * var(--px));
+  height: calc(16 * var(--px));
+  margin-right: calc(3 * var(--px));
+  vertical-align: calc(-4 * var(--px));
+  background-image: url('/assets/ui/icons_butin.png');
+  background-size: calc(64 * var(--px)) calc(16 * var(--px));
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.icone--credits { background-position: 0 0; }
+.icone--plans { background-position: calc(-16 * var(--px)) 0; }
+.icone--scripts { background-position: calc(-32 * var(--px)) 0; }
+.icone--infos { background-position: calc(-48 * var(--px)) 0; }
+
+/* La pluie de Ninsei. Une tuile de 16x16 tuilable, deplacee par pas d'un pixel
+ * — `steps(16)` et non une interpolation continue, sinon le navigateur la
+ * rendrait entre deux pixels et la floutterait malgre `pixelated`.
+ *
+ * Elle est sous le HUD et sous la boite de dialogue : il pleut sur la rue, pas
+ * sur l'interface. */
+.pluie {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.38;
+  background-image: url('/assets/ui/fx_pluie.png');
+  background-size: calc(16 * var(--px)) calc(16 * var(--px));
+  background-repeat: repeat;
+  image-rendering: pixelated;
+  animation: pluie 0.55s steps(16) infinite;
+}
+@keyframes pluie {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: calc(-6 * var(--px)) calc(16 * var(--px));
+  }
+}
+/* La bascule d'accessibilite coupe aussi la pluie : c'est un motif fin en
+ * mouvement permanent, exactement ce que la bascule existe pour retirer. */
+.viewport:not(.scanlines) .pluie {
+  animation-duration: 1.6s;
+  opacity: 0.32;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pluie {
+    animation: none;
+  }
+}
+
+/* Une case d'une planche d'icones d'objets (16x16 chacune). La planche et le
+ * rang viennent du composant : les tailles de fond restent ici pour tenir
+ * l'echelle entiere. */
+.vignette {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: calc(16 * var(--px));
+  height: calc(16 * var(--px));
+  background-size: auto calc(16 * var(--px));
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.etat__objets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(2 * var(--px)) calc(8 * var(--px));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.etat__objets li {
+  display: flex;
+  align-items: center;
+  gap: calc(3 * var(--px));
+  line-height: calc(16 * var(--px));
+  color: var(--c2);
 }

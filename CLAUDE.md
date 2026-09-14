@@ -496,6 +496,17 @@ tools/aseprite.sh tools/aseprite/ts_interior.lua
 - `tools/aseprite/lib.lua` — art ASCII, matière procédurale, enregistrement
 - `tools/aseprite/<nom>.lua` — un générateur par asset
 
+Ce qui n'est **pas** un asset, et volontairement : cadre de dialogue, boutons, jauges, curseur.
+Ils sont en CSS, tiennent les grilles de 10 et de 8, se redimensionnent avec `--px`, et les
+remplacer par du 9-slice ne gagnerait qu'un risque de régression. Les assets d'interface qui
+existent (`ui.lua` : logo-titre, fiole de toxine, icônes de butin ; `items.lua` : scripts et
+plans ; `fx.lua` : la pluie) existent parce qu'aucun CSS ne les ferait.
+
+**Une planche d'icônes est indexée par l'ordre de `data/*.json`.** `items_scripts` suit
+`hacking.scripts`, `items_plans` suit `hacking.plans`, `icons_butin` suit les quatre types de
+butin. Réordonner la donnée sans réordonner la planche affiche le mauvais dessin, sans la
+moindre erreur — même piège que l'ordre des tuiles d'un tileset.
+
 Chaque générateur produit `.aseprite` (éditable à la main), `.png` et un `.json` de manifeste,
 **dans deux emplacements distincts** — Vite ne sert que `public/`, et il n'y a aucune raison
 d'embarquer les sources éditables dans le build :

@@ -18,7 +18,10 @@ import { ouvrirJeu, derouler, passerEntracte, dansLeReseau, plongerAuHasard } fr
 const DOSSIER = 'docs/images';
 fs.mkdirSync(DOSSIER, { recursive: true });
 
-const { navigateur, page, erreurs } = await ouvrirJeu();
+const { navigateur, page, erreurs } = await ouvrirJeu({
+  captureBoot: path.join(DOSSIER, 'boot.png'),
+});
+console.log('  boot.png');
 
 const capturer = async (nom) => {
   await page.locator('.viewport').screenshot({ path: path.join(DOSSIER, `${nom}.png`) });

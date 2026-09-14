@@ -112,6 +112,13 @@ export function Dialogue({ moteur }: Props) {
     <div className="dlg">
       <div className="dlg__hud">
         <span>
+          {/* La fiole se vide avant que le chiffre n'inquiete. C'est le
+              minuteur de la partie : il merite d'etre vu, pas lu. */}
+          <i
+            className="hud__fiole"
+            style={{ backgroundPositionX: `calc(${-12 * Math.max(0, Math.min(12, cycles))} * var(--px))` }}
+            aria-hidden="true"
+          />
           CYCLES <b>{cycles}</b>
         </span>
         <span>

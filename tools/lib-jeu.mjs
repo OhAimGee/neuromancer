@@ -22,7 +22,7 @@ if (fs.existsSync(LIBS)) {
  * duree d'une partie automatique par dix. Passer `vitesseTexte` pour capturer
  * l'effet.
  */
-export async function ouvrirJeu({ largeur = 1280, hauteur = 720, vitesseTexte = 0 } = {}) {
+export async function ouvrirJeu({ largeur = 1280, hauteur = 720, vitesseTexte = 0, captureBoot = null } = {}) {
   const navigateur = await chromium.launch();
   const page = await navigateur.newPage({ viewport: { width: largeur, height: hauteur } });
 
@@ -40,7 +40,10 @@ export async function ouvrirJeu({ largeur = 1280, hauteur = 720, vitesseTexte = 
   page.on('pageerror', (e) => erreurs.push(`PAGEERROR ${e.message}`));
 
   await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
-  await page.waitForSelector('.boot__title', { timeout: 10_000 });
+  await page.waitForSelector('.boot__logo', { timeout: 10_000 });
+  // L'ecran de demarrage disparait au premier clic : qui veut le capturer n'a
+  // pas d'autre occasion que celle-ci.
+  if (captureBoot) await page.locator('.viewport').screenshot({ path: captureBoot });
   await page.click('.viewport');
   await page.waitForSelector('.dlg', { timeout: 5_000 });
 

@@ -60,7 +60,7 @@ await page.addInitScript((p) => {
   window.localStorage.setItem('neuromancer-profil', JSON.stringify(p));
 }, PROFIL);
 await page.reload({ waitUntil: 'networkidle' });
-await page.waitForSelector('.boot__title');
+await page.waitForSelector('.boot__logo');
 await page.click('.viewport');
 await page.waitForSelector('.dlg');
 

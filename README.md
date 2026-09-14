@@ -7,7 +7,7 @@ statistiques.
 Projet de fan **non commercial**, librement inspiré du roman de William Gibson (1984).
 Jeu et code entièrement en français.
 
-![L'ouverture, dans la matrice](docs/images/ouverture.png)
+![L'écran-titre](docs/images/boot.png)
 
 ---
 
@@ -21,6 +21,8 @@ brancher déclenche une crise.
 Au Chatsubo, une femme aux lentilles-miroirs incrustées à même l'os te propose une réparation.
 Quelqu'un veut ce que tu as dans le crâne. Pour garantir ta coopération, on t'a déjà posé quinze
 sacs de toxine à dissolution lente.
+
+![L'ouverture, dans la matrice](docs/images/ouverture.png)
 
 **Douze cycles.** C'est le minuteur de la partie, et le moteur de la rejouabilité : douze cycles
 ne suffisent jamais à tout faire. Chaque partie voit un autre morceau de l'histoire, parce
@@ -257,6 +259,12 @@ Palette **verrouillée à 32 couleurs**, partagée à l'identique entre le CSS e
 Les assets sont **générés par des scripts Lua** exécutés dans Aseprite, et non dessinés à la
 main : un tileset entier est une boucle, pas cinquante appels d'outil.
 
+Ce qui n'est **pas** un asset, et volontairement : le cadre de dialogue, les boutons, les jauges
+et le curseur. Ils sont en CSS, ils tiennent les grilles de 10 et de 8, ils se redimensionnent
+avec `--px`, et les remplacer par du 9-slice ne gagnerait qu'un risque de régression. Les assets
+d'interface qui existent — le logo, la fiole de toxine, les icônes — existent parce qu'aucun CSS
+ne les ferait.
+
 ```bash
 tools/aseprite.sh tools/aseprite/ts_interior.lua
 ```
@@ -323,9 +331,10 @@ Tranche verticale en cours. Ce qui tourne aujourd'hui :
 - [x] **Acte III — le run** : Freeside, la Villa Straylight, approche / percée / le cœur
 - [x] **Les huit fins**, dont une secrète qui exige d'avoir déjà joué
 - [x] Tileset extérieur (`ts_street`), décors de Ninsei, Freeside et Straylight
-- [ ] Interface en pixel art (cadre 9-slice, boutons, jauges, icônes de butin)
-- [ ] Objets : planches d'implants et de scripts
-- [ ] Effets : glitch, pluie, transition de branchement, logo-titre
+- [x] Interface dessinée : logo-titre, fiole de toxine à treize états, icônes de butin
+- [x] Objets : planches des cinq scripts et des six plans d'implants
+- [x] La pluie de Ninsei — une tuile de 16 px, déplacée au pixel par le CSS
+- [ ] Transition de branchement (`fx_jack_in`) et écran de mort par glace noire
 - [x] Scènes de friction par paire d'équipiers — six paires écrites, une par partie
 
 ---

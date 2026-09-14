@@ -15,6 +15,25 @@ interface Membre {
 const MEMBRES = equipage.membres as unknown as Record<string, Membre>;
 const NOM_SCRIPT = new Map(SCRIPTS.map((s) => [s.id, s.nom]));
 
+// L'ORDRE des planches d'icones est celui de data/hacking.json. Reordonner la
+// donnee sans reordonner la planche donnerait le mauvais dessin, en silence.
+const RANG_SCRIPT = new Map(SCRIPTS.map((s, i) => [s.id, i]));
+const RANG_PLAN = new Map(hackingData.plans.map((id, i) => [id, i]));
+
+/** Une case d'une planche d'icones de 16x16, designee par son rang. */
+function Vignette({ planche, rang }: { planche: string; rang: number }) {
+  return (
+    <i
+      className="vignette"
+      style={{
+        backgroundImage: `url(/assets/ui/${planche}.png)`,
+        backgroundPositionX: `calc(${-16 * rang} * var(--px))`,
+      }}
+      aria-hidden="true"
+    />
+  );
+}
+
 /**
  * Fiche de partie : ce que Sable a, sait et emmene.
  *
@@ -40,7 +59,9 @@ export function Etat({ onFermer }: { onFermer: () => void }) {
         <span className="etat__val">{run.credits}</span>
       </div>
 
-      <p className="etat__section">COMPÉTENCES</p>
+      <p className="etat__section">
+        <span>COMPÉTENCES</span>
+      </p>
       <div className="etat__grille">
         {Object.entries(run.competences).map(([nom, n]) => (
           <span key={nom} className="etat__paire">
@@ -51,7 +72,9 @@ export function Etat({ onFermer }: { onFermer: () => void }) {
       </div>
 
       <p className="etat__section">
-        ÉQUIPAGE {run.equipage.length}/{MEMBRES_MAX}
+        <span>
+          ÉQUIPAGE {run.equipage.length}/{MEMBRES_MAX}
+        </span>
       </p>
       {run.equipage.length === 0 ? (
         <p className="etat__vide">Personne. Tu fais ça seul.</p>
@@ -65,17 +88,42 @@ export function Etat({ onFermer }: { onFermer: () => void }) {
         </ul>
       )}
 
-      <p className="etat__section">SCRIPTS</p>
-      <p className="etat__ligne">{run.scripts.map((s) => NOM_SCRIPT.get(s) ?? s).join(' · ')}</p>
+      <p className="etat__section">
+        <i className="icone icone--scripts" aria-hidden="true" />
+        <span>SCRIPTS</span>
+      </p>
+      <ul className="etat__objets">
+        {run.scripts.map((id) => (
+          <li key={id}>
+            <Vignette planche="items_scripts" rang={RANG_SCRIPT.get(id) ?? 0} />
+            {NOM_SCRIPT.get(id) ?? id}
+          </li>
+        ))}
+      </ul>
 
       {run.plans.length > 0 && (
         <>
-          <p className="etat__section">PLANS</p>
-          <p className="etat__ligne">{run.plans.join(' · ')}</p>
+          <p className="etat__section">
+            <i className="icone icone--plans" aria-hidden="true" />
+            <span>PLANS</span>
+          </p>
+          <ul className="etat__objets">
+            {run.plans.map((id) => (
+              <li key={id}>
+                <Vignette planche="items_plans" rang={RANG_PLAN.get(id) ?? 0} />
+                {id.replace(/_/g, ' ')}
+              </li>
+            ))}
+          </ul>
         </>
       )}
 
-      <p className="etat__section">CE QUE TU SAIS ({infosConnues.length}/{hackingData.infos.length})</p>
+      <p className="etat__section">
+        <i className="icone icone--infos" aria-hidden="true" />
+        <span>
+          CE QUE TU SAIS ({infosConnues.length}/{hackingData.infos.length})
+        </span>
+      </p>
       {infosConnues.length === 0 ? (
         <p className="etat__vide">Rien qu'on ne t'ait dit.</p>
       ) : (
