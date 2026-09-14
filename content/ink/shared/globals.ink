@@ -13,6 +13,10 @@ VAR humanite = 100
 VAR cycles_restants = 12
 VAR credits = 0
 
+// Vrai quand l'ampoule est dans la poche de Sable. Une VAR et non un learn() :
+// un antidote se fabrique a chaque partie, il ne s'apprend pas a vie.
+VAR antidote_en_poche = false
+
 // --- Identite du fragment --------------------------------------------------
 // "" tant que le joueur ne sait rien. Valeurs possibles :
 // wintermute | neuromancer | construct | demon_ta | rien
@@ -52,6 +56,19 @@ EXTERNAL learn(info_id)
 
 // Augmente une competence de 1. Utilise par l'ouverture : la facon dont Sable
 // est mort definit ce qu'il a garde.
+// Rend la main au jeu pour une plongee dans la matrice, depuis le point
+// d'acces donne. `retour` est le knot ou le recit reprend au debranchement ;
+// c'est le recit qui decide de la suite, pas le moteur.
+EXTERNAL plonger(point_acces, retour)
+=== function plonger(point_acces, retour) ===
+~ return 0
+
+// Ajoute un script a l'inventaire de la partie. Le recit ne connait que des
+// identifiants ; les nombres restent dans data/hacking.json.
+EXTERNAL acquerir_script(id)
+=== function acquerir_script(id) ===
+~ return 0
+
 EXTERNAL boost_competence(nom)
 === function boost_competence(nom) ===
 ~ return 0

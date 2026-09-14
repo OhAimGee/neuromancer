@@ -271,4 +271,81 @@ local function fragment()
   return L.enregistrer(sprite, 'port_fragment', 'portraits')
 end
 
-for _, faire in ipairs({ sable, molly, ratz, fragment }) do faire() end
+-- ----------------------------------------------------------------- FINN ----
+-- Le receleur. N'a jamais ete jeune. Le visage d'un homme qui a survecu a tous
+-- ceux qui auraient pu temoigner.
+
+local function finn()
+  local sprite, img = creer()
+  fond(img)
+  buste(img, '3', '4', 'x', 'w')
+  patch(img, 17, 41, { '4444444444444', '.34444444443.' })   -- col de veste rape
+  crane(img, 'a', 'x', 'w', 'y', 2)
+
+  -- Front degarni : on remonte la ligne de cheveux en repeignant de la peau,
+  -- puis on laisse quelques meches. Un homme sans age n'a pas de coiffure.
+  plein(img, 15, 12, 33, 16, 'x')
+  patch(img, 11, 8, {
+    '...aaabbaaaaabaaaa...',
+    '..aabaaaaabaaaaaaba..',
+    '.aa.a.aa.....aa.a.aa.',
+    'aa...a.........a...aa',
+    'a.................a.a',
+  })
+
+  patch(img, 15, 20, {                     -- paupieres lourdes, regard de commerce
+    'wwwwwwwww.wwwwwwwww',
+    '4wwww4ww...ww4wwww4',
+    '.4zb4..w...w..4bz4.',
+    '.4444..w...w..4444.',
+    '..ww...w...w...ww..',
+    '..4....w...w....4..',
+  })
+
+  patch(img, 22, 26, { '.wy4', 'wwy4', 'ww44', '4www' })     -- nez long
+
+  patch(img, 18, 33, { '4wwwwwwwww4', '.444444444.' })       -- bouche mince
+  patch(img, 17, 31, { '.w.........w.' })                    -- plis d'amertume
+
+  return L.enregistrer(sprite, 'port_finn', 'portraits')
+end
+
+-- ------------------------------------------------------------- ARMITAGE ----
+-- Reconstruit a partir d'un homme qui s'appelait Corto. Le visage ne bouge
+-- jamais : c'est ca, le pire. Symetrique la ou les autres ne le sont pas.
+
+local function armitage()
+  local sprite, img = creer()
+  fond(img)
+  buste(img, '2', '3', 'x', 'w')
+  patch(img, 13, 41, {                     -- col militaire, monte trop haut
+    '4444444444444444444444',
+    '4333333333333333333334',
+    '.4444444444444444444.',
+  })
+  crane(img, '3', 'x', 'w', 'y', 1)
+
+  -- Coupe reglementaire : un plat net, pas une meche.
+  patch(img, 12, 10, {
+    '333333333333333333333333',
+    '333333333333333333333333',
+    '344444444444444444444443',
+  })
+
+  -- Le regard. Les deux yeux identiques au pixel pres : personne n'a deux yeux
+  -- identiques, et c'est exactement ce qui met mal a l'aise.
+  patch(img, 15, 20, {
+    'wwwwwww...wwwwwwwww',
+    '4www4ww...ww4www4ww',
+    '.4zl4.....4.4zl4...',
+    '.4444.....4.4444...',
+    '..w.......4..w.....',
+  })
+
+  patch(img, 23, 26, { 'wy4', 'wy4', 'ww4', '4w4' })         -- nez droit
+
+  patch(img, 19, 33, { '444444444', '.4444444.' })           -- bouche : une ligne
+  return L.enregistrer(sprite, 'port_armitage', 'portraits')
+end
+
+for _, faire in ipairs({ sable, molly, ratz, fragment, finn, armitage }) do faire() end

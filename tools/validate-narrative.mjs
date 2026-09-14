@@ -29,7 +29,7 @@ const avertissements = [];
 const TAGS_CONNUS = new Set([
   'etq', 'cout_credits', 'cout_cycles', 'cout_humanite',
   'bg', 'musique', 'sfx', 'speaker', 'portrait',
-  'ending', 'hub', 'horloge', 'entracte',
+  'ending', 'hub', 'horloge', 'entracte', 'glose',
 ]);
 // La boite de dialogue montre UNE replique a la fois, en bas de l'ecran, et ne
 // defile pas : au-dela de cette longueur le texte deborde du cadre et devient
@@ -147,9 +147,12 @@ const sourcesInk = fichiersInk(INK).map((f) => fs.readFileSync(f, 'utf-8')).join
 const infosLues = new Set(
   [...sourcesInk.matchAll(/knows\(\s*"([^"]+)"\s*\)/g)].map((m) => m[1]),
 );
+// Erreur et non avertissement depuis le lot J : la tranche narrative est
+// ecrite, donc une info pillable que rien ne lit est un butin mort, pas un
+// chantier en cours.
 const infosMortes = hacking.infos.filter((id) => !infosLues.has(id));
 if (infosMortes.length > 0) {
-  avertissements.push(
+  erreurs.push(
     `dette narrative : ${infosMortes.length}/${hacking.infos.length} infos pillables ne sont ` +
     `lues par aucun knows() dans content/ink — ${infosMortes.join(', ')}`,
   );
@@ -166,26 +169,76 @@ let plantages = 0;
 let premierPlantage = null;
 let etapes = 0;
 
+// Le fuzzing rejoue la boucle complete, plongees comprises.
+//
+// Sans cela une partie s'arreterait au premier `~ plonger(...)` : le recit rend
+// la main au jeu, et un harnais qui ne la reprend pas ne verrait jamais ni le
+// hub ni les fins. Ce petit modele double donc volontairement le moteur —
+// c'est le prix a payer pour que « aucune fin n'est inatteignable » veuille
+// dire quelque chose.
+const KNOT_FLATLINE = 'fin_flatline_reseau';
+const P_FLATLINE = 0.2;
+
+function jouerUnePartie() {
+  const story = new Story(json);
+  story.allowExternalFunctionFallbacks = true;
+
+  // Les connaissances sont tirees UNE FOIS par partie : un knows() qui repond
+  // oui puis non dans la meme partie decrirait un joueur impossible.
+  const su = new Map();
+  const lier = (nom, fn) => story.BindExternalFunction(nom, fn, false);
+  lier('knows', (id) => {
+    const cle = String(id);
+    if (!su.has(cle)) su.set(cle, Math.random() < 0.5);
+    return su.get(cle);
+  });
+  lier('skill', () => 1 + Math.floor(Math.random() * 3));
+  lier('has_implant', () => Math.random() < 0.3);
+  lier('crew_present', () => Math.random() < 0.3);
+  lier('learn', () => 0);
+  lier('resolve_scene', () => 0);
+  lier('boost_competence', () => 0);
+  lier('acquerir_script', () => 0);
+
+  let retourDePlongee = null;
+  lier('plonger', (_point, retour) => {
+    retourDePlongee = String(retour);
+    return 0;
+  });
+
+  let garde = 0;
+  while (garde++ < 2000) {
+    while (story.canContinue) {
+      story.Continue();
+      etapes++;
+      for (const tag of story.currentTags ?? []) {
+        if (tag.startsWith('ending:')) finsAtteintes.add(tag.slice(7).trim());
+      }
+    }
+    if (story.currentChoices.length > 0) {
+      story.ChooseChoiceIndex(Math.floor(Math.random() * story.currentChoices.length));
+      continue;
+    }
+    if (retourDePlongee === null) break;
+
+    const retour = retourDePlongee;
+    retourDePlongee = null;
+    if (Math.random() < P_FLATLINE) {
+      story.ChoosePathString(KNOT_FLATLINE);
+      continue;
+    }
+    // Une plongee consomme des cycles : sans cela l'horloge ne tomberait jamais
+    // a zero et la fin par la toxine serait declaree inatteignable a tort.
+    const reste = Number(story.variablesState['cycles_restants']);
+    story.variablesState['cycles_restants'] = Math.max(0, reste - 1 - Math.floor(Math.random() * 2));
+    story.ChoosePathString(retour);
+  }
+}
+
 if (json) {
   for (let partie = 0; partie < PARTIES; partie++) {
-    // Le fuzzing reste ainsi independant du moteur TypeScript.
-    const story = new Story(json);
-    // Les externals ne sont pas liees ici : Ink doit retomber sur les fonctions
-    // de repli de globals.ink, sinon il refuse de jouer.
-    story.allowExternalFunctionFallbacks = true;
     try {
-      let garde = 0;
-      while (garde++ < 2000) {
-        while (story.canContinue) {
-          story.Continue();
-          etapes++;
-          for (const tag of story.currentTags ?? []) {
-            if (tag.startsWith('ending:')) finsAtteintes.add(tag.slice(7).trim());
-          }
-        }
-        if (story.currentChoices.length === 0) break;
-        story.ChooseChoiceIndex(Math.floor(Math.random() * story.currentChoices.length));
-      }
+      jouerUnePartie();
     } catch (e) {
       plantages++;
       premierPlantage ??= e instanceof Error ? e.message : String(e);

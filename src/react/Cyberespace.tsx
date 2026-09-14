@@ -21,7 +21,8 @@ const LIGNES_JOURNAL = 3;
 interface Props {
   pointAcces: string;
   graine: string;
-  onSortie: () => void;
+  /** `flatline` vrai : Sable est reste dans la matrice, le recit en tient compte. */
+  onSortie: (flatline: boolean) => void;
 }
 
 export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie }: Props) {
@@ -91,8 +92,8 @@ export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie }: Prop
       else if (butin.type === 'infos') useProfileStore.getState().apprendre(butin.id);
       else run.acquerir(butin.type, butin.id);
     }
-    onSortie();
-  }, [encaisse, etat.sac, cyclesConsommes, onSortie]);
+    onSortie(etat.statut === 'flatline');
+  }, [encaisse, etat.sac, etat.statut, cyclesConsommes, onSortie]);
 
   const region = pointAcces(idPointAcces);
   const pctTrace = Math.round((etat.trace / donnees.trace.max) * 100);

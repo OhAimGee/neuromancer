@@ -1,20 +1,18 @@
 #!/usr/bin/env node
-// Joue le prologue dans un vrai navigateur et capture chaque palette de choix.
+// Joue une partie ENTIERE, du flatline d'ouverture jusqu'a une fin, en
+// capturant chaque replique et chaque palette de choix.
 //
-//   node tools/jouer.mjs [dossier-de-sortie] [strategie]
+//   node tools/jouer.mjs [dossier-de-sortie] [premier|dernier|hasard]
 //
-// strategie : "dernier" (defaut, prend le dernier choix — souvent le plus
-// conditionnel), "premier", ou "hasard".
-//
-// Sert a verifier qu'une modification narrative ne casse pas la scene, sans
-// rejouer a la main. Le serveur de dev doit tourner.
+// C'est la verification qui compte : elle prouve que la boucle se ferme.
+// Le serveur de dev doit tourner.
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { derouler, ouvrirJeu } from './lib-jeu.mjs';
+import { dansLeReseau, derouler, ouvrirJeu, plongerAuHasard } from './lib-jeu.mjs';
 
 const dossier = process.argv[2] ?? 'captures';
-const strategie = process.argv[3] ?? 'dernier';
+const strategie = process.argv[3] ?? 'premier';
 fs.mkdirSync(dossier, { recursive: true });
 
 const { navigateur, page, erreurs } = await ouvrirJeu();
@@ -22,9 +20,17 @@ await page.locator('.viewport').screenshot({ path: path.join(dossier, '00-demarr
 
 let etape = 0;
 let beats = 0;
+let plongees = 0;
+let fin = null;
 
-while (etape < 30) {
-  // Derouler la scene replique par replique, en capturant chaque boite.
+while (etape < 60) {
+  if (await dansLeReseau(page)) {
+    plongees++;
+    const bilan = await plongerAuHasard(page);
+    console.log(`\n=== plongee ${plongees} : ${bilan}\n`);
+    continue;
+  }
+
   await derouler(page, {
     surReplique: async ({ nom, texte }) => {
       console.log(`   ${nom ? `[${nom}] ` : '           '}${texte}`);
@@ -33,6 +39,13 @@ while (etape < 30) {
       });
     },
   });
+
+  if ((await page.locator('.fin__nom').count()) > 0) {
+    fin = ((await page.locator('.fin__nom').textContent()) ?? '').trim();
+    await page.locator('.viewport').screenshot({ path: path.join(dossier, 'fin.png') });
+    break;
+  }
+  if (await dansLeReseau(page)) continue;
 
   const boutons = page.locator('.dlg__bouton');
   const n = await boutons.count();
@@ -50,20 +63,30 @@ while (etape < 30) {
     console.log('   glose> ' + g.replace(/\n/g, ' '));
   }
 
+  const actifs = [];
+  for (let i = 0; i < n; i++) if (await boutons.nth(i).isEnabled()) actifs.push(i);
+  if (actifs.length === 0) break;
   const i =
-    strategie === 'premier' ? 0 : strategie === 'hasard' ? Math.floor(Math.random() * n) : n - 1;
+    strategie === 'premier'
+      ? actifs[0]
+      : strategie === 'hasard'
+        ? actifs[Math.floor(Math.random() * actifs.length)]
+        : actifs[actifs.length - 1];
   console.log(`   => choisi : ${libelles[i]?.replace(/\n/g, ' ')}\n`);
   await boutons.nth(i).click();
   await page.waitForTimeout(150);
 }
 
-await page.locator('.viewport').screenshot({ path: path.join(dossier, 'fin.png') });
+const hud = (await page.locator('.dlg__hud').count())
+  ? ((await page.locator('.dlg__hud').textContent()) ?? '').replace(/\s+/g, ' ').trim()
+  : '(pas de HUD)';
 
-const hud = await page.locator('.dlg__hud').innerText();
-console.log(`\nHUD final : ${hud.replace(/\n/g, '  ')}`);
-console.log(`repliques lues : ${beats} · palettes de choix : ${etape}`);
-console.log('erreurs console :', erreurs.length ? erreurs.join('\n') : 'aucune');
+console.log(`\nHUD final : ${hud}`);
+console.log(`repliques lues : ${beats} · palettes de choix : ${etape} · plongees : ${plongees}`);
+console.log(`fin atteinte : ${fin ?? 'AUCUNE — la boucle ne se ferme pas'}`);
+console.log(`erreurs console : ${erreurs.length === 0 ? 'aucune' : ''}`);
+for (const e of erreurs) console.error(`  ${e}`);
 console.log(`captures dans ${dossier}/`);
 
 await navigateur.close();
-process.exit(erreurs.length ? 1 : 0);
+process.exit(erreurs.length === 0 && fin !== null ? 0 : 1);

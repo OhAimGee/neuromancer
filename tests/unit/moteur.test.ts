@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { compileInk } from '../../tools/compile-ink.mjs';
 import { MoteurDialogue } from '@/dialogue/moteur';
+import { useProfileStore } from '@/stores/profileStore';
 import { useRunStore } from '@/stores/runStore';
 
 const { json, errors } = compileInk();
@@ -16,6 +17,94 @@ describe('trame narrative', () => {
   it('compile sans erreur', () => {
     expect(errors).toEqual([]);
     expect(json).not.toBeNull();
+  });
+});
+
+/** Amene le moteur au hub, texte epuise, choix affiches. */
+function auHub(m: MoteurDialogue): void {
+  m.demarrer();
+  m.reprendre('hub');
+  epuiser(m);
+}
+
+/** Index du choix dont le libelle contient ce fragment. */
+function choixNomme(m: MoteurDialogue, fragment: string): number {
+  const i = m.lire().choix.findIndex((c) => c.texte.includes(fragment));
+  expect(i).toBeGreaterThanOrEqual(0);
+  return i;
+}
+
+describe('boucle de partie', () => {
+  beforeEach(() => {
+    useRunStore.getState().nouvellePartie();
+    useProfileStore.getState().reinitialiser();
+  });
+
+  it('reprendre() rouvre le recit a un knot nomme', () => {
+    const m = neuf();
+    auHub(m);
+    // Le hub propose des lieux, pas des repliques : c'est la signature du hub.
+    expect(m.lire().choix.map((c) => c.texte).join(' ')).toContain('Finn');
+  });
+
+  it('le recit reclame la plongee, et la matrice ne s’ouvre pas avant la fin du texte', () => {
+    const m = neuf();
+    auHub(m);
+    m.choisir(choixNomme(m, 'cabine'));
+    // La replique de branchement doit encore se lire : tant qu'il reste du
+    // texte, le jeu ne bascule pas dans la matrice.
+    expect(m.lire().plongee).toBeNull();
+    epuiser(m);
+    expect(m.lire().plongee).toBe('chatsubo');
+  });
+
+  it('terminerPlongee() rend la main au knot que le recit a nomme', () => {
+    const m = neuf();
+    auHub(m);
+    m.choisir(choixNomme(m, 'cabine'));
+    epuiser(m);
+    m.terminerPlongee(false);
+    expect(m.lire().plongee).toBeNull();
+    expect(m.lire().ligne?.texte).toContain('Il revint dans son corps');
+  });
+
+  it('un flatline dans la matrice termine la partie', () => {
+    const m = neuf();
+    auHub(m);
+    m.choisir(choixNomme(m, 'cabine'));
+    epuiser(m);
+    m.terminerPlongee(true);
+    expect(m.lire().fin).toBe('flatline');
+    expect(useRunStore.getState().terminee).toBe(true);
+    expect(useProfileStore.getState().finsVues).toEqual(['flatline']);
+  });
+
+  it('l’horloge tombee a zero tue, au passage suivant par le hub', () => {
+    const m = neuf();
+    m.demarrer();
+    useRunStore.setState({ cycles: 0 });
+    m.reprendre('hub');
+    epuiser(m);
+    expect(m.lire().fin).toBe('flatline');
+  });
+
+  it('un cout en cycles annonce est preleve sur l’horloge du jeu', () => {
+    const m = neuf();
+    auHub(m);
+    const avant = useRunStore.getState().cycles;
+    const i = choixNomme(m, 'Finn');
+    expect(m.lire().choix[i]?.cout.cycles).toBe(1);
+    m.choisir(i);
+    epuiser(m);
+    expect(useRunStore.getState().cycles).toBe(avant - 1);
+  });
+
+  it('la fin n’est enregistree qu’une fois, meme en relisant la scene', () => {
+    const m = neuf();
+    m.demarrer();
+    m.reprendre('fin_toxine');
+    epuiser(m);
+    expect(useProfileStore.getState().parties).toBe(1);
   });
 });
 

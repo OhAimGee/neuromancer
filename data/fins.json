@@ -1,0 +1,11 @@
+{
+  "_note": "Les fins de la tranche verticale. L'identifiant vient du tag # ending:<id> porte par le knot. Le texte de la fin vit dans le .ink ; ce fichier ne porte que le carton.",
+  "la_rue": {
+    "nom": "LA RUE",
+    "sous_titre": "Humain. Payé. Petit."
+  },
+  "flatline": {
+    "nom": "FLATLINE",
+    "sous_titre": "Le rien n'est pas noir."
+  }
+}

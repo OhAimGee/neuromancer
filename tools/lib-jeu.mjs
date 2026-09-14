@@ -73,14 +73,87 @@ export async function derouler(page, { surReplique = null, max = 80 } = {}) {
   return lues;
 }
 
-/** Joue le prologue de bout en bout, en prenant toujours le premier choix. */
-export async function traverserPrologue(page, max = 30) {
+/** Vrai quand le jeu a bascule dans le cyberespace. */
+export async function dansLeReseau(page) {
+  return (await page.locator('.net canvas').count()) > 0;
+}
+
+/**
+ * Mene une plongee au hasard et se debranche.
+ *
+ * Les noeuds vivent sur un canvas : on les designe par les coordonnees que le
+ * rendu publie dans `window.__noeudsVisibles` (sonde de developpement), faute
+ * de quoi Playwright n'a rien a cliquer.
+ * Rend le bilan affiche a la sortie.
+ */
+export async function plongerAuHasard(page, { coups = 14, surEtape = null } = {}) {
+  await page.waitForSelector('.net canvas', { timeout: 10_000 });
+  await page.waitForTimeout(500);
+
+  const carte = await page.locator('.net__carte canvas').boundingBox();
+  const echelle = carte ? carte.width / 320 : 4;
+
+  const bouton = (libelle) =>
+    page.locator('.net__actions .net__bouton:not([disabled])', { hasText: libelle });
+
+  for (let coup = 1; coup <= coups; coup++) {
+    if ((await page.locator('.net__bilan').count()) > 0) break;
+
+    // Piller des que c'est possible : une marche purement aleatoire ne pille
+    // presque jamais, et un outil qui ne rapporte rien ne prouve rien — les
+    // fins qui dependent d'une info volee resteraient hors d'atteinte.
+    if ((await bouton('PILLER').count()) > 0) {
+      await bouton('PILLER').first().click();
+      await page.waitForTimeout(120);
+      if (surEtape) await surEtape(coup);
+      continue;
+    }
+
+    const noeuds = await page.evaluate(() => window.__noeudsVisibles ?? []);
+    if (noeuds.length > 0 && carte) {
+      // Viser une BDD en priorite, sinon n'importe quoi.
+      const bdd = noeuds.filter((n) => n.type === 'bdd');
+      const pool = bdd.length > 0 && Math.random() < 0.7 ? bdd : noeuds;
+      const n = pool[Math.floor(Math.random() * pool.length)];
+      await page.mouse.click(carte.x + n.x * echelle, carte.y + n.y * echelle);
+      await page.waitForTimeout(80);
+    }
+
+    const actions = page.locator('.net__actions .net__bouton:not([disabled])');
+    const total = await actions.count();
+    if (total === 0) break;
+    // Le dernier bouton est DEBRANCHER : on ne le prend qu'a la fin.
+    const utiles = Math.max(1, total - 1);
+    await actions.nth(Math.floor(Math.random() * utiles)).click();
+    await page.waitForTimeout(120);
+    if (surEtape) await surEtape(coup);
+  }
+
+  // Se debrancher si la plongee est encore ouverte, puis encaisser.
+  if ((await page.locator('.net__bilan').count()) === 0) {
+    await page.locator('.net__bouton--sortie').click();
+    await page.waitForTimeout(150);
+  }
+  const bilan = ((await page.locator('.net__bilan').textContent()) ?? '').trim();
+  await page.locator('.net__bouton--sortie').click();
+  await page.waitForTimeout(250);
+  return bilan;
+}
+
+/**
+ * Joue depuis l'ouverture en prenant toujours le premier choix, et s'arrete
+ * des que le jeu bascule dans la matrice — au hub, le premier choix est la
+ * cabine du Chatsubo. Rend vrai si on est branche.
+ */
+export async function traverserPrologue(page, max = 40) {
   for (let i = 0; i < max; i++) {
     await derouler(page);
+    if (await dansLeReseau(page)) return true;
     const boutons = page.locator('.dlg__bouton:not([disabled])');
     if ((await boutons.count()) === 0) break;
     await boutons.first().click();
     await page.waitForTimeout(120);
   }
   await derouler(page);
+  return dansLeReseau(page);
 }

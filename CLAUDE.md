@@ -36,10 +36,16 @@ Boucle de 60-90 min, horloge de 12 cycles, 8 fins, forte rejouabilité.
   de plus de 180 signes** : la boîte de dialogue en montre une à la fois et ne défile pas, donc
   au-delà le texte sortirait du cadre. Les six contrôles ont été vérifiés contre des fautes
   introduites volontairement.
-- Le validateur signale aussi la **dette narrative** : une info pillable dans une BDD
+- Le validateur refuse aussi la **dette narrative** : une info pillable dans une BDD
   (`data/hacking.json`) qu'aucun `knows()` ne consulte est un butin mort. C'est précisément ce
-  qui sépare le hacking d'un mini-jeu décoratif, donc c'est surveillé. Avertissement tant que
-  la tranche narrative n'est pas écrite ; à passer en erreur au lot J.
+  qui sépare le hacking d'un mini-jeu décoratif. C'était un avertissement tant que la tranche
+  narrative n'était pas écrite ; c'est une **erreur** depuis le lot J. Ajouter une info à
+  `data/hacking.json`, c'est s'engager à l'utiliser dans `content/ink`.
+- La passe dynamique **rejoue la boucle entière, plongées comprises** : le harnais honore
+  `plonger()`, reprend au knot de retour annoncé, décompte des cycles, et simule parfois un
+  flatline. Sans cela une partie s'arrêterait au premier branchement, et « aucune fin n'est
+  inatteignable » ne voudrait rien dire. Ce harnais double volontairement le moteur ; quand la
+  boucle change dans `moteur.ts`, il change aussi.
 - Les fichiers `.ink` sont écrits en **français typographique complet** : accents et majuscules
   accentuées. Vérifié sur inkjs 2.4.0 — l'UTF-8 traverse le compilateur, les choix et les tags
   sans altération.
@@ -79,7 +85,9 @@ comportement voulu — c'est la réplique prononcée par Sable. Ne jamais redupl
 | `# cout_credits:N` `# cout_cycles:N` `# cout_humanite:N` | choix | Coût, filtré côté UI |
 | `# bg:<id>` `# musique:<id>` `# sfx:<id>` | ligne | Pilotage audiovisuel |
 | `# speaker:<id>` `# portrait:<id>:<expression>` | ligne | Portrait et locuteur |
-| `# ending:<id>` `# hub` | knot | Lu par le validateur narratif |
+| `# ending:<id>` | knot | **Termine la partie.** Lu par le moteur et par le validateur |
+| `# glose:<id>` | ligne | Demande l'explication de règle `<id>` de `data/gloses.json` |
+| `# hub` | knot | Lu par le validateur narratif |
 | `# entracte:<texte libre>` | ligne | Carton plein écran bloquant — saut dans le temps |
 | `# horloge:demarrer` | ligne | **Réservé** — écrit dans le contenu, pas encore consommé par `tags.ts` |
 
@@ -107,7 +115,7 @@ npm test
 
 # Verification visuelle autonome (serveur de dev requis)
 node tools/screenshot.mjs capture.png
-node tools/jouer.mjs captures      # joue le prologue et capture chaque palette de choix
+node tools/jouer.mjs captures hasard  # joue une partie ENTIERE jusqu'a une fin
 node tools/plonger.mjs captures    # prologue + branchement + plongee au hasard
 ```
 
@@ -203,6 +211,39 @@ d'annuler une action sans machinerie.
 
 ---
 
+## La boucle de partie — c'est le récit qui pilote
+
+Il n'y a **aucun bouton câblé en dur vers le cyberespace**, et aucune fin décidée par le code.
+Le jeu rend la main au récit, et le récit rend la main au jeu :
+
+| Sens | Mécanisme |
+|---|---|
+| Récit → jeu | `~ plonger("<point_acces>", "<knot_de_retour>")` puis `-> DONE` |
+| Jeu → récit | `moteur.terminerPlongee(flatline)`, qui reprend au knot annoncé |
+| Récit → fin | `# ending:<id>` sur un knot |
+
+`MoteurDialogue.reprendre(knot)` est la pièce qui rend la structure en hub possible : chaque
+scène finit par `-> DONE`, et le jeu redonne la main là où le récit l'a dit. Les deux seuls
+chemins que le moteur emprunte de sa propre initiative sont nommés en tête de `moteur.ts` :
+`fin_flatline_reseau` (on est mort dans la matrice, il ne reste personne pour choisir) et `hub`
+(filet de sécurité si un `plonger()` n'a nommé aucun retour).
+
+- **Le knot de retour doit être un chemin Ink complet.** `hub.retour` et non `retour` : un stitch
+  n'est pas joignable par son nom seul, et `ChoosePathString` échoue à l'exécution — pas à la
+  compilation.
+- **L'horloge est relue à chaque passage par `hub`.** C'est le seul endroit où la toxine tue ;
+  ailleurs, `cycles_restants` descend sans conséquence immédiate.
+- **`cycles_restants` est observé dans les deux sens.** Sans l'observateur ajouté au lot J, un
+  choix annonçant `# cout_cycles:1` décrémentait la variable Ink et laissait l'horloge du jeu
+  intacte : le compte à rebours ne descendait jamais hors des plongées.
+- Une valeur qui vaut pour **une seule partie** est une `VAR` Ink (`antidote_en_poche`).
+  `learn()` écrit dans le profil et survit à toutes les parties : ne jamais l'utiliser pour un
+  objet qu'on ramasse.
+- La plongée n'est exposée à l'interface qu'une fois le texte épuisé, pour la même raison que le
+  chevron : la matrice ne doit pas s'ouvrir sous une réplique que le joueur n'a pas lue.
+
+---
+
 ## La boîte de dialogue — modèle RPG au tour par tour
 
 La scène reste visible : bandeau de HUD en haut, boîte en bas, décor entre les deux. **Une seule
@@ -230,6 +271,11 @@ ressemble à aucune conversation.
 - `tools/jouer.mjs` et `tools/plonger.mjs` passent par `derouler()` (`tools/lib-jeu.mjs`), qui
   fait défiler la boîte avant de chercher des boutons. Un outil qui cherche directement
   `.dlg__bouton` ne trouve plus rien.
+- `node tools/jouer.mjs captures hasard` joue **une partie entière jusqu'à une fin**, plongées
+  comprises, et sort en code non nul si aucune fin n'est atteinte. C'est la vérification qui
+  prouve que la boucle se ferme. Son harnais de plongée pille dès qu'il le peut : une marche
+  aléatoire ne rapporte presque jamais rien, et les fins qui dépendent d'une info volée
+  resteraient hors d'atteinte.
 
 ---
 

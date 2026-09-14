@@ -23,6 +23,10 @@ export interface MiseEnScene {
   sfx: string | null;
   /** Carton plein ecran a lire avant de reprendre (saut dans le temps). */
   entracte: string | null;
+  /** Identifiant de la fin atteinte. Non nul = la partie est finie. */
+  fin: string | null;
+  /** Explication de regle que le recit demande a montrer ici. */
+  glose: string | null;
 }
 
 export function parseTagsLigne(tags: readonly string[]): MiseEnScene {
@@ -34,6 +38,8 @@ export function parseTagsLigne(tags: readonly string[]): MiseEnScene {
     musique: null,
     sfx: null,
     entracte: null,
+    fin: null,
+    glose: null,
   };
 
   for (const tag of tags) {
@@ -59,6 +65,12 @@ export function parseTagsLigne(tags: readonly string[]): MiseEnScene {
       // apres la premiere ponctuation plutot que le premier segment.
       case 'entracte':
         mes.entracte = tag.slice(tag.indexOf(':') + 1).trim() || null;
+        break;
+      case 'ending':
+        mes.fin = a ?? null;
+        break;
+      case 'glose':
+        mes.glose = a ?? null;
         break;
     }
   }

@@ -19,11 +19,9 @@ const COULEUR_ETIQUETTE: Record<Etiquette, string> = {
 
 interface Props {
   moteur: MoteurDialogue;
-  /** Propose de se brancher une fois la scene close. */
-  onBrancher?: () => void;
 }
 
-export function Dialogue({ moteur, onBrancher }: Props) {
+export function Dialogue({ moteur }: Props) {
   const etat = useSyncExternalStore(moteur.souscrire, moteur.lire);
   const cycles = useRunStore((e) => e.cycles);
   const humanite = useRunStore((e) => e.humanite);
@@ -40,7 +38,7 @@ export function Dialogue({ moteur, onBrancher }: Props) {
   // ou la notion se presente. La signature evite que le double montage des
   // effets en mode strict ne consomme la glose avant qu'elle ne s'affiche.
   useEffect(() => {
-    const sig = `${etat.ligne?.texte ?? ''}|${etat.choix.map((c) => c.texte).join('|')}`;
+    const sig = `${etat.ligne?.texte ?? ''}|${etat.glose ?? ''}|${etat.choix.map((c) => c.texte).join('|')}`;
     if (sig === signature.current) return;
     signature.current = sig;
 
@@ -52,7 +50,8 @@ export function Dialogue({ moteur, onBrancher }: Props) {
       if (c.cout.credits > 0) candidats.push('cout:credits');
       if (c.cout.cycles > 0) candidats.push('cout:cycles');
     }
-    if (etat.termine) candidats.push('horloge');
+    // Le recit peut reclamer lui-meme une explication de regle, par `# glose:`.
+    if (etat.glose) candidats.push(etat.glose);
 
     const neuves = [...new Set(candidats)].filter((id) => GLOSES[id] && !profil.aVuGlose(id));
     for (const id of neuves) profil.marquerGlose(id);
@@ -122,6 +121,9 @@ export function Dialogue({ moteur, onBrancher }: Props) {
                     </span>
                   )}
                   <span>{c.texte}</span>
+                  {c.cout.cycles > 0 && (
+                    <span className="dlg__cout dlg__cout--horloge">-{c.cout.cycles} CYC</span>
+                  )}
                   {c.cout.humanite > 0 && <span className="dlg__cout">-{c.cout.humanite} HUM</span>}
                   {c.cout.credits > 0 && <span className="dlg__cout">-{c.cout.credits} cr</span>}
                 </button>
@@ -136,17 +138,17 @@ export function Dialogue({ moteur, onBrancher }: Props) {
         </div>
       )}
 
+      {glosesNeuves.includes(etat.glose ?? '') && etat.glose && (
+        <div className="dlg__fin">
+          <p className="dlg__glose dlg__glose--large">{GLOSES[etat.glose]}</p>
+        </div>
+      )}
+
+      {/* Un recit epuise sans choix, sans plongee et sans fin est un cul-de-sac :
+          du contenu manque. Mieux vaut le dire que de laisser l'ecran figé. */}
       {etat.termine && (
         <div className="dlg__fin">
           <p>— FIN DE SCÈNE —</p>
-          {glosesNeuves.includes('horloge') && (
-            <p className="dlg__glose dlg__glose--large">{GLOSES['horloge']}</p>
-          )}
-          {onBrancher && (
-            <button className="net__bouton" onClick={onBrancher}>
-              SE BRANCHER SUR LA CABINE
-            </button>
-          )}
         </div>
       )}
 

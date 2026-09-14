@@ -26,6 +26,19 @@ sacs de toxine à dissolution lente.
 ne suffisent jamais à tout faire. Chaque partie voit un autre morceau de l'histoire, parce
 qu'elle en sacrifie un autre.
 
+### La boucle
+
+Entre deux plongées, Ninsei est un hub : le Chatsubo et sa cabine, la boutique du Finn,
+l'hôtel-cercueil, Molly au bout d'une ligne. Se déplacer coûte des cycles, dormir coûte des
+cycles, plonger coûte des cycles. **L'horloge n'attend pas**, et quand elle tombe à zéro les
+quinze poches cèdent à peu près en même temps.
+
+Pour s'en sortir il faut un nom — celui de l'homme qui a payé pour te retrouver — et ce nom
+dort derrière de la glace. Deux façons de finir : on rapporte le nom et on obtient l'antidote,
+ou on ne le rapporte pas.
+
+![Le hub de Ninsei](docs/images/hub.png)
+
 ### Les conversations ont un prix
 
 Chaque scène de dialogue est jouée sur deux jauges **cachées** — CONFIANCE et SOUPÇON — dont les
@@ -73,6 +86,15 @@ Une information découverte dans **n'importe quelle partie** débloque définiti
 `[CONNAISSANCE]` qui la référencent, dans toutes les parties suivantes. On ne monte pas de
 niveau : on rejoue parce qu'on en sait plus.
 
+![Une fin](docs/images/fin.png)
+
+### C'est le récit qui pilote
+
+Il n'y a aucun bouton câblé en dur vers le cyberespace, et aucune fin décidée par le code. Le
+récit Ink appelle `plonger()` en nommant le point d'accès et le knot où il reprendra ; le jeu
+ouvre la matrice, puis lui rend la main là où il l'a dit. Une fin est un tag `# ending:` sur un
+knot. Ajouter un lieu, une plongée ou une fin ne demande pas de toucher au code.
+
 ---
 
 ## Démarrer
@@ -101,12 +123,15 @@ npm run dev        # compile Ink en surveillance + serveur Vite sur :5173
 Le choix du web s'est fait en grande partie pour ça : le jeu se teste sans intervention humaine.
 
 ```bash
-node tools/jouer.mjs captures      # joue le prologue, capture chaque palette de choix
-node tools/plonger.mjs captures    # prologue, branchement, plongée dans le cyberespace
-node tools/screenshot.mjs vue.png  # une capture et les erreurs console
+node tools/jouer.mjs captures hasard  # joue une partie ENTIERE jusqu'à une fin
+node tools/plonger.mjs captures       # une plongée détaillée dans le cyberespace
+node tools/screenshot.mjs vue.png     # une capture et les erreurs console
 ```
 
-Chacun rend un code de sortie non nul si la console du navigateur a remonté une erreur.
+`jouer.mjs` joue vraiment la boucle complète — ouverture, prologue, hub, plongées, fin — en
+capturant chaque réplique et chaque palette de choix. Il **sort en code non nul si aucune fin
+n'est atteinte** : c'est la vérification qui prouve que la boucle se ferme. Tous rendent un code
+non nul si la console du navigateur a remonté une erreur.
 
 ---
 
@@ -170,8 +195,17 @@ ASCII plus une légende vers des noms de tuiles, jamais des images plein écran.
 - **coût affiché qui ne correspond pas à l'arithmétique Ink du corps du choix** — l'interface
   annoncerait un prix que le récit ne prélèverait pas.
 
+- **réplique de plus de 180 signes** — la boîte de dialogue en montre une à la fois et ne défile
+  pas, donc au-delà le texte sortirait du cadre ;
+- **dette narrative** : une info pillable dans une base de données qu'aucun `knows()` ne consulte
+  est un butin mort. C'est précisément ce qui sépare le hacking d'un mini-jeu décoratif.
+
 **Dynamique** : 500 parties à choix aléatoires, pour les plantages d'exécution et les fins
-devenues inatteignables.
+devenues inatteignables. Le harnais rejoue la boucle entière, plongées comprises — sans cela une
+partie s'arrêterait au premier branchement et « aucune fin n'est inatteignable » ne voudrait
+rien dire.
+
+Chaque contrôle a été vérifié contre une faute introduite volontairement.
 
 ---
 
@@ -186,9 +220,11 @@ Tranche verticale en cours. Ce qui tourne aujourd'hui :
 - [x] Socle Pixi, tilesets, tilemaps, fond de matrice
 - [x] Cyberespace jouable : génération, trace, scripts, quatre types de butin
 - [x] Validateurs de trame et d'assets, vérification navigateur autonome
-- [ ] Hub ouvert et recrutement d'équipage
-- [ ] Fins
-- [ ] Portraits, tilesets extérieurs, audio
+- [x] Boîte de dialogue façon RPG au tour par tour, portraits nominatifs
+- [x] **Boucle complète et fermée** : hub, horloge qui tue, deux fins atteignables
+- [ ] Recrutement d'équipage (6 candidats, 3 places)
+- [ ] Les six autres fins
+- [ ] Tilesets extérieurs, audio, bascules d'accessibilité
 
 ---
 

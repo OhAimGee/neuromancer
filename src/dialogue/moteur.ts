@@ -13,6 +13,12 @@ export interface EtatDialogue {
   entracte: string | null;
   /** Il reste du texte : le joueur doit valider pour passer a la suite. */
   peutContinuer: boolean;
+  /** Le recit reclame une plongee sur ce point d'acces physique. */
+  plongee: string | null;
+  /** Identifiant de la fin atteinte. Non nul = la partie est finie. */
+  fin: string | null;
+  /** Explication de regle reclamee par le recit, a montrer une fois par profil. */
+  glose: string | null;
   termine: boolean;
 }
 
@@ -22,6 +28,9 @@ const ETAT_VIDE: EtatDialogue = {
   decor: null,
   entracte: null,
   peutContinuer: false,
+  plongee: null,
+  fin: null,
+  glose: null,
   termine: false,
 };
 
@@ -36,6 +45,22 @@ interface Beat {
   ligne: LigneDialogue;
   scene: MiseEnScene;
 }
+
+/** Une plongee demandee par le recit, et le knot ou il reprendra ensuite. */
+interface Plongee {
+  point: string;
+  retour: string;
+}
+
+/**
+ * Les deux seuls chemins que le moteur emprunte de sa propre initiative.
+ *
+ * Tout le reste du routage vit dans le recit : c'est `plonger()` qui nomme son
+ * knot de retour. Un flatline fait exception, parce qu'il n'y a plus personne
+ * pour choisir.
+ */
+const KNOT_FLATLINE = 'fin_flatline_reseau';
+const KNOT_HUB = 'hub';
 
 /**
  * Pont entre inkjs et les stores.
@@ -57,6 +82,8 @@ export class MoteurDialogue {
     musique: null,
     sfx: null,
     entracte: null,
+    fin: null,
+    glose: null,
   };
   /**
    * La replique affichee, et celle d'apres, deja lue.
@@ -71,6 +98,8 @@ export class MoteurDialogue {
   /** Texte du choix qui vient d'etre pris ; sert a marquer son echo. */
   private repliqueAttendue: string | null = null;
   private sceneAResoudre: string | null = null;
+  private plongeeDemandee: Plongee | null = null;
+  private finEnregistree = false;
   private demarre = false;
 
   private constructor(story: Story) {
@@ -111,6 +140,19 @@ export class MoteurDialogue {
       return 0;
     }) as never);
 
+    // Le recit rend la main au jeu. La demande est mise de cote et non honoree
+    // sur-le-champ : le moteur lit une replique d'avance, et la plongee doit
+    // attendre que le joueur ait fini de lire ce qui est a l'ecran.
+    lier('plonger', ((point: string, retour: string) => {
+      this.plongeeDemandee = { point: String(point), retour: String(retour) };
+      return 0;
+    }) as never);
+
+    lier('acquerir_script', ((id: string) => {
+      useRunStore.getState().acquerir('scripts', String(id));
+      return 0;
+    }) as never);
+
     lier('learn', ((id: string) => {
       useProfileStore.getState().apprendre(String(id));
       return 0;
@@ -135,6 +177,12 @@ export class MoteurDialogue {
       useRunStore.setState({ humanite: Number(v) }),
     );
     this.story.ObserveVariable('credits', (_n, v) => useRunStore.setState({ credits: Number(v) }));
+    // Sans cet observateur, un choix qui annonce `# cout_cycles:1` decrementait
+    // la variable Ink et laissait l'horloge du jeu intacte : le compte a rebours
+    // ne descendait jamais hors des plongees.
+    this.story.ObserveVariable('cycles_restants', (_n, v) =>
+      useRunStore.setState({ cycles: Number(v) }),
+    );
   }
 
   private pousserEtatVersInk(): void {
@@ -176,6 +224,27 @@ export class MoteurDialogue {
     this.repliqueAttendue = choix.texte;
     this.story.ChooseChoiceIndex(i);
     this.recharger();
+  }
+
+  /**
+   * Reprend le recit a un knot nomme. C'est ce qui rend la structure en hub
+   * possible : chaque scene finit par `-> DONE`, et le jeu redonne la main au
+   * recit la ou il le decide.
+   */
+  reprendre(knot: string): void {
+    this.pousserEtatVersInk();
+    this.story.ChoosePathString(knot);
+    this.recharger();
+  }
+
+  /**
+   * Fin de plongee. Le recit reprend ou il l'avait dit — sauf si Sable y est
+   * reste : un flatline ne laisse personne pour choisir la suite.
+   */
+  terminerPlongee(flatline: boolean): void {
+    const demande = this.plongeeDemandee;
+    this.plongeeDemandee = null;
+    this.reprendre(flatline ? KNOT_FLATLINE : (demande?.retour ?? KNOT_HUB));
   }
 
   /** Reprend la lecture apres un saut : replique courante, puis son avance. */
@@ -244,13 +313,27 @@ export class MoteurDialogue {
           return { index: i, texte: c.text, etiquette, cout, abordable: run.peutPayer(cout) };
         });
 
+    const fin = this.courant?.scene.fin ?? null;
+    if (fin !== null && !this.finEnregistree) {
+      this.finEnregistree = true;
+      useProfileStore.getState().enregistrerFin(fin, run.cycles);
+      run.terminer();
+    }
+
+    // La plongee attend que le joueur ait lu ce qui est a l'ecran : sinon la
+    // matrice s'ouvrirait sous une replique qu'il n'a pas encore vue.
+    const plongee = !enAttenteDeLecture && fin === null ? (this.plongeeDemandee?.point ?? null) : null;
+
     this.etat = {
       ligne: this.courant?.ligne ?? null,
       choix,
       decor: this.courant?.scene.decor ?? null,
       entracte: this.courant?.scene.entracte ?? null,
       peutContinuer: enAttenteDeLecture,
-      termine: !enAttenteDeLecture && choix.length === 0,
+      plongee,
+      fin,
+      glose: this.courant?.scene.glose ?? null,
+      termine: !enAttenteDeLecture && choix.length === 0 && plongee === null && fin === null,
     };
     this.notifier();
   }

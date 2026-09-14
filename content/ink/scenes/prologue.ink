@@ -163,4 +163,4 @@ Elle posa un jeton de crédit sur le zinc.
     ~ learn("contrat_accepte")
     ~ resolve_scene("prologue")
     # horloge:demarrer
-    -> DONE
+    -> hub

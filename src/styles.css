@@ -292,6 +292,15 @@ body {
   color: var(--g2);
 }
 
+/* Sous une palette de choix, la boite ne garde plus ses quatre lignes : elle
+ * n'affiche alors que la question, et la place qu'elle economise revient aux
+ * options — qui, elles, se faisaient couper en bas de l'ecran sans rien laisser
+ * voir de ce qui manquait. Le selecteur frere marche parce que la boite est
+ * apres le panneau de choix dans le DOM. */
+.dlg__choix ~ .boite .boite__texte {
+  min-height: calc(24 * var(--px));
+}
+
 /* Le chevron classique : il dit qu'il reste du texte derriere celui-ci. */
 .boite__suite {
   position: absolute;
@@ -324,6 +333,9 @@ body {
   font-size: calc(10 * var(--px));
   line-height: calc(12 * var(--px));
   scrollbar-width: none;
+  /* Si la liste deborde malgre tout, le bas s'efface au lieu d'etre tranche
+   * net : un choix coupe a mi-hauteur ne se voit pas, un choix estompe si. */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 6 * var(--px)), transparent);
 }
 .dlg__choix::-webkit-scrollbar {
   display: none;
@@ -371,6 +383,15 @@ body {
   font-size: calc(7 * var(--px));
   color: var(--o1);
 }
+/* Plusieurs couts sur un meme choix : seul le premier est pousse a droite. */
+.dlg__cout ~ .dlg__cout {
+  margin-left: 0;
+}
+/* L'horloge est la pression centrale du jeu : son cout ne se lit pas comme
+ * les autres. */
+.dlg__cout--horloge {
+  color: var(--r2);
+}
 
 /* Explication de regle, montree une seule fois par profil au moment ou la
  * notion apparait. Discrete : elle accompagne le choix, elle ne le remplace pas. */
@@ -400,6 +421,50 @@ body {
   font-family: 'Silkscreen', monospace;
   font-size: calc(8 * var(--px));
   color: var(--n4);
+}
+
+/* --- Carton de fin de partie -------------------------------------------- */
+
+/* Pleine page et par-dessus tout : une partie finie ne se continue pas, et
+ * laisser la boite cliquable derriere donnerait le contraire a penser. */
+.fin {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(4 * var(--px));
+  /* Opaque, pas translucide : la derniere replique se lisait a travers le
+   * carton et passait sous le bouton RECOMMENCER. */
+  background: var(--n0);
+  font-family: 'Silkscreen', monospace;
+  text-align: center;
+}
+.fin__etiquette {
+  margin: 0;
+  font-size: calc(8 * var(--px));
+  letter-spacing: calc(2 * var(--px));
+  color: var(--n4);
+}
+.fin__nom {
+  margin: 0;
+  font-size: calc(24 * var(--px));
+  line-height: calc(28 * var(--px));
+  letter-spacing: calc(3 * var(--px));
+  color: var(--m3);
+}
+.fin__sous {
+  margin: 0 0 calc(6 * var(--px));
+  font-family: 'Jersey 10', monospace;
+  font-size: calc(10 * var(--px));
+  color: var(--g2);
+}
+.fin__compte {
+  margin: 0 0 calc(4 * var(--px));
+  font-size: calc(8 * var(--px));
+  color: var(--c1);
 }
 
 /* Scanlines — desactivables (accessibilite : risque photosensible). */
