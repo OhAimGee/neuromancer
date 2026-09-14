@@ -200,7 +200,9 @@ body {
   display: flex;
   justify-content: space-between;
   flex: 0 0 auto;
-  padding: calc(3 * var(--px)) calc(5 * var(--px));
+  /* La gouttiere de droite est reservee au bouton d'options, qui flotte
+   * au-dessus de tout : sans elle il se posait sur la valeur d'HUMANITE. */
+  padding: calc(3 * var(--px)) calc(14 * var(--px)) calc(3 * var(--px)) calc(5 * var(--px));
   border-bottom: var(--px) solid var(--n3);
   background: var(--n0);
   font-family: 'Silkscreen', monospace;
@@ -467,6 +469,137 @@ body {
   color: var(--c1);
 }
 
+/* --- Options ------------------------------------------------------------- */
+
+.opt__ouvrir {
+  position: absolute;
+  top: calc(2 * var(--px));
+  right: calc(2 * var(--px));
+  /* Au-dessus de tout, carton d'entracte compris : une bascule
+   * d'accessibilite ne doit jamais devenir inatteignable. */
+  z-index: 7;
+  width: calc(11 * var(--px));
+  height: calc(11 * var(--px));
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--n4);
+  font-size: calc(8 * var(--px));
+  line-height: calc(11 * var(--px));
+  cursor: pointer;
+}
+.opt__ouvrir:hover {
+  color: var(--c2);
+}
+
+.opt {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--px));
+  padding: calc(12 * var(--px)) calc(14 * var(--px));
+  background: var(--n0);
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  color: var(--g1);
+}
+.opt__titre {
+  margin: 0 0 calc(4 * var(--px));
+  font-size: calc(16 * var(--px));
+  letter-spacing: calc(2 * var(--px));
+  color: var(--c3);
+}
+.opt__ligne {
+  display: flex;
+  align-items: baseline;
+  gap: calc(4 * var(--px));
+}
+.opt__cle {
+  flex: 0 0 calc(56 * var(--px));
+  color: var(--n4);
+}
+.opt__choix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(3 * var(--px));
+}
+.opt__val {
+  padding: 0 calc(3 * var(--px));
+  border: var(--px) solid transparent;
+  background: transparent;
+  color: var(--g2);
+  font-family: inherit;
+  font-size: inherit;
+  line-height: calc(11 * var(--px));
+  cursor: pointer;
+}
+.opt__val:hover {
+  color: var(--w0);
+  border-color: var(--n4);
+}
+.opt__val--actif {
+  border-color: var(--c1);
+  color: var(--c3);
+}
+.opt__cran {
+  padding: 0 var(--px);
+  border: 0;
+  background: transparent;
+  color: var(--n4);
+  font-family: inherit;
+  font-size: inherit;
+  line-height: calc(11 * var(--px));
+  cursor: pointer;
+}
+.opt__cran--plein {
+  color: var(--c2);
+}
+
+.opt__note {
+  margin: 0 0 calc(4 * var(--px));
+  font-size: calc(7 * var(--px));
+  line-height: calc(10 * var(--px));
+  color: var(--n4);
+}
+.opt__fermer {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+/* Glitch — la chose dans le crane ne parle pas comme les autres. Lent et de
+ * faible contraste : l'effet doit se sentir, pas clignoter. Coupe par les
+ * options (risque photosensible reel). */
+.glitch .boite--fragment {
+  animation: fragment 2.4s steps(1) infinite;
+}
+@keyframes fragment {
+  0%, 92% {
+    transform: none;
+    border-color: var(--m2);
+  }
+  93% {
+    transform: translateX(var(--px));
+    border-color: var(--m3);
+  }
+  95% {
+    transform: translateX(calc(-1 * var(--px)));
+    border-color: var(--c2);
+  }
+  97% {
+    transform: none;
+    border-color: var(--m3);
+  }
+}
+.boite--fragment {
+  border-color: var(--m2);
+}
+.boite--fragment .boite__nom {
+  border-color: var(--m2);
+  color: var(--m3);
+}
+
 /* Scanlines — desactivables (accessibilite : risque photosensible). */
 .scanlines::after {
   content: '';
@@ -513,7 +646,8 @@ body {
   display: flex;
   justify-content: space-between;
   flex: 0 0 auto;
-  padding: calc(3 * var(--px)) calc(5 * var(--px));
+  /* Meme gouttiere que le HUD de dialogue, pour le bouton d'options. */
+  padding: calc(3 * var(--px)) calc(14 * var(--px)) calc(3 * var(--px)) calc(5 * var(--px));
   border-bottom: var(--px) solid var(--c0);
   background: var(--n0);
   font-family: 'Silkscreen', monospace;

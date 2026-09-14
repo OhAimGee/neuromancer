@@ -3,7 +3,7 @@
 // que la cabine du Chatsubo.
 
 === finn ===
-# bg:map_finn
+# bg:map_finn # musique:ambiance_ninsei
 La boutique du Finn tenait dans un couloir. Des étagères, un comptoir, et derrière le comptoir un homme qui n'avait jamais été jeune.
 # speaker:finn
 {&— Tiens. Le mort.|— Encore toi. Tu as toujours cette tête de facture impayée.|— Referme derrière toi. Le couloir écoute.}

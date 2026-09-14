@@ -14,6 +14,11 @@ captures/
 # JSON Ink compile depuis content/ink — artefact de build
 public/content/
 
+# Banque sonore : fichiers CC0 telecharges par l'utilisateur, pas du code.
+# Voir docs/audio.md. Le jeu tourne sans.
+public/assets/audio/*
+!public/assets/audio/.gitkeep
+
 # Tests
 playwright-report/
 test-results/

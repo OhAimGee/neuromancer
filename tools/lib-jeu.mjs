@@ -14,10 +14,24 @@ if (fs.existsSync(LIBS)) {
   process.env['LD_LIBRARY_PATH'] = `${LIBS}:${process.env['LD_LIBRARY_PATH'] ?? ''}`;
 }
 
-/** Ouvre le jeu, passe l'ecran de demarrage, et collecte les erreurs console. */
-export async function ouvrirJeu({ largeur = 1280, hauteur = 720 } = {}) {
+/**
+ * Ouvre le jeu, passe l'ecran de demarrage, et collecte les erreurs console.
+ *
+ * Le texte s'affiche d'un coup par defaut : les outils verifient le jeu, pas la
+ * vitesse de la machine a ecrire, et attendre chaque caractere multiplierait la
+ * duree d'une partie automatique par dix. Passer `vitesseTexte` pour capturer
+ * l'effet.
+ */
+export async function ouvrirJeu({ largeur = 1280, hauteur = 720, vitesseTexte = 0 } = {}) {
   const navigateur = await chromium.launch();
   const page = await navigateur.newPage({ viewport: { width: largeur, height: hauteur } });
+
+  await page.addInitScript((v) => {
+    window.localStorage.setItem(
+      'neuromancer-options',
+      JSON.stringify({ state: { vitesseTexte: v }, version: 2 }),
+    );
+  }, vitesseTexte);
 
   const erreurs = [];
   page.on('console', (m) => {
@@ -69,6 +83,16 @@ export async function derouler(page, { surReplique = null, max = 80 } = {}) {
     if ((await page.locator('.boite__suite').count()) === 0) break;
     await boite.click();
     await page.waitForTimeout(90);
+    // Un clic pendant l'ecriture ne fait que reveler la replique : il en faut
+    // un second pour passer a la suivante. La boite peut aussi avoir disparu
+    // entre-temps (plongee, fin de partie), d'ou le comptage avant lecture.
+    if ((await page.locator('.boite__texte').count()) > 0) {
+      const apres = ((await page.locator('.boite__texte').textContent()) ?? '').trim();
+      if (apres === texte) {
+        await boite.click();
+        await page.waitForTimeout(90);
+      }
+    }
   }
   return lues;
 }

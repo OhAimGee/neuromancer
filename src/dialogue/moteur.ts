@@ -19,6 +19,9 @@ export interface EtatDialogue {
   fin: string | null;
   /** Explication de regle reclamee par le recit, a montrer une fois par profil. */
   glose: string | null;
+  /** Ambiance a faire tourner, et son ponctuel a declencher sur cette replique. */
+  musique: string | null;
+  sfx: string | null;
   termine: boolean;
 }
 
@@ -31,6 +34,8 @@ const ETAT_VIDE: EtatDialogue = {
   plongee: null,
   fin: null,
   glose: null,
+  musique: null,
+  sfx: null,
   termine: false,
 };
 
@@ -333,6 +338,8 @@ export class MoteurDialogue {
       plongee,
       fin,
       glose: this.courant?.scene.glose ?? null,
+      musique: this.courant?.scene.musique ?? null,
+      sfx: this.courant?.scene.sfx ?? null,
       termine: !enAttenteDeLecture && choix.length === 0 && plongee === null && fin === null,
     };
     this.notifier();

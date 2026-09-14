@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import donnees from '@data/hacking.json';
+import { audio } from '@/audio/bus';
 import { SceneJeu } from '@/engine/scene';
 import { genererGraphe, pointAcces } from '@/hacking/graphe';
 import { formuler } from '@/hacking/journal';
@@ -66,6 +67,24 @@ export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie }: Prop
   useEffect(() => {
     rendu.current?.dessiner(etat);
   }, [etat]);
+
+  useEffect(() => {
+    audio.effet('jack_in');
+    audio.musique('nappe_matrice');
+  }, []);
+
+  // Un seul avertissement au franchissement du seuil : le rejouer a chaque
+  // tick au-dessus du seuil en ferait un bruit de fond qu'on n'entend plus.
+  const alerteDonnee = useRef(false);
+  useEffect(() => {
+    const chaud = etat.trace >= donnees.trace.seuilAlerte;
+    if (chaud && !alerteDonnee.current) audio.effet('trace_alerte');
+    alerteDonnee.current = chaud;
+  }, [etat.trace]);
+
+  useEffect(() => {
+    if (etat.statut === 'flatline') audio.effet('glace_noire');
+  }, [etat.statut]);
 
   const ici = etat.graphe.noeuds[etat.position];
   const voisin = cible !== null && ici ? ici.voisins.includes(cible) : false;

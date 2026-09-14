@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import gloses from '@data/gloses.json';
+import { audio } from '@/audio/bus';
 import type { MoteurDialogue } from '@/dialogue/moteur';
 import { useProfileStore } from '@/stores/profileStore';
 import { useRunStore } from '@/stores/runStore';
+import { useUiStore } from '@/stores/uiStore';
 import type { Etiquette } from '@/types/jeu';
 import { Boite } from './Boite';
+import { useMachineAEcrire } from './useMachineAEcrire';
 
 const GLOSES = gloses as Record<string, string>;
 
@@ -25,6 +28,13 @@ export function Dialogue({ moteur }: Props) {
   const etat = useSyncExternalStore(moteur.souscrire, moteur.lire);
   const cycles = useRunStore((e) => e.cycles);
   const humanite = useRunStore((e) => e.humanite);
+  const vitesseTexte = useUiStore((e) => e.vitesseTexte);
+
+  const { affiche, complet, toutReveler } = useMachineAEcrire(
+    etat.ligne?.texte ?? '',
+    vitesseTexte,
+    etat.ligne,
+  );
 
   const [entracteLu, setEntracteLu] = useState<string | null>(null);
   const [glosesNeuves, setGlosesNeuves] = useState<string[]>([]);
@@ -58,9 +68,26 @@ export function Dialogue({ moteur }: Props) {
     setGlosesNeuves(neuves);
   }, [etat]);
 
+  // Le son suit la replique affichee, pas la lecture d'avance du moteur : la
+  // dependance est l'objet `ligne`, qui ne change qu'au changement de replique.
+  useEffect(() => {
+    audio.musique(etat.musique);
+  }, [etat.musique]);
+  useEffect(() => {
+    if (etat.sfx) audio.effet(etat.sfx);
+  }, [etat.ligne, etat.sfx]);
+
   const entracte = etat.entracte !== null && etat.entracte !== entracteLu ? etat.entracte : null;
   const fermerEntracte = useCallback(() => setEntracteLu(etat.entracte), [etat.entracte]);
-  const continuer = useCallback(() => moteur.continuer(), [moteur]);
+  // Premiere pression : finir la replique. Seconde : passer a la suivante.
+  // L'inverse ferait perdre des lignes a qui appuie vite.
+  const continuer = useCallback(() => {
+    if (!complet) {
+      toutReveler();
+      return;
+    }
+    moteur.continuer();
+  }, [moteur, complet, toutReveler]);
 
   // Espace et Entree font avancer la replique, comme dans tout RPG au tour par
   // tour. Le clic sur la boite fait la meme chose.
@@ -93,7 +120,7 @@ export function Dialogue({ moteur }: Props) {
       </div>
 
       <div className="dlg__bas">
-      {etat.choix.length > 0 && (
+      {etat.choix.length > 0 && complet && (
         <div className="dlg__choix">
           {etat.choix.map((c) => {
             const miennes: string[] = [];
@@ -113,7 +140,10 @@ export function Dialogue({ moteur }: Props) {
                 <button
                   className="dlg__bouton"
                   disabled={!c.abordable}
-                  onClick={() => moteur.choisir(c.index)}
+                  onClick={() => {
+                    audio.effet(c.abordable ? 'ui_valide' : 'ui_refus');
+                    moteur.choisir(c.index);
+                  }}
                 >
                   {c.etiquette && (
                     <span className="dlg__etq" style={{ color: COULEUR_ETIQUETTE[c.etiquette] }}>
@@ -153,7 +183,12 @@ export function Dialogue({ moteur }: Props) {
       )}
 
       {etat.ligne && (
-        <Boite ligne={etat.ligne} peutContinuer={etat.peutContinuer} onContinuer={continuer} />
+        <Boite
+          ligne={etat.ligne}
+          texte={affiche}
+          peutContinuer={etat.peutContinuer && complet}
+          onContinuer={continuer}
+        />
       )}
       </div>
 

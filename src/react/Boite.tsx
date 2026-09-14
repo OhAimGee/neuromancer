@@ -18,10 +18,13 @@ const PERSONNAGES = personnages as unknown as Record<string, Personnage>;
  */
 export function Boite({
   ligne,
+  texte,
   peutContinuer,
   onContinuer,
 }: {
   ligne: LigneDialogue;
+  /** Texte a afficher : partiel tant que la machine a ecrire n'a pas fini. */
+  texte: string;
   peutContinuer: boolean;
   onContinuer: () => void;
 }) {
@@ -31,7 +34,13 @@ export function Boite({
 
   return (
     <div
-      className={ligne.dite ? 'boite boite--dite' : 'boite boite--recit'}
+      className={[
+        'boite',
+        ligne.dite ? 'boite--dite' : 'boite--recit',
+        ligne.locuteur === 'fragment' ? 'boite--fragment' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       onClick={onContinuer}
       role="presentation"
     >
@@ -45,7 +54,7 @@ export function Boite({
             aria-hidden="true"
           />
         )}
-        <p className="boite__texte">{ligne.texte}</p>
+        <p className="boite__texte">{texte}</p>
       </div>
 
       {peutContinuer && <span className="boite__suite" aria-hidden="true" />}

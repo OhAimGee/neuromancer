@@ -95,6 +95,24 @@ récit Ink appelle `plonger()` en nommant le point d'accès et le knot où il re
 ouvre la matrice, puis lui rend la main là où il l'a dit. Une fin est un tag `# ending:` sur un
 knot. Ajouter un lieu, une plongée ou une fin ne demande pas de toucher au code.
 
+### Confort et accessibilité
+
+Le texte s'écrit caractère par caractère, comme un RPG au tour par tour : la première pression
+finit la réplique, la seconde passe à la suivante.
+
+`Échap` ouvre les options **en pleine partie**. Scanlines et glitch se coupent séparément — cette
+esthétique présente un risque photosensible réel, et la bascule reste atteignable en toutes
+circonstances, y compris derrière un carton plein écran.
+
+![Les options](docs/images/options.png)
+
+### Son
+
+Le bus audio est câblé et piloté par le récit (`# musique:` et `# sfx:` dans le `.ink`), mais les
+fichiers ne sont pas versionnés : ce sont des archives qui appartiennent à leurs auteurs. **Le jeu
+tourne sans un seul son.** Pour l'habiller, voir [`docs/audio.md`](docs/audio.md) — la liste de ce
+qu'il faut, le registre recherché pour chaque son, et où trouver du CC0.
+
 ---
 
 ## Démarrer
@@ -222,9 +240,11 @@ Tranche verticale en cours. Ce qui tourne aujourd'hui :
 - [x] Validateurs de trame et d'assets, vérification navigateur autonome
 - [x] Boîte de dialogue façon RPG au tour par tour, portraits nominatifs
 - [x] **Boucle complète et fermée** : hub, horloge qui tue, deux fins atteignables
+- [x] Machine à écrire, options en jeu, bascules d'accessibilité
+- [x] Bus audio piloté par le récit (banque sonore à télécharger séparément)
 - [ ] Recrutement d'équipage (6 candidats, 3 places)
 - [ ] Les six autres fins
-- [ ] Tilesets extérieurs, audio, bascules d'accessibilité
+- [ ] Tilesets extérieurs, interface et effets en pixel art
 
 ---
 

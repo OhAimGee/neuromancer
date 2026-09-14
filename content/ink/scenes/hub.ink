@@ -9,7 +9,7 @@
 -> hub_menu
 
 = hub_menu
-# bg:map_chatsubo
+# bg:map_chatsubo # musique:ambiance_chatsubo
 { hub_menu == 1:
     Le jeton de crédit de Molly était toujours sur le zinc. Sable ne l'avait pas pris, et personne d'autre n'y avait touché : au Chatsubo on sait à quoi ressemble un piège.
     Douze cycles. Il fallait un nom, et le nom dormait derrière de la glace. # glose:horloge
@@ -35,7 +35,7 @@
     -> hub_ratz
 
 = hub_cabine
-La cabine était vieille de vingt ans et sentait le plastique cuit. Sable posa les trodes sur ses tempes et laissa la surface venir à lui.
+La cabine était vieille de vingt ans et sentait le plastique cuit. Sable posa les trodes sur ses tempes et laissa la surface venir à lui. # sfx:jack_in
 ~ plonger("chatsubo", "hub.retour")
 -> DONE
 

@@ -277,6 +277,45 @@ ressemble à aucune conversation.
   aléatoire ne rapporte presque jamais rien, et les fins qui dépendent d'une info volée
   resteraient hors d'atteinte.
 
+### Machine à écrire
+
+Le texte s'écrit caractère par caractère (`useMachineAEcrire`), au rythme de `uiStore.vitesseTexte`.
+**La première pression finit la réplique, la seconde seulement passe à la suivante** — l'inverse
+fait perdre des lignes à qui appuie vite. Les choix n'apparaissent qu'une fois la réplique
+entièrement écrite.
+
+Les outils de vérification ouvrent le jeu en `vitesseTexte: 0` (injecté dans `localStorage` par
+`ouvrirJeu`) : ils vérifient le jeu, pas la vitesse de l'animation. `derouler()` sait tout de
+même encaisser un clic qui ne fait que révéler.
+
+---
+
+## Audio
+
+Le bus (`src/audio/bus.ts`, Howler) est monté dès le départ, mais **les fichiers sont
+facultatifs** : le jeu tourne sans un seul son, et un fichier absent se signale une fois dans la
+console au lieu de casser une scène. C'est ce qui permet d'écrire le jeu et de constituer la
+banque sonore en parallèle.
+
+- `data/audio.json` : identifiant → fichier, bus, boucle, volume. Aucun chemin en dur ailleurs.
+- Le récit pilote le son par les tags `# musique:<id>` et `# sfx:<id>`, déjà dans le vocabulaire.
+- `public/assets/audio/` est **ignoré par git** : ce sont des archives CC0 téléchargées par
+  l'utilisateur. La liste de ce qu'il faut, et le registre recherché, vivent dans `docs/audio.md`.
+- Les navigateurs refusent le son avant une interaction : le bus met l'ambiance demandée de côté
+  et la joue au premier clic ou à la première touche.
+
+---
+
+## Accessibilité
+
+Non négociable, et pas repoussé à la fin : cette esthétique présente un **risque photosensible
+réel**. `Échap` ouvre les options en pleine partie, et le bouton ⚙ passe au-dessus de tout, carton
+d'entracte compris — une bascule d'accessibilité ne doit jamais devenir inatteignable.
+
+Scanlines et glitch se coupent séparément. Le glitch est volontairement lent et de faible
+contraste : il se sent sur la boîte quand le fragment parle (`.boite--fragment`), il ne clignote
+pas.
+
 ---
 
 ## Pédagogie — expliquer sans écran de tutoriel

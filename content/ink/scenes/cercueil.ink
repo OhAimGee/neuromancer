@@ -2,7 +2,7 @@
 // C'est le seul endroit où Sable est assez seul pour entendre l'autre chose.
 
 === cercueil ===
-# bg:map_coffin
+# bg:map_coffin # musique:ambiance_ninsei
 Le cercueil faisait deux mètres sur un, et le tarif se payait à l'heure. Sable referma le panneau et le bruit de Ninsei devint une rumeur au fond d'un tuyau.
 -> cercueil_menu
 

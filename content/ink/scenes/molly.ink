@@ -46,7 +46,7 @@ Elle ne demanda pas où il l'avait pris.
 -> rendez_vous
 
 === rendez_vous ===
-# bg:map_entrepot
+# bg:map_entrepot # musique:ambiance_ninsei
 ~ cycles_restants -= 1
 L'entrepôt sentait le sel et le béton neuf. Armitage se tenait debout au milieu, très droit, comme un homme qui a appris la station debout dans une armée qui n'existe plus.
 # speaker:armitage

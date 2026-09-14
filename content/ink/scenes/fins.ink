@@ -6,7 +6,7 @@
 
 === fin_la_rue ===
 # ending:la_rue
-# bg:aucun
+# bg:aucun # musique:nappe_fin
 L'ampoule tenait dans le creux de la main. Sable se la posa dans le cou lui-même, sur le trottoir, parce qu'il n'avait pas confiance en une pièce fermée.
 La dissolution s'arrêta en quatre minutes. Ce fut tout. Pas de lumière, pas de soulagement — juste une chose qui cessa de se produire.
 Il ne redevint pas cowboy. Personne ne lui rendit la matrice, et personne n'avait jamais promis de le faire.
@@ -16,7 +16,7 @@ La chose derrière l'os frontal ne dit rien. Elle avait ce qu'elle voulait, ou e
 
 === fin_la_rue_seul ===
 # ending:la_rue
-# bg:aucun
+# bg:aucun # musique:nappe_fin
 Sable referma la mallette de lui-même et la repoussa sur le béton, vers l'homme qui n'avait plus rien à vendre.
 Il avait fabriqué son antidote avec de l'argent volé et une formule volée. Ça ne valait pas mieux moralement, mais ça se payait une fois.
 Armitage ne le poursuivit pas. Les hommes reconstruits ne courent pas : ils notent.
@@ -26,7 +26,7 @@ Il descendit vers le port avec quelqu'un d'autre dans la tête, et cette fois il
 
 === fin_toxine ===
 # ending:flatline
-# bg:aucun
+# bg:aucun # musique:nappe_fin
 Le douzième cycle ne s'annonça pas. Les sacs n'avaient jamais eu à s'annoncer.
 Sable était assis au Chatsubo quand les parois fines cédèrent toutes à peu près en même temps, comme on avait payé pour qu'elles cèdent.
 Ratz vit un client glisser du tabouret et ne posa pas son chiffon. Sur Ninsei on apprend vite ce qu'on ne peut pas empêcher.
@@ -35,7 +35,7 @@ Dans le crâne, la chose resta attentive jusqu'à la fin, et prit des notes jusq
 
 === fin_flatline_reseau ===
 # ending:flatline
-# bg:aucun
+# bg:aucun # musique:nappe_fin
 La glace noire ne fait pas de bruit. Elle remonte le lien, trouve le corps au bout, et ferme.
 Quatre-vingt-quatorze secondes, la première fois. Cette fois personne ne comptait, et personne ne vint chercher le corps dans une cabine que le bar louait à l'heure.
 Le rien n'est toujours pas noir. Sable eut le temps de le remarquer une seconde fois, et de trouver ça injuste.

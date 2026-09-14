@@ -9,7 +9,7 @@
 // apparaissent ici, dans une scène dont l'issue est déjà écrite.
 
 === ouverture ===
-# bg:matrice
+# bg:matrice # musique:nappe_matrice
 # musique:matrice_froide
 # entracte:CHIBA CITY — IL Y A TROIS ANS
 

@@ -6,6 +6,7 @@ import { Cyberespace } from './Cyberespace';
 import { Decor } from './Decor';
 import { Dialogue } from './Dialogue';
 import { Fin } from './Fin';
+import { Options } from './Options';
 import { useIntegerScale, VIEWPORT_W, VIEWPORT_H } from './useIntegerScale';
 
 type Niveau = 'ok' | 'warn' | 'err' | 'dim';
@@ -21,6 +22,8 @@ const CLASSE: Record<Niveau, string> = {
 export function App() {
   const scale = useIntegerScale();
   const scanlines = useUiStore((e) => e.scanlines);
+  const glitch = useUiStore((e) => e.glitch);
+  const [options, setOptions] = useState(false);
   const [lignes, setLignes] = useState<Ligne[]>([]);
   const [moteur, setMoteur] = useState<MoteurDialogue | null>(null);
   const [lance, setLance] = useState(false);
@@ -66,7 +69,12 @@ export function App() {
 
   useEffect(() => {
     if (!moteur || lance) return;
-    const onTouche = () => demarrer();
+    const onTouche = (e: Event) => {
+      // Le bouton d'options est au-dessus de l'ecran de demarrage : y cliquer
+      // ne doit pas lancer la partie par la meme occasion.
+      if (e.target instanceof Element && e.target.closest('.opt, .opt__ouvrir')) return;
+      demarrer();
+    };
     window.addEventListener('keydown', onTouche);
     window.addEventListener('pointerdown', onTouche);
     return () => {
@@ -75,10 +83,21 @@ export function App() {
     };
   }, [moteur, lance, demarrer]);
 
+  // Echap ouvre et ferme les options, y compris en pleine scene.
+  useEffect(() => {
+    const onTouche = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      setOptions((v) => !v);
+    };
+    window.addEventListener('keydown', onTouche);
+    return () => window.removeEventListener('keydown', onTouche);
+  }, []);
+
   return (
     <div className="stage">
       <div
-        className={scanlines ? 'viewport scanlines' : 'viewport'}
+        className={`viewport${scanlines ? ' scanlines' : ''}${glitch ? ' glitch' : ''}`}
         style={{ '--s': scale } as React.CSSProperties}
       >
         {lance && moteur ? (
@@ -101,6 +120,17 @@ export function App() {
             )}
           </div>
         )}
+
+        <button
+          className="opt__ouvrir"
+          onClick={() => setOptions(true)}
+          aria-label="Options"
+          title="Options (Échap)"
+        >
+          ⚙
+        </button>
+
+        {options && <Options onFermer={() => setOptions(false)} />}
       </div>
 
       <div className="filigrane">
