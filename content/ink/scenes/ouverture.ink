@@ -15,7 +15,8 @@
 
 La matrice n'est pas un lieu. C'est une convention : une hallucination consensuelle, vécue chaque jour par des milliards d'opérateurs légitimes, dans tous les pays du monde.
 
-Sable n'était pas légitime. Il était cowboy de console — on lui payait un deck, il se collait les trodes aux tempes, et il allait chercher dans la mémoire des autres ce que les autres ne voulaient pas donner.
+Sable n'était pas légitime. Il était cowboy de console : on lui payait un deck, il se collait les trodes aux tempes.
+Et il allait chercher dans la mémoire des autres ce que les autres ne voulaient pas donner.
 
 Branché, le monde devenait de la géométrie. Des grappes et des constellations de données, dépliées dans le non-espace de l'esprit. Comme des lumières de ville qui s'éloignent.
 
@@ -39,11 +40,12 @@ La glace monta du plancher de données comme de l'encre dans de l'eau claire.
 
 Pas un mur commercial. Pas une alarme. Une chose noire, lente, qui avait des intentions.
 
-La glace ordinaire protège les données. La glace noire ne s'occupe pas des données : elle remonte le lien, trouve le corps au bout, et arrête le cœur. C'est parfaitement légal quand l'opérateur est un voleur.
+La glace ordinaire protège les données. La glace noire ne s'occupe pas des données : elle remonte le lien, trouve le corps au bout, et arrête le cœur.
+C'est parfaitement légal quand l'opérateur est un voleur.
 
 Sable était un voleur.
 
-— Glace noire, dit-il tout haut, dans une pièce vide, à trois heures du matin.
+— Glace noire, dit-il tout haut, dans une pièce vide, à trois heures du matin. # speaker:sable
 
 Il lui restait peut-être sept secondes, et trois façons de les dépenser.
 
@@ -90,7 +92,8 @@ RÉANIMATION — PARTIELLE
 INTERFACE NEURALE — DÉGRADÉE
 PRONOSTIC — toute plongée profonde déclenchera une crise
 
-— Vous pourrez encore effleurer la surface, dit le médecin. Rien de plus. Votre système nerveux a appris à avoir peur, et il ne désapprendra pas.
+— Vous pourrez encore effleurer la surface, dit le médecin. Rien de plus. # speaker:medecin
+— Votre système nerveux a appris à avoir peur, et il ne désapprendra pas.
 
 Ce qui revenait à dire : vous n'êtes plus cowboy. Vous êtes quelqu'un qui l'a été.
 

@@ -17,7 +17,8 @@
 
 Le ciel au-dessus de Chiba avait la couleur d'un écran mort.
 
-Sable comptait les néons pour éviter de compter les heures. Trois ans que la matrice lui était fermée. Trois ans à descendre Ninsei comme on descend un escalier dans le noir : une marche, puis une autre, sans jamais toucher le fond.
+Sable comptait les néons pour éviter de compter les heures. Trois ans que la matrice lui était fermée.
+Trois ans à descendre Ninsei comme on descend un escalier dans le noir : une marche, puis une autre, sans jamais toucher le fond.
 
 Quelque part derrière l'os frontal, la chose remua. Elle faisait toujours ça quand il pensait à la matrice.
 
@@ -32,7 +33,8 @@ Le Chatsubo sentait la bière tiède et le plastique chaud. Clientèle de profes
 
 — Encore toi, l'artiste.
 
-Le bras prothétique de Ratz poussa un verre sur le zinc. Antiquité militaire russe, sept fonctions, manipulateur rose sale couleur prothèses d'hôpital. Ses dents d'acier accrochèrent le néon quand il sourit.
+Le bras prothétique de Ratz poussa un verre sur le zinc. Antiquité militaire russe, sept fonctions, manipulateur rose sale couleur prothèses d'hôpital.
+Ses dents d'acier accrochèrent le néon quand il sourit.
 
 — Tu as la tête de quelqu'un qui attend. Ça fait trois ans que tu as cette tête-là.
 
@@ -60,7 +62,7 @@ Le bras prothétique de Ratz poussa un verre sur le zinc. Antiquité militaire r
     ~ confiance += 3
     ~ soupcon += 1
     Quelque chose se servit de sa bouche.
-    — Tu as peur de la femme qui va entrer, Ratz. Tu as raison.
+    — Tu as peur de la femme qui va entrer, Ratz. Tu as raison. # speaker:fragment
     Le barman se figea. Sable sentit le goût du cuivre. Il ne savait pas d'où venait la phrase, et c'était exactement le problème.
 
 - -> prologue_molly
@@ -73,7 +75,8 @@ Le bras prothétique de Ratz poussa un verre sur le zinc. Antiquité militaire r
 
 La porte s'ouvrit sur la pluie.
 
-Elle traversa la salle sans regarder personne, et personne ne la regarda, ce qui au Chatsubo revenait à un cri. Quand elle s'assit, Sable vit pourquoi : des lunettes-miroirs incrustées à même l'os, scellées dans la chair. Pas de monture. Pas d'yeux.
+Elle traversa la salle sans regarder personne, et personne ne la regarda, ce qui au Chatsubo revenait à un cri.
+Quand elle s'assit, Sable vit pourquoi : des lunettes-miroirs incrustées à même l'os, scellées dans la chair. Pas de monture. Pas d'yeux.
 
 — Sable.
 
@@ -150,7 +153,8 @@ Elle posa un jeton de crédit sur le zinc.
 -
     Molly se leva. Elle ne lui laissa pas le temps de décider s'il avait accepté.
 
-    — Première chose. Il me faut un nom : celui de l'homme qui a payé pour te retrouver. Il dort dans les registres d'une corpo de Ninsei, et tu es assis à trente mètres d'un point d'accès.
+    — Première chose. Il me faut un nom : celui de l'homme qui a payé pour te retrouver.
+    — Il dort dans les registres d'une corpo de Ninsei, et tu es assis à trente mètres d'un point d'accès.
 
     Elle désigna le fond de la salle du menton.
 

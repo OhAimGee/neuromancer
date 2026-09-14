@@ -44,14 +44,43 @@ export async function passerEntracte(page, capture = null) {
   return texte;
 }
 
+/**
+ * Fait defiler la boite de dialogue jusqu'a la prochaine palette de choix.
+ *
+ * La boite ne montre qu'une replique a la fois : sans ce deroulage, un outil
+ * qui cherche des boutons ne trouve jamais rien.
+ * Rend les repliques lues, dans l'ordre.
+ */
+export async function derouler(page, { surReplique = null, max = 80 } = {}) {
+  const lues = [];
+  for (let i = 0; i < max; i++) {
+    await passerEntracte(page);
+    const boite = page.locator('.boite');
+    if ((await boite.count()) === 0) break;
+
+    const nom = (await page.locator('.boite__nom').count())
+      ? ((await page.locator('.boite__nom').textContent()) ?? '').trim()
+      : null;
+    const texte = ((await page.locator('.boite__texte').textContent()) ?? '').trim();
+    const replique = { nom, texte };
+    lues.push(replique);
+    if (surReplique) await surReplique(replique, i);
+
+    if ((await page.locator('.boite__suite').count()) === 0) break;
+    await boite.click();
+    await page.waitForTimeout(90);
+  }
+  return lues;
+}
+
 /** Joue le prologue de bout en bout, en prenant toujours le premier choix. */
 export async function traverserPrologue(page, max = 30) {
   for (let i = 0; i < max; i++) {
-    await passerEntracte(page);
+    await derouler(page);
     const boutons = page.locator('.dlg__bouton:not([disabled])');
     if ((await boutons.count()) === 0) break;
     await boutons.first().click();
     await page.waitForTimeout(120);
   }
-  await passerEntracte(page);
+  await derouler(page);
 }

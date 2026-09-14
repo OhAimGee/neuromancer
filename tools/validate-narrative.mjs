@@ -31,6 +31,12 @@ const TAGS_CONNUS = new Set([
   'bg', 'musique', 'sfx', 'speaker', 'portrait',
   'ending', 'hub', 'horloge', 'entracte',
 ]);
+// La boite de dialogue montre UNE replique a la fois, en bas de l'ecran, et ne
+// defile pas : au-dela de cette longueur le texte deborde du cadre et devient
+// invisible. Mesure : 4 lignes de Jersey 10 dans la boite etroite (celle qui
+// porte un portrait) tiennent un peu plus de 200 signes ; 180 garde une marge
+// pour les mots longs, qui passent a la ligne sans se couper.
+const MAX_SIGNES = 180;
 const ETIQUETTES = new Set(['MENSONGE', 'MENACE', 'CONNAISSANCE', 'FRAGMENT', 'IMPLANT', 'ACTION']);
 // Tag de cout -> variable Ink que le corps du choix doit reellement decrementer.
 const VARIABLE_DU_COUT = {
@@ -65,6 +71,21 @@ for (const fichier of fichiersInk(INK)) {
 
     const debutTags = sansCommentaire.indexOf('#');
     const zoneTags = debutTags === -1 ? '' : sansCommentaire.slice(debutTags);
+
+    // Longueur du texte reellement affiche : marqueur de choix, condition et
+    // tags retires, puisque rien de tout cela n'arrive dans la boite.
+    const affiche = (debutTags === -1 ? sansCommentaire : sansCommentaire.slice(0, debutTags))
+      .replace(/^\s*[*+][*+\s]*/, '')
+      .replace(/^\s*-(?!>)\s*/, '')
+      .replace(/^\s*\{[^}]*\}\s*/, '')
+      .trim();
+    const directive = /^(===|->|VAR\b|CONST\b|LIST\b|EXTERNAL\b|INCLUDE\b|~|\{|\}|=)/.test(affiche);
+    if (!directive && affiche.length > MAX_SIGNES) {
+      erreurs.push(
+        `${ou} : replique de ${affiche.length} signes (max ${MAX_SIGNES}) — ` +
+        `elle deborderait de la boite de dialogue. La couper en deux repliques.`,
+      );
+    }
 
     for (const tag of zoneTags.split('#').map((t) => t.trim()).filter(Boolean)) {
       const cle = tag.split(':')[0].trim();

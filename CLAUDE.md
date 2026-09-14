@@ -32,8 +32,10 @@ Boucle de 60-90 min, horloge de 12 cycles, 8 fins, forte rejouabilité.
   étiquettes invalides, `EXTERNAL` déclaré mais non lié dans `moteur.ts`, et **coût affiché qui
   ne correspond pas à l'arithmétique Ink du corps du choix** — l'interface mentirait au joueur
   sans jamais planter), et une **dynamique** de 500 parties à choix aléatoires (plantages
-  d'exécution, fins déclarées jamais atteintes). Les cinq contrôles ont été vérifiés contre des
-  fautes introduites volontairement.
+  d'exécution, fins déclarées jamais atteintes). La passe statique refuse aussi une **réplique
+  de plus de 180 signes** : la boîte de dialogue en montre une à la fois et ne défile pas, donc
+  au-delà le texte sortirait du cadre. Les six contrôles ont été vérifiés contre des fautes
+  introduites volontairement.
 - Le validateur signale aussi la **dette narrative** : une info pillable dans une BDD
   (`data/hacking.json`) qu'aucun `knows()` ne consulte est un butin mort. C'est précisément ce
   qui sépare le hacking d'un mini-jeu décoratif, donc c'est surveillé. Avertissement tant que
@@ -45,7 +47,8 @@ Boucle de 60-90 min, horloge de 12 cycles, 8 fins, forte rejouabilité.
   sous la forme de doubles chevrons `<<` `>>`. Le tiret cadratin est à la fois la convention
   française correcte et le seul rendu propre en pixel. Les répliques du joueur s'écrivent **sans
   tiret** dans le `.ink` — le même texte sert d'étiquette de bouton, où le tiret n'aurait pas de
-  sens ; c'est la règle CSS `.dlg__ligne--replique::before` qui l'ajoute à l'affichage.
+  sens. Une fois choisie, la réplique est rejouée dans la boîte au nom de Sable : le moteur
+  reconnaît l'écho du choix et lui attribue le locuteur `sable` (voir `repliqueAttendue`).
 
 ---
 
@@ -193,8 +196,40 @@ d'annuler une action sans machinerie.
 - **`SceneJeu` doit retenir un décor demandé avant son montage.** `monter()` est asynchrone et
   React réclame le décor aussitôt ; la demande était perdue, et comme `decorActuel` avait déjà
   été noté, aucune demande identique ne repassait. D'où `decorEnAttente`.
-- `.dlg__journal` a besoin d'un `max-height` explicite : sans lui, le journal calé en bas déborde
-  du viewport au lieu de défiler.
+- **`chokidar@4` a retiré la prise en charge des globs.** `chokidar.watch('content/ink/**/*.ink')`
+  ne surveillait donc rien, sans la moindre erreur : on modifiait un `.ink`, le navigateur gardait
+  l'ancien récit, et on cherchait la faute dans le moteur. On surveille le **dossier**, et on
+  filtre l'extension dans le gestionnaire.
+
+---
+
+## La boîte de dialogue — modèle RPG au tour par tour
+
+La scène reste visible : bandeau de HUD en haut, boîte en bas, décor entre les deux. **Une seule
+réplique à la fois**, jamais un journal — un journal qui accumule tout depuis le début du jeu ne
+ressemble à aucune conversation.
+
+- Le moteur garde **une réplique d'avance** (`courant` / `suivant` dans `moteur.ts`). C'est la
+  seule façon de savoir s'il reste quelque chose à lire, donc d'afficher le chevron `▼` à bon
+  escient. Sans cette avance, `story.canContinue` restait vrai pour du contenu sans texte (tags
+  seuls, fin de knot) : le chevron s'affichait, le joueur validait, et rien ne changeait à
+  l'écran. Verrouillé par un test.
+- Chaque réplique emporte **une copie de la mise en scène** valable à sa lecture. Sans cette
+  copie, le `# bg:` ou le `# entracte:` de la réplique d'avance s'appliquerait à celle encore
+  affichée, une pression trop tôt.
+- Conséquence à connaître : les effets `~` du corps d'un choix se déclenchent **au fil de la
+  lecture**, pas au clic. Un test qui vérifie un effet doit d'abord épuiser le texte (`epuiser`).
+- **Parole ou narration se distinguent sans lire** : une parole porte une plaque nominative et un
+  portrait, la narration n'en a pas et son cadre est terne. Le moteur déduit la parole du tiret
+  cadratin initial (`LigneDialogue.dite`), conformément à la convention typographique du projet.
+- `data/personnages.json` fait le lien `# speaker:<id>` → nom affiché + portrait. Un locuteur
+  absent du fichier n'a pas de plaque : c'est le comportement voulu pour une voix anonyme.
+- La boîte a une **hauteur fixe de quatre lignes**, parole comme narration. Une boîte qui se
+  redimensionne fait sauter le décor d'une réplique à l'autre. Ces quatre lignes sont exactement
+  ce que garantit la limite de 180 signes du validateur.
+- `tools/jouer.mjs` et `tools/plonger.mjs` passent par `derouler()` (`tools/lib-jeu.mjs`), qui
+  fait défiler la boîte avant de chercher des boutons. Un outil qui cherche directement
+  `.dlg__bouton` ne trouve plus rien.
 
 ---
 
@@ -345,6 +380,22 @@ forme d'un décor vide.
 **Deux variantes valent mieux qu'une tuile parfaite** : vingt copies d'une même tuile de sol sur
 une rangée se lisent immédiatement comme un motif. `sol_beton` / `sol_beton_b` et `etagere` /
 `etagere_b` alternent pour cette seule raison.
+
+### Portraits — un fichier par personnage
+
+`tools/aseprite/portraits.lua` produit `public/assets/portraits/port_<id>.png`, en 48×48, un
+fichier par personnage. Pas de planche : la boîte les charge par `url()` en CSS, et découper dans
+une planche imposerait des coordonnées dans le code pour quelques kilo-octets.
+
+Deux règles apprises à l'écran :
+
+- **Cheveux d'abord, visage par-dessus.** L'ordre inverse donne une masse capillaire qui mange le
+  front jusqu'aux sourcils : tous les portraits se lisaient comme des casques.
+- **Le fond doit différer des cheveux.** La première version peignait des cheveux `'1'` sur un
+  fond `'1'` : la chevelure existait dans le fichier et n'existait pas à l'écran.
+
+Les ovales donnent la masse, l'art ASCII donne les yeux et la bouche — c'est là qu'un pixel de
+travers change l'expression.
 
 Aperçu agrandi pour inspection :
 ```bash

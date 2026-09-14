@@ -6,20 +6,36 @@ import { parseTagsChoix, parseTagsLigne, type MiseEnScene } from './tags';
 import type { ChoixDialogue, LigneDialogue } from '@/types/jeu';
 
 export interface EtatDialogue {
-  lignes: LigneDialogue[];
+  /** La replique courante. Une seule a la fois : la boite n'est pas un journal. */
+  ligne: LigneDialogue | null;
   choix: ChoixDialogue[];
   decor: string | null;
   entracte: string | null;
+  /** Il reste du texte : le joueur doit valider pour passer a la suite. */
+  peutContinuer: boolean;
   termine: boolean;
 }
 
 const ETAT_VIDE: EtatDialogue = {
-  lignes: [],
+  ligne: null,
   choix: [],
   decor: null,
   entracte: null,
+  peutContinuer: false,
   termine: false,
 };
+
+/**
+ * Une replique, accompagnee de la mise en scene qui valait a sa lecture.
+ *
+ * La mise en scene est copiee et non partagee : le moteur lit toujours une
+ * replique d'avance, et celle-ci peut porter un `# bg:` ou un `# entracte:`
+ * qui ne doit surtout pas s'appliquer a la replique encore a l'ecran.
+ */
+interface Beat {
+  ligne: LigneDialogue;
+  scene: MiseEnScene;
+}
 
 /**
  * Pont entre inkjs et les stores.
@@ -42,6 +58,16 @@ export class MoteurDialogue {
     sfx: null,
     entracte: null,
   };
+  /**
+   * La replique affichee, et celle d'apres, deja lue.
+   *
+   * Le moteur garde UNE replique d'avance : c'est la seule facon de savoir s'il
+   * reste quelque chose a lire, donc d'afficher le chevron a bon escient. Sans
+   * cette avance, une fin de knot faisait clignoter le chevron puis avalait une
+   * pression du joueur sans rien changer a l'ecran.
+   */
+  private courant: Beat | null = null;
+  private suivant: Beat | null = null;
   /** Texte du choix qui vient d'etre pris ; sert a marquer son echo. */
   private repliqueAttendue: string | null = null;
   private sceneAResoudre: string | null = null;
@@ -132,8 +158,16 @@ export class MoteurDialogue {
     if (this.demarre) return;
     this.demarre = true;
     this.pousserEtatVersInk();
-    this.etat = { ...ETAT_VIDE, lignes: [] };
-    this.avancer();
+    this.etat = ETAT_VIDE;
+    this.recharger();
+  }
+
+  /** Passe a la replique suivante. Sans effet s'il n'y a plus rien a lire. */
+  continuer(): void {
+    if (this.suivant === null) return;
+    this.courant = this.suivant;
+    this.suivant = this.consommer();
+    this.publier();
   }
 
   choisir(i: number): void {
@@ -141,12 +175,25 @@ export class MoteurDialogue {
     if (!choix || !choix.abordable) return;
     this.repliqueAttendue = choix.texte;
     this.story.ChooseChoiceIndex(i);
-    this.avancer();
+    this.recharger();
   }
 
-  private avancer(): void {
-    const lignes = [...this.etat.lignes];
+  /** Reprend la lecture apres un saut : replique courante, puis son avance. */
+  private recharger(): void {
+    const beat = this.consommer();
+    if (beat !== null) this.courant = beat;
+    this.suivant = this.consommer();
+    this.publier();
+  }
 
+  /**
+   * Consomme exactement UNE replique, ou rend null si le recit n'en a plus.
+   *
+   * Le moteur ne deroule plus la scene d'un trait : la boite de dialogue en
+   * montre une a la fois, comme dans un RPG au tour par tour, et c'est le
+   * joueur qui demande la suite.
+   */
+  private consommer(): Beat | null {
     while (this.story.canContinue) {
       const texte = (this.story.Continue() ?? '').trim();
       const tags = this.story.currentTags ?? [];
@@ -160,34 +207,50 @@ export class MoteurDialogue {
         }
       }
 
+      // Les lignes vides ne sont pas des repliques : on les saute sans compter.
       if (!texte) continue;
 
       const replique = this.repliqueAttendue !== null && texte === this.repliqueAttendue;
       if (replique) this.repliqueAttendue = null;
 
-      lignes.push({
-        texte,
-        locuteur: this.miseEnScene.locuteur,
-        portrait: this.miseEnScene.portrait,
-        expression: this.miseEnScene.expression,
-        replique,
-      });
+      return {
+        ligne: {
+          texte,
+          // Une replique du joueur est prononcee par Sable, jamais par le PNJ
+          // dont la mise en scene est encore en place.
+          locuteur: replique ? 'sable' : this.miseEnScene.locuteur,
+          portrait: replique ? null : this.miseEnScene.portrait,
+          expression: this.miseEnScene.expression,
+          replique,
+          dite: replique || texte.startsWith('\u2014'),
+        },
+        scene: { ...this.miseEnScene },
+      };
     }
+    return null;
+  }
 
+  private publier(): void {
     if (this.sceneAResoudre !== null) this.resoudreScene(this.sceneAResoudre);
 
+    // Les choix n'existent qu'une fois le texte epuise : sinon ils
+    // s'afficheraient sous une replique que le joueur n'a pas encore lue.
+    const enAttenteDeLecture = this.suivant !== null;
     const run = useRunStore.getState();
-    const choix: ChoixDialogue[] = this.story.currentChoices.map((c, i) => {
-      const { etiquette, cout } = parseTagsChoix(c.tags ?? []);
-      return { index: i, texte: c.text, etiquette, cout, abordable: run.peutPayer(cout) };
-    });
+    const choix: ChoixDialogue[] = enAttenteDeLecture
+      ? []
+      : this.story.currentChoices.map((c, i) => {
+          const { etiquette, cout } = parseTagsChoix(c.tags ?? []);
+          return { index: i, texte: c.text, etiquette, cout, abordable: run.peutPayer(cout) };
+        });
 
     this.etat = {
-      lignes,
+      ligne: this.courant?.ligne ?? null,
       choix,
-      decor: this.miseEnScene.decor,
-      entracte: this.miseEnScene.entracte,
-      termine: choix.length === 0 && !this.story.canContinue,
+      decor: this.courant?.scene.decor ?? null,
+      entracte: this.courant?.scene.entracte ?? null,
+      peutContinuer: enAttenteDeLecture,
+      termine: !enAttenteDeLecture && choix.length === 0,
     };
     this.notifier();
   }

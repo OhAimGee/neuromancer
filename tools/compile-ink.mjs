@@ -106,13 +106,14 @@ if (!executeDirectement) {
   const { default: chokidar } = await import('chokidar');
   console.log(`${C.magenta}ink${C.reset} surveillance de content/ink/**/*.ink`);
   chokidar
+    // Un DOSSIER, pas un motif : chokidar 4 a retire la prise en charge des
+    // globs. `content/ink/**/*.ink` ne surveillait donc rien du tout, en
+    // silence — on editait un .ink, le navigateur gardait l'ancien recit, et
+    // on cherchait la faute dans le moteur.
     // usePolling : le projet vit sur /mnt/c, ou inotify n'est pas fiable.
-    .watch(path.join(INK_DIR, '**/*.ink'), {
-      ignoreInitial: true,
-      usePolling: true,
-      interval: 300,
-    })
+    .watch(INK_DIR, { ignoreInitial: true, usePolling: true, interval: 300 })
     .on('all', (_event, file) => {
+      if (!file.endsWith('.ink')) return;
       console.log(`${C.dim}ink ${path.relative(ROOT, file)} modifie${C.reset}`);
       build();
     });

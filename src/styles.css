@@ -184,15 +184,15 @@ body {
   }
 }
 
-/* --- Dialogue ----------------------------------------------------------- */
+/* --- Dialogue : boite de RPG au tour par tour ---------------------------- */
 
+/* La couche de dialogue ne masque plus la scene : elle pose un bandeau en
+ * haut, une boite en bas, et laisse tout l'espace entre les deux au decor. */
 .dlg {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
-  /* Transparent : le decor Pixi est dessous. Seuls le bandeau et le journal
-   * posent un fond, pour que le texte reste lisible par-dessus les tuiles. */
   background: transparent;
 }
 
@@ -214,82 +214,119 @@ body {
   font-weight: normal;
 }
 
-.dlg__corps {
+/* Le bas de l'ecran, pousse tout en bas : boite de dialogue et, juste
+ * au-dessus, les choix. Sans ce bloc, une scene sans choix laissait la boite
+ * remonter se coller au HUD et manger le decor. */
+.dlg__bas {
   display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
+  justify-content: flex-end;
   min-height: 0;
-  /* Le journal est cale en bas : sinon il occupe toute la hauteur et le decor
-   * n'existe qu'a travers la transparence du panneau. */
-  align-items: flex-end;
 }
 
-.dlg__portrait {
-  flex: 0 0 calc(48 * var(--px));
-  align-self: flex-start;
-  height: calc(60 * var(--px));
-  margin: calc(5 * var(--px)) 0 0 calc(5 * var(--px));
-  display: grid;
-  place-items: center;
-  border: var(--px) solid var(--n4);
-  background: linear-gradient(160deg, var(--n3), var(--n2));
+/* --- La boite ------------------------------------------------------------ */
+
+.boite {
+  position: relative;
+  flex: 0 0 auto;
+  margin: calc(4 * var(--px)) calc(6 * var(--px)) calc(6 * var(--px));
+  padding: calc(5 * var(--px));
+  border: var(--px) solid var(--c1);
+  background: color-mix(in srgb, var(--n0) 92%, transparent);
+  cursor: pointer;
+}
+
+/* La narration n'est pas prononcee : ni plaque, ni portrait, ni cadre vif.
+ * C'est ce contraste qui dit au joueur, sans lire, si quelqu'un parle. */
+.boite--recit {
+  border-color: var(--n3);
+}
+
+/* Plaque nominative, a cheval sur le bord haut de la boite. */
+.boite__nom {
+  position: absolute;
+  top: calc(-6 * var(--px));
+  left: calc(4 * var(--px));
+  padding: 0 calc(3 * var(--px));
+  border: var(--px) solid var(--c1);
+  background: var(--n0);
   font-family: 'Silkscreen', monospace;
   font-size: calc(7 * var(--px));
-  color: var(--g1);
-  text-transform: uppercase;
+  line-height: calc(11 * var(--px));
+  letter-spacing: var(--px);
+  color: var(--c3);
 }
 
-.dlg__journal {
+.boite__corps {
+  display: flex;
+  gap: calc(5 * var(--px));
+  align-items: flex-start;
+}
+
+.boite__portrait {
+  flex: 0 0 calc(48 * var(--px));
+  width: calc(48 * var(--px));
+  height: calc(48 * var(--px));
+  border: var(--px) solid var(--n4);
+  background-color: var(--n1);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* Hauteur fixe de quatre lignes, parole comme narration. Une boite qui se
+ * redimensionne a chaque replique fait sauter le decor d'un beat a l'autre ;
+ * et quatre lignes, c'est la limite que le validateur narratif fait respecter
+ * aux sources .ink (MAX_SIGNES). */
+.boite__texte {
   flex: 1 1 auto;
   min-width: 0;
+  min-height: calc(48 * var(--px));
+  font-size: calc(10 * var(--px));
+  line-height: calc(12 * var(--px));
+  color: var(--w0);
+  text-wrap: pretty;
+}
+.boite--recit .boite__texte {
+  color: var(--g2);
+}
+
+/* Le chevron classique : il dit qu'il reste du texte derriere celui-ci. */
+.boite__suite {
+  position: absolute;
+  right: calc(4 * var(--px));
+  bottom: calc(2 * var(--px));
+  font-size: calc(7 * var(--px));
+  line-height: calc(9 * var(--px));
+  color: var(--c2);
+  animation: respire 1.2s steps(2) infinite;
+}
+.boite__suite::after {
+  content: '\25BC';
+}
+
+/* --- Choix --------------------------------------------------------------- */
+
+/* Pousses juste au-dessus de la boite : la replique qui pose la question reste
+ * lisible pendant qu'on y repond. */
+.dlg__choix {
+  flex: 0 1 auto;
+  min-height: 0;
   overflow-y: auto;
-  /* Pas de hauteur imposee : le panneau prend ce dont le texte a besoin, cale
-   * en bas. Une scene courte laisse voir le decor, une tirade prend l'ecran.
-   * Le plafond est indispensable — sans lui le journal deborde du viewport au
-   * lieu de defiler. */
-  max-height: calc(100% - 10 * var(--px));
-  margin: calc(5 * var(--px));
+  /* 7 px de marge basse : la plaque nominative de la boite deborde vers le
+   * haut, et sans cette reserve elle passe sous le panneau de choix. */
+  margin: auto calc(6 * var(--px)) calc(7 * var(--px));
+  padding: calc(3 * var(--px)) calc(4 * var(--px));
   border: var(--px) solid var(--n3);
-  background: color-mix(in srgb, var(--n0) 80%, transparent);
-  padding: calc(4 * var(--px)) calc(6 * var(--px)) calc(6 * var(--px));
+  border-left: var(--px) solid var(--c0);
+  background: color-mix(in srgb, var(--n0) 85%, transparent);
   font-size: calc(10 * var(--px));
   line-height: calc(12 * var(--px));
   scrollbar-width: none;
 }
-.dlg__journal::-webkit-scrollbar {
+.dlg__choix::-webkit-scrollbar {
   display: none;
-}
-
-.dlg__ligne {
-  margin-bottom: calc(4 * var(--px));
-  color: var(--g2);
-  text-wrap: pretty;
-}
-
-/* Une parole s'ouvre par un tiret cadratin — c'est la convention du projet.
- * La distinguer de la narration a l'oeil evite au joueur de deviner qui parle. */
-.dlg__ligne--dit {
-  color: var(--w0);
-}
-
-/* La replique choisie par le joueur, reaffichee par Ink. Le tiret de dialogue
- * est ajoute ici plutot que dans le contenu : le meme texte sert d'etiquette de
- * bouton, ou le tiret n'aurait pas de sens. */
-.dlg__ligne--replique {
-  color: var(--c3);
-  padding-left: calc(4 * var(--px));
-  border-left: var(--px) solid var(--c1);
-}
-.dlg__ligne--replique::before {
-  content: '— ';
-}
-
-.dlg__choix {
-  margin-top: calc(5 * var(--px));
-  padding-top: calc(4 * var(--px));
-  border-top: var(--px) solid var(--n3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--px);
 }
 
 .dlg__bouton {
@@ -349,16 +386,17 @@ body {
 }
 .dlg__glose--large {
   margin-left: 0;
-  max-width: calc(240 * var(--px));
-  text-align: left;
 }
 
 .dlg__fin {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: calc(4 * var(--px));
-  margin-top: calc(8 * var(--px));
+  gap: calc(3 * var(--px));
+  margin: auto calc(6 * var(--px)) calc(7 * var(--px));
+  padding: calc(4 * var(--px));
+  border: var(--px) solid var(--n3);
+  background: color-mix(in srgb, var(--n0) 85%, transparent);
   font-family: 'Silkscreen', monospace;
   font-size: calc(8 * var(--px));
   color: var(--n4);
@@ -521,29 +559,8 @@ body {
   color: var(--c2);
 }
 
-/* Repere de defilement : un pave de recit peut pousser les choix sous le bord
- * du panneau, et rien n'indiquerait qu'il reste a lire. */
-.dlg__suite {
-  position: absolute;
-  left: calc(6 * var(--px));
-  right: calc(6 * var(--px));
-  bottom: calc(6 * var(--px));
-  height: calc(10 * var(--px));
-  pointer-events: none;
-  background: linear-gradient(to bottom, transparent, var(--n0));
-}
-.dlg__suite::after {
-  content: '\25BC';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  font-size: calc(7 * var(--px));
-  color: var(--c2);
-  animation: respire 1.6s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .dlg__suite::after {
+  .boite__suite {
     animation: none;
   }
 }

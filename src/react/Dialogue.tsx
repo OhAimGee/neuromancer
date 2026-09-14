@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import gloses from '@data/gloses.json';
 import type { MoteurDialogue } from '@/dialogue/moteur';
 import { useProfileStore } from '@/stores/profileStore';
 import { useRunStore } from '@/stores/runStore';
 import type { Etiquette } from '@/types/jeu';
+import { Boite } from './Boite';
 
 const GLOSES = gloses as Record<string, string>;
 
@@ -26,52 +27,20 @@ export function Dialogue({ moteur, onBrancher }: Props) {
   const etat = useSyncExternalStore(moteur.souscrire, moteur.lire);
   const cycles = useRunStore((e) => e.cycles);
   const humanite = useRunStore((e) => e.humanite);
-  const journalRef = useRef<HTMLDivElement>(null);
 
   const [entracteLu, setEntracteLu] = useState<string | null>(null);
   const [glosesNeuves, setGlosesNeuves] = useState<string[]>([]);
-  const [rabEnBas, setRabEnBas] = useState(false);
   const signature = useRef('');
 
   useEffect(() => {
     moteur.demarrer();
   }, [moteur]);
 
-  // Se caler sur la PREMIERE ligne nouvelle, et non sur le bas du journal :
-  // un bloc de recit qui arrive d'un coup doit se lire depuis son debut, sinon
-  // le joueur ne voit que sa derniere phrase.
-  const lignesVues = useRef(0);
-  useLayoutEffect(() => {
-    const el = journalRef.current;
-    if (!el) return;
-    const premiereNouvelle = el.querySelector<HTMLElement>(
-      `[data-ligne="${lignesVues.current}"]`,
-    );
-    if (premiereNouvelle) {
-      // getBoundingClientRect et non offsetTop : les deux elements ne partagent
-      // pas forcement le meme offsetParent.
-      el.scrollTop +=
-        premiereNouvelle.getBoundingClientRect().top - el.getBoundingClientRect().top;
-    } else {
-      el.scrollTop = el.scrollHeight;
-    }
-    lignesVues.current = etat.lignes.length;
-    mesurerRab();
-  }, [etat.lignes.length, etat.choix.length]);
-
-  // Un pave de recit pousse les choix hors de l'ecran. Sans reperé, le joueur
-  // croit la scene bloquee — il faut lui dire qu'il reste quelque chose dessous.
-  const mesurerRab = useCallback(() => {
-    const el = journalRef.current;
-    if (!el) return;
-    setRabEnBas(el.scrollHeight - el.scrollTop - el.clientHeight > 2);
-  }, []);
-
   // Les explications de regle n'apparaissent qu'une fois par profil, au moment
   // ou la notion se presente. La signature evite que le double montage des
   // effets en mode strict ne consomme la glose avant qu'elle ne s'affiche.
   useEffect(() => {
-    const sig = `${etat.lignes.length}|${etat.choix.map((c) => c.texte).join('|')}`;
+    const sig = `${etat.ligne?.texte ?? ''}|${etat.choix.map((c) => c.texte).join('|')}`;
     if (sig === signature.current) return;
     signature.current = sig;
 
@@ -92,15 +61,25 @@ export function Dialogue({ moteur, onBrancher }: Props) {
 
   const entracte = etat.entracte !== null && etat.entracte !== entracteLu ? etat.entracte : null;
   const fermerEntracte = useCallback(() => setEntracteLu(etat.entracte), [etat.entracte]);
+  const continuer = useCallback(() => moteur.continuer(), [moteur]);
 
+  // Espace et Entree font avancer la replique, comme dans tout RPG au tour par
+  // tour. Le clic sur la boite fait la meme chose.
   useEffect(() => {
-    if (entracte === null) return;
-    const onTouche = () => fermerEntracte();
+    const onTouche = (e: KeyboardEvent) => {
+      if (entracte !== null) {
+        fermerEntracte();
+        return;
+      }
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        continuer();
+      }
+    };
     window.addEventListener('keydown', onTouche);
     return () => window.removeEventListener('keydown', onTouche);
-  }, [entracte, fermerEntracte]);
+  }, [entracte, fermerEntracte, continuer]);
 
-  const locuteur = etat.lignes.at(-1)?.locuteur ?? null;
   const dejaRendu = new Set<string>();
 
   return (
@@ -114,94 +93,67 @@ export function Dialogue({ moteur, onBrancher }: Props) {
         </span>
       </div>
 
-      <div className="dlg__corps">
-        {locuteur && (
-          <div className="dlg__portrait" data-perso={locuteur}>
-            <span>{locuteur}</span>
-          </div>
-        )}
+      <div className="dlg__bas">
+      {etat.choix.length > 0 && (
+        <div className="dlg__choix">
+          {etat.choix.map((c) => {
+            const miennes: string[] = [];
+            const reclamer = (id: string) => {
+              if (glosesNeuves.includes(id) && !dejaRendu.has(id)) {
+                dejaRendu.add(id);
+                miennes.push(id);
+              }
+            };
+            if (c.etiquette) reclamer(`etq:${c.etiquette}`);
+            if (c.cout.humanite > 0) reclamer('cout:humanite');
+            if (c.cout.credits > 0) reclamer('cout:credits');
+            if (c.cout.cycles > 0) reclamer('cout:cycles');
 
-        <div className="dlg__journal" ref={journalRef} onScroll={mesurerRab}>
-          {etat.lignes.map((l, i) => {
-            // Le tiret cadratin en tete est la convention du projet pour une
-            // parole ; le reste est de la narration. Les distinguer a l'oeil
-            // evite au joueur de devoir deviner qui parle.
-            const classes = l.replique
-              ? 'dlg__ligne dlg__ligne--replique'
-              : l.texte.startsWith('—')
-                ? 'dlg__ligne dlg__ligne--dit'
-                : 'dlg__ligne';
             return (
-              <p key={i} className={classes} data-ligne={i}>
-                {l.texte}
-              </p>
+              <div key={c.index}>
+                <button
+                  className="dlg__bouton"
+                  disabled={!c.abordable}
+                  onClick={() => moteur.choisir(c.index)}
+                >
+                  {c.etiquette && (
+                    <span className="dlg__etq" style={{ color: COULEUR_ETIQUETTE[c.etiquette] }}>
+                      [{c.etiquette}]
+                    </span>
+                  )}
+                  <span>{c.texte}</span>
+                  {c.cout.humanite > 0 && <span className="dlg__cout">-{c.cout.humanite} HUM</span>}
+                  {c.cout.credits > 0 && <span className="dlg__cout">-{c.cout.credits} cr</span>}
+                </button>
+                {miennes.map((id) => (
+                  <p key={id} className="dlg__glose">
+                    {GLOSES[id]}
+                  </p>
+                ))}
+              </div>
             );
           })}
+        </div>
+      )}
 
-          {etat.choix.length > 0 && (
-            <div className="dlg__choix">
-              {etat.choix.map((c) => {
-                const miennes: string[] = [];
-                const reclamer = (id: string) => {
-                  if (glosesNeuves.includes(id) && !dejaRendu.has(id)) {
-                    dejaRendu.add(id);
-                    miennes.push(id);
-                  }
-                };
-                if (c.etiquette) reclamer(`etq:${c.etiquette}`);
-                if (c.cout.humanite > 0) reclamer('cout:humanite');
-                if (c.cout.credits > 0) reclamer('cout:credits');
-                if (c.cout.cycles > 0) reclamer('cout:cycles');
-
-                return (
-                  <div key={c.index}>
-                    <button
-                      className="dlg__bouton"
-                      disabled={!c.abordable}
-                      onClick={() => moteur.choisir(c.index)}
-                    >
-                      {c.etiquette && (
-                        <span
-                          className="dlg__etq"
-                          style={{ color: COULEUR_ETIQUETTE[c.etiquette] }}
-                        >
-                          [{c.etiquette}]
-                        </span>
-                      )}
-                      <span>{c.texte}</span>
-                      {c.cout.humanite > 0 && (
-                        <span className="dlg__cout">-{c.cout.humanite} HUM</span>
-                      )}
-                      {c.cout.credits > 0 && <span className="dlg__cout">-{c.cout.credits} cr</span>}
-                    </button>
-                    {miennes.map((id) => (
-                      <p key={id} className="dlg__glose">
-                        {GLOSES[id]}
-                      </p>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
+      {etat.termine && (
+        <div className="dlg__fin">
+          <p>— FIN DE SCÈNE —</p>
+          {glosesNeuves.includes('horloge') && (
+            <p className="dlg__glose dlg__glose--large">{GLOSES['horloge']}</p>
           )}
-
-          {etat.termine && (
-            <div className="dlg__fin">
-              <p>— FIN DE SCÈNE —</p>
-              {glosesNeuves.includes('horloge') && (
-                <p className="dlg__glose dlg__glose--large">{GLOSES['horloge']}</p>
-              )}
-              {onBrancher && (
-                <button className="net__bouton" onClick={onBrancher}>
-                  SE BRANCHER SUR LA CABINE
-                </button>
-              )}
-            </div>
+          {onBrancher && (
+            <button className="net__bouton" onClick={onBrancher}>
+              SE BRANCHER SUR LA CABINE
+            </button>
           )}
         </div>
-      </div>
+      )}
 
-      {rabEnBas && <div className="dlg__suite" aria-hidden="true" />}
+      {etat.ligne && (
+        <Boite ligne={etat.ligne} peutContinuer={etat.peutContinuer} onContinuer={continuer} />
+      )}
+      </div>
 
       {entracte !== null && (
         <div className="entracte" onClick={fermerEntracte} role="presentation">

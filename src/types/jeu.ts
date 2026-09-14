@@ -40,12 +40,20 @@ export interface ChoixDialogue {
   abordable: boolean;
 }
 
-/** Une ligne jouee, avec ses tags de mise en scene. */
+/** Une replique, telle que la boite de dialogue doit l'afficher. */
 export interface LigneDialogue {
   texte: string;
+  /** Identifiant du locuteur, ou null si c'est de la narration. */
   locuteur: string | null;
   portrait: string | null;
   expression: string | null;
   /** Vrai si la ligne est la replique que le joueur vient de choisir. */
   replique: boolean;
+  /**
+   * Vrai si la ligne est une parole et non de la narration.
+   *
+   * Deduit du tiret cadratin initial, qui est la convention du projet : c'est
+   * lui qui decide si la boite affiche un nom et un portrait.
+   */
+  dite: boolean;
 }

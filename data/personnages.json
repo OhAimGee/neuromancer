@@ -1,0 +1,9 @@
+{
+  "_note": "Nom affiche et portrait de chaque locuteur. Le .ink ne connait que l'identifiant : # speaker:molly. Un locuteur sans portrait n'affiche que sa plaque.",
+
+  "sable":    { "nom": "SABLE",    "portrait": "port_sable" },
+  "molly":    { "nom": "MOLLY",    "portrait": "port_molly" },
+  "ratz":     { "nom": "RATZ",     "portrait": "port_ratz" },
+  "fragment": { "nom": "?",        "portrait": "port_fragment" },
+  "medecin":  { "nom": "MÉDECIN",  "portrait": null }
+}
