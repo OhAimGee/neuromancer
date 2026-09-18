@@ -287,13 +287,21 @@ body {
   align-items: flex-start;
 }
 
+/* Les portraits font 64x80 — un buste vertical, pas une vignette carree. La
+ * boite n'en montre QUE LA TETE : 60 rangees sur 80, cadrees par le haut. Le
+ * buste entier dans la boite coutait vingt-quatre rangees de decor sur les cent
+ * quatre-vingts de l'ecran, et on venait justement de donner de la profondeur a
+ * ce decor. Les epaules se voient la ou il y a la place — la fiche, le carnet.
+ * `background-size` porte la taille REELLE de l'image et non 100% : c'est ce
+ * qui fait du recadrage un recadrage et non un ecrasement. */
 .boite__portrait {
-  flex: 0 0 calc(48 * var(--px));
-  width: calc(48 * var(--px));
-  height: calc(48 * var(--px));
+  flex: 0 0 calc(64 * var(--px));
+  width: calc(64 * var(--px));
+  height: calc(60 * var(--px));
   border: var(--px) solid var(--n4);
   background-color: var(--n1);
-  background-size: 100% 100%;
+  background-size: calc(64 * var(--px)) calc(80 * var(--px));
+  background-position: 0 0;
   background-repeat: no-repeat;
   image-rendering: pixelated;
 }
@@ -305,7 +313,7 @@ body {
 .boite__texte {
   flex: 1 1 auto;
   min-width: 0;
-  min-height: calc(48 * var(--px));
+  min-height: calc(60 * var(--px));
   font-size: calc(10 * var(--px));
   line-height: calc(12 * var(--px));
   color: var(--w0);

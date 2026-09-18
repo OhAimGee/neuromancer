@@ -654,16 +654,45 @@ une rangée se lisent immédiatement comme un motif. `sol_beton` / `sol_beton_b`
 
 ### Portraits — un fichier par personnage
 
-`tools/aseprite/portraits.lua` produit `public/assets/portraits/port_<id>.png`, en 48×48, un
+`tools/aseprite/portraits.lua` produit `public/assets/portraits/port_<id>.png`, en **64×80**, un
 fichier par personnage. Pas de planche : la boîte les charge par `url()` en CSS, et découper dans
 une planche imposerait des coordonnées dans le code pour quelques kilo-octets.
 
-Deux règles apprises à l'écran :
+Le format est un **buste vertical**, pas un carré. Quarante-huit pixels de côté ne laissaient de
+place qu'à une tête flottante : pas de cou, pas d'épaules, pas d'espace au-dessus du crâne, et
+surtout **aucune place pour poser une lumière**. Tous les visages se lisaient comme des vignettes
+d'icône.
+
+Ce qui tient le lot :
 
 - **Cheveux d'abord, visage par-dessus.** L'ordre inverse donne une masse capillaire qui mange le
   front jusqu'aux sourcils : tous les portraits se lisaient comme des casques.
 - **Le fond doit différer des cheveux.** La première version peignait des cheveux `'1'` sur un
   fond `'1'` : la chevelure existait dans le fichier et n'existait pas à l'écran.
+- **Deux sources, jamais une.** Une clé chaude d'un côté, un **liseré de néon froid** de l'autre,
+  et une lueur tramée derrière l'épaule pour justifier ce liseré — sans source visible il se lit
+  comme un contour dessiné, pas comme une lumière. Le liseré est tramé une ligne sur trois :
+  plein, il devient un trait au feutre et la tête se décolle du fond.
+- **Le même liseré court sur l'arête de l'épaule.** Sans lui le buste est un aplat sombre sur un
+  fond sombre, la tête flotte, et les onze portraits ont l'air découpés aux ciseaux.
+- **Le cou est large et commence sous la mâchoire.** Un cou étroit fait une tête plantée sur un
+  piquet — c'était le défaut le plus visible du premier passage en 64×80, et il se voyait sur les
+  onze à la fois.
+- **Le nez est une arête éclairée, une ombre et deux narines.** À cette taille un nez dessiné en
+  volume devient une tache sombre au milieu du visage, et c'est tout ce qu'on voit du portrait.
+  Nez et bouche sont donc des **arts partagés** (`NEZ_ART`, `BOUCHE_ART`) dont les majuscules sont
+  substituées par la carnation de chacun : onze copies du même dessin auraient divergé à la
+  première retouche.
+- **Les hauteurs de traits sont nommées** (`CHEVEUX`, `YEUX`, `NEZ`, `BOUCHE`, `COL`), pas semées
+  dans onze fonctions. Remonter les yeux de deux pixels sur tout le lot est un réglage qu'on
+  refait dix fois avant que les visages se ressemblent entre eux.
+- **Un tramage se fait par matrice ordonnée, pas par formule modulo.** La lueur de fond tirait
+  d'abord `(x * 3 + y * 5) % 7`, qui dessine des diagonales régulières : à l'écran ce n'était pas
+  une lueur, c'étaient des rayures.
+- **La boîte de dialogue n'en montre que la tête** — 60 rangées sur 80, cadrées par le haut
+  (`background-size` porte la taille réelle de l'image, sinon le recadrage devient un
+  écrasement). Le buste entier dans la boîte coûtait vingt-quatre rangées de décor sur les cent
+  quatre-vingts de l'écran, et on venait justement de donner de la profondeur à ce décor.
 
 Les ovales donnent la masse, l'art ASCII donne les yeux et la bouche — c'est là qu'un pixel de
 travers change l'expression.
