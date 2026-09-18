@@ -22,7 +22,14 @@ if (fs.existsSync(LIBS)) {
  * duree d'une partie automatique par dix. Passer `vitesseTexte` pour capturer
  * l'effet.
  */
-export async function ouvrirJeu({ largeur = 1280, hauteur = 720, vitesseTexte = 0, captureBoot = null, clavier = false } = {}) {
+export async function ouvrirJeu({
+  largeur = 1280,
+  hauteur = 720,
+  vitesseTexte = 0,
+  captureBoot = null,
+  captureTitre = null,
+  clavier = false,
+} = {}) {
   const navigateur = await chromium.launch();
   const page = await navigateur.newPage({ viewport: { width: largeur, height: hauteur } });
 
@@ -40,14 +47,23 @@ export async function ouvrirJeu({ largeur = 1280, hauteur = 720, vitesseTexte = 
   page.on('pageerror', (e) => erreurs.push(`PAGEERROR ${e.message}`));
 
   await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
-  await page.waitForSelector('.boot__logo', { timeout: 10_000 });
-  // L'ecran de demarrage disparait au premier clic : qui veut le capturer n'a
-  // pas d'autre occasion que celle-ci.
+
+  // Le jeu s'ouvre en deux temps : un journal de demarrage de deux secondes,
+  // sautable, puis l'ecran-titre et son menu. Un outil qui cliquait n'importe
+  // ou pour entrer en partie ne marche plus, et c'est voulu — NOUVELLE PARTIE
+  // est maintenant une entree qu'on vise.
+  await page.waitForSelector('.boot', { timeout: 10_000 });
+  // Le journal disparait apres deux secondes : qui veut le capturer n'a pas
+  // d'autre occasion que celle-ci.
   if (captureBoot) await page.locator('.viewport').screenshot({ path: captureBoot });
+  await page.keyboard.press('Space');
+
+  await page.waitForSelector('.titre__entree:not([disabled])', { timeout: 10_000 });
+  if (captureTitre) await page.locator('.viewport').screenshot({ path: captureTitre });
   // `clavier` : l'outil qui prouve que le jeu se joue sans souris ne peut pas
-  // commencer par un clic.
+  // commencer par un clic. NOUVELLE PARTIE est la premiere entree, donc visee.
   if (clavier) await page.keyboard.press('Enter');
-  else await page.click('.viewport');
+  else await page.click('.titre__entree');
   await page.waitForSelector('.dlg', { timeout: 5_000 });
 
   return { navigateur, page, erreurs };

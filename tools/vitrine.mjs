@@ -20,8 +20,10 @@ fs.mkdirSync(DOSSIER, { recursive: true });
 
 const { navigateur, page, erreurs } = await ouvrirJeu({
   captureBoot: path.join(DOSSIER, 'boot.png'),
+  captureTitre: path.join(DOSSIER, 'titre.png'),
 });
 console.log('  boot.png');
+console.log('  titre.png');
 
 const capturer = async (nom) => {
   await page.locator('.viewport').screenshot({ path: path.join(DOSSIER, `${nom}.png`) });

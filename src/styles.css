@@ -156,24 +156,6 @@ body {
   color: var(--n4);
 }
 
-/* Le titre est une image et non du texte : les jambages, l'ombre portee et le
- * soulignement sont dessines au pixel, ce qu'aucune police ne rendrait. Sa
- * taille est un MULTIPLE ENTIER de ses 96x19 pixels, sinon il baverait. */
-.boot__logo {
-  display: block;
-  width: calc(192 * var(--px));
-  height: calc(38 * var(--px));
-  margin: calc(14 * var(--px)) 0 calc(4 * var(--px));
-  image-rendering: pixelated;
-}
-
-.boot__sub {
-  font-family: 'Silkscreen', monospace;
-  font-size: calc(8 * var(--px));
-  letter-spacing: calc(1 * var(--px));
-  color: var(--g0);
-}
-
 .boot__caret::after {
   content: '\2588';
   animation: caret 1s steps(1) infinite;
@@ -185,6 +167,137 @@ body {
     opacity: 0;
   }
 }
+
+/* --- Ecran-titre -------------------------------------------------------- */
+
+/* Le journal de demarrage n'est plus l'ecran d'accueil : il est devenu une
+ * sequence d'ouverture de deux secondes, sautable, et ce qui suit est un vrai
+ * ecran-titre — une ville la nuit, un logo, trois lignes de menu. Un jeu dont
+ * le premier ecran est une liste de diagnostics annonce un prototype. */
+
+.titre {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--n0);
+}
+
+/* Le voile assombrit le bas de la ville pour que le menu s'y pose. Un menu
+ * ecrit a meme une skyline chargee de neons est illisible aux deux tiers, et
+ * l'assombrir en entier tuerait l'image qu'on vient d'etalonner. */
+.titre__voile {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 42% at 50% 44%, rgba(5, 6, 10, 0.9) 0%, rgba(5, 6, 10, 0.55) 60%, rgba(5, 6, 10, 0) 100%),
+    linear-gradient(to bottom, rgba(5, 6, 10, 0.6) 0%, rgba(5, 6, 10, 0) 22%),
+    linear-gradient(to top, rgba(5, 6, 10, 0.78) 0%, rgba(5, 6, 10, 0) 30%);
+}
+
+.titre__bloc {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(26 * var(--px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Le titre est une image et non du texte : les jambages ciseles, l'ombre portee
+ * et le halo cuit sont dessines au pixel, ce qu'aucune police ne rendrait. Sa
+ * taille est celle du fichier, au pixel pres — un multiple non entier le ferait
+ * baver, et il n'y a aucune raison de l'agrandir sur un ecran de 320. */
+.titre__logo {
+  display: block;
+  width: calc(128 * var(--px));
+  height: calc(28 * var(--px));
+  image-rendering: pixelated;
+}
+
+.titre__sous {
+  margin: calc(4 * var(--px)) 0 0;
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  letter-spacing: calc(1 * var(--px));
+  color: var(--g2);
+  text-shadow: calc(1 * var(--px)) calc(1 * var(--px)) 0 var(--n0);
+}
+
+.titre__menu {
+  list-style: none;
+  margin: calc(16 * var(--px)) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(3 * var(--px));
+}
+
+/* Meme gouttiere et meme chevron que les choix de dialogue : le joueur apprend
+ * un seul curseur pour tout le jeu. */
+.titre__entree {
+  position: relative;
+  display: block;
+  min-width: calc(120 * var(--px));
+  padding: calc(3 * var(--px)) calc(8 * var(--px)) calc(3 * var(--px)) calc(14 * var(--px));
+  border: 0;
+  background: transparent;
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  letter-spacing: calc(1 * var(--px));
+  text-align: left;
+  color: var(--g3);
+  /* Une ombre portee d'UN pixel, sans flou : le texte reste lisible sur une
+   * ville pleine de neons sans qu'aucun glyphe ne soit re-echantillonne. Un
+   * `text-shadow` floute rendrait la police lisse, ce que tout le reste du
+   * projet s'interdit. */
+  text-shadow: calc(1 * var(--px)) calc(1 * var(--px)) 0 var(--n0);
+  cursor: pointer;
+}
+
+.titre__entree::before {
+  content: '\25B8';
+  position: absolute;
+  left: calc(5 * var(--px));
+  opacity: 0;
+  color: var(--c3);
+}
+
+.titre__entree--vise {
+  color: var(--w0);
+  background: rgba(18, 181, 196, 0.14);
+  box-shadow: inset calc(2 * var(--px)) 0 0 var(--c2);
+}
+
+.titre__entree--vise::before {
+  opacity: 1;
+}
+
+.titre__entree:disabled {
+  color: var(--n4);
+  cursor: default;
+}
+
+.titre__echec {
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  color: var(--r2);
+}
+
+.titre__pied {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(5 * var(--px));
+  margin: 0;
+  text-align: center;
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  color: var(--n4);
+}
+
 
 /* --- Dialogue : boite de RPG au tour par tour ---------------------------- */
 

@@ -1,5 +1,45 @@
 {
   "_note": "Ce qu'un decor est, au-dela de ses tuiles. `plans` remplace la tilemap par des plans de parallaxe (public/assets/parallax/, produits par tools/aseprite/etalonner.lua) ; sans `plans`, le decor reste une tilemap du meme nom. `brume`, `vignette` et `halos` se posent PAR-DESSUS l'un comme l'autre. `pluie` est une nappe DOM et non une couche Pixi : c'est une tuile de 16 pixels que le CSS fait glisser, donc elle suit l'echelle entiere du reste de l'interface sans etre reechantillonnee. Freeside n'a pas de pluie : c'est un cylindre ferme, il y fait toujours le meme temps, et c'est precisement ce qui le rend sinistre. Les `derive` sont minuscules a dessein — voir Plans.animer.",
+  "titre": {
+    "plans": [
+      {
+        "image": "ciel_fond",
+        "x": 0,
+        "y": 0,
+        "derive": 0.5,
+        "alpha": 0.9
+      },
+      {
+        "image": "ciel_tours",
+        "x": 0,
+        "y": 0,
+        "derive": 0.22
+      }
+    ],
+    "brume": 0.3,
+    "vignette": 0.78,
+    "pluie": true,
+    "halos": [
+      {
+        "x": 42,
+        "y": 152,
+        "r": 20,
+        "couleur": "0xff4fb8"
+      },
+      {
+        "x": 176,
+        "y": 146,
+        "r": 18,
+        "couleur": "0xff4fb8"
+      },
+      {
+        "x": 288,
+        "y": 156,
+        "r": 20,
+        "couleur": "0x5bf0ff"
+      }
+    ]
+  },
   "map_ninsei": {
     "plans": [
       {

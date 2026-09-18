@@ -692,6 +692,31 @@ forme d'un décor vide.
 une rangée se lisent immédiatement comme un motif. `sol_beton` / `sol_beton_b` et `etagere` /
 `etagere_b` alternent pour cette seule raison.
 
+### L'ecran-titre — deux temps
+
+`src/react/Titre.tsx` : un journal de demarrage de deux secondes, sautable a la premiere touche,
+puis le titre proprement dit — le decor `titre` (les trois plans `ciel_*` etalonnes nuit), le logo
+128x28, un sous-titre, et un menu minimal navigable aux fleches.
+
+- **Le menu est la seule porte d'entree.** Avant, n'importe quelle touche lancait la partie ; on
+  ne pouvait donc pas poser de menu sans casser tous les outils de verification. `ouvrirJeu()`
+  saute maintenant le journal puis clique (ou valide) `NOUVELLE PARTIE`.
+- **`EcranTitre` est un composant separe, et ce n'est pas du decoupage de confort.** `useDecor`
+  monte son canvas Pixi au premier effet : tant que le journal occupait l'ecran, l'hote n'etait
+  pas dans le DOM, `SceneJeu` notait un decor en attente que plus rien ne reclamait, et le titre
+  s'affichait sur du noir — sans une erreur nulle part.
+- **`Echap` est branche dans le crochet du titre, pas dans `App`.** L'ecran-titre ecoute deja le
+  clavier ; un second ecouteur sur le meme ecran est exactement ce que `useNavigationClavier`
+  existe pour empecher, meme quand les deux se partagent les touches sans se marcher dessus.
+- Le logo est dessine par `tools/aseprite/ui.lua`, en 128x28, et **pose a sa taille exacte** :
+  un multiple non entier le ferait baver, et il n'y a aucune raison de l'agrandir sur 320 pixels.
+  Trois choses s'y jouent et aucune n'est decorative — le halo cyan est **trame** (une diffusion
+  pleine sur trois pixels se referme entre deux lettres et pose le mot sur une plaque turquoise
+  opaque), l'ombre portee est decalee de **un** pixel horizontalement (la chasse laisse deux
+  pixels entre deux lettres, une ombre de deux les remplit exactement et soude le mot), et le
+  ciselage est deduit du masque : du vide au-dessus ou a gauche donne une arete, du vide en
+  dessous ou a droite un chanfrein.
+
 ### Portraits — un fichier par personnage
 
 `tools/aseprite/portraits.lua` produit `public/assets/portraits/port_<id>.png`, en **64×80**, un

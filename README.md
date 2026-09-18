@@ -7,7 +7,7 @@ statistiques.
 Projet de fan **non commercial**, librement inspiré du roman de William Gibson (1984).
 Jeu et code entièrement en français.
 
-![L'écran-titre](docs/images/boot.png)
+![L'écran-titre](docs/images/titre.png)
 
 ---
 

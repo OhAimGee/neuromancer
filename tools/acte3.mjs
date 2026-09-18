@@ -60,8 +60,10 @@ await page.addInitScript((p) => {
   window.localStorage.setItem('neuromancer-profil', JSON.stringify(p));
 }, PROFIL);
 await page.reload({ waitUntil: 'networkidle' });
-await page.waitForSelector('.boot__logo');
-await page.click('.viewport');
+await page.waitForSelector('.boot');
+await page.keyboard.press('Space');
+await page.waitForSelector('.titre__entree:not([disabled])');
+await page.click('.titre__entree');
 await page.waitForSelector('.dlg');
 
 const capturer = async (nom) => {

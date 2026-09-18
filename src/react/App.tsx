@@ -8,18 +8,10 @@ import { Dialogue } from './Dialogue';
 import { Fin } from './Fin';
 import { Etat } from './Etat';
 import { Options } from './Options';
+import { Titre, type LigneBoot, type Niveau } from './Titre';
 import { useIntegerScale, VIEWPORT_W, VIEWPORT_H } from './useIntegerScale';
 
-type Niveau = 'ok' | 'warn' | 'err' | 'dim';
 type Couche = 'titre' | 'jeu' | 'fiche' | 'options';
-type Ligne = { texte: string; niveau: Niveau };
-
-const CLASSE: Record<Niveau, string> = {
-  ok: 'boot__ok',
-  warn: 'boot__warn',
-  err: 'boot__err',
-  dim: 'boot__dim',
-};
 
 export function App() {
   const scale = useIntegerScale();
@@ -27,7 +19,7 @@ export function App() {
   const glitch = useUiStore((e) => e.glitch);
   const [options, setOptions] = useState(false);
   const [fiche, setFiche] = useState(false);
-  const [lignes, setLignes] = useState<Ligne[]>([]);
+  const [lignes, setLignes] = useState<LigneBoot[]>([]);
   const [moteur, setMoteur] = useState<MoteurDialogue | null>(null);
   const [lance, setLance] = useState(false);
   const [plongee, setPlongee] = useState(0);
@@ -70,22 +62,6 @@ export function App() {
     window.location.reload();
   }, []);
 
-  useEffect(() => {
-    if (!moteur || lance) return;
-    const onTouche = (e: Event) => {
-      // Le bouton d'options est au-dessus de l'ecran de demarrage : y cliquer
-      // ne doit pas lancer la partie par la meme occasion.
-      if (e.target instanceof Element && e.target.closest('.opt, .opt__ouvrir, .etat')) return;
-      demarrer();
-    };
-    window.addEventListener('keydown', onTouche);
-    window.addEventListener('pointerdown', onTouche);
-    return () => {
-      window.removeEventListener('keydown', onTouche);
-      window.removeEventListener('pointerdown', onTouche);
-    };
-  }, [moteur, lance, demarrer]);
-
   // Quel ecran est au-dessus. Un seul ecoute le clavier : deux ecouteurs poses
   // sur `window` recoivent la meme touche, et rien dans l'ordre du DOM ne dit
   // lequel est devant. C'est ici qu'on tranche, parce que c'est ici qu'on sait
@@ -96,20 +72,25 @@ export function App() {
   // a rien a fermer — c'est ce que le joueur attend de cette touche. Tab
   // bascule la fiche de partie. Les panneaux gerent leur propre Echap ; celui-ci
   // ne sert qu'a l'ouvrir depuis la scene.
+  //
+  // L'ecran-titre n'est PAS dans cette couche : il a son propre crochet de
+  // navigation, et c'est lui qui y branche Echap. Deux ecouteurs sur le meme
+  // ecran sont exactement ce que le crochet existe pour eviter, meme quand ils
+  // se partagent les touches sans se marcher dessus aujourd'hui.
   useEffect(() => {
-    if (couche !== 'jeu' && couche !== 'titre') return;
+    if (couche !== 'jeu') return;
     const onTouche = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
         setOptions(true);
       } else if (e.key === 'Tab') {
         e.preventDefault();
-        if (lance) setFiche((v) => !v);
+        setFiche((v) => !v);
       }
     };
     window.addEventListener('keydown', onTouche);
     return () => window.removeEventListener('keydown', onTouche);
-  }, [couche, lance]);
+  }, [couche]);
 
   return (
     <div className="stage">
@@ -126,22 +107,13 @@ export function App() {
             actif={couche === 'jeu'}
           />
         ) : (
-          <div className="boot">
-            {lignes.map((l, i) => (
-              <div key={i} className={`boot__line ${CLASSE[l.niveau]}`}>
-                {l.texte}
-              </div>
-            ))}
-            {moteur && (
-              <>
-                <img className="boot__logo" src="/assets/ui/logo_titre.png" alt="NEUROMANCER" />
-                <div className="boot__sub">CHIBA CITY &middot; 12 CYCLES</div>
-                <div className="boot__line boot__caret" style={{ marginTop: 10 }}>
-                  {'> '}
-                </div>
-              </>
-            )}
-          </div>
+          <Titre
+            lignes={lignes}
+            pret={moteur !== null}
+            onDemarrer={demarrer}
+            onOptions={() => setOptions(true)}
+            actif={couche === 'titre'}
+          />
         )}
 
         {lance && (

@@ -1,7 +1,7 @@
-import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 import decors from '@data/decors.json';
 import type { MoteurDialogue } from '@/dialogue/moteur';
-import { SceneJeu } from '@/engine/scene';
+import { useDecor } from './useDecor';
 
 const DECORS = decors as Record<string, { pluie?: boolean } | undefined>;
 
@@ -10,23 +10,8 @@ const DECORS = decors as Record<string, { pluie?: boolean } | undefined>;
  * l'identifiant de decor ; il ne re-rend jamais le contenu du canvas.
  */
 export function Decor({ moteur }: { moteur: MoteurDialogue }) {
-  const hote = useRef<HTMLDivElement>(null);
-  const scene = useRef<SceneJeu | null>(null);
   const decor = useSyncExternalStore(moteur.souscrire, () => moteur.lire().decor);
-
-  useEffect(() => {
-    const s = new SceneJeu();
-    scene.current = s;
-    if (hote.current) void s.monter(hote.current);
-    return () => {
-      s.detruire();
-      scene.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    void scene.current?.afficherDecor(decor);
-  }, [decor]);
+  const hote = useDecor(decor);
 
   // La pluie est une nappe DOM et non un filtre Pixi : c'est une tuile de 16
   // pixels que le CSS fait glisser par pas d'un pixel, donc elle suit

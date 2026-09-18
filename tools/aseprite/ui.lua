@@ -13,60 +13,158 @@ local L = dofile(DOSSIER_SCRIPTS .. "/lib.lua")
 
 -- ---------------------------------------------------------- LOGO TITRE ----
 
--- Fonte de titre, 7x9. Huit glyphes suffisent a ecrire NEUROMANCER, et une
+-- Fonte de titre, 9x13. Huit glyphes suffisent a ecrire NEUROMANCER, et une
 -- fonte complete pour onze lettres serait du travail jete.
+--
+-- La premiere version faisait 96x19 : deux couleurs, une ombre portee droite,
+-- et l'allure d'un titre de demo. Le probleme n'etait pas la taille mais
+-- l'absence de matiere — un lettrage plat ne devient pas une enseigne en
+-- grossissant. Ce qui suit ne dessine donc pas des lettres mais les EROdE :
+-- le masque est pose une fois, et chaque passe le regarde pour decider ou est
+-- l'arete, ou est l'ombre, et ou le neon deborde.
 local GLYPHES = {
-  N = { '##...##', '##...##', '###..##', '###..##', '##.#.##', '##..###', '##..###', '##...##', '##...##' },
-  E = { '#######', '#######', '##.....', '######.', '######.', '##.....', '##.....', '#######', '#######' },
-  U = { '##...##', '##...##', '##...##', '##...##', '##...##', '##...##', '##...##', '.#####.', '..###..' },
-  R = { '######.', '#######', '##...##', '##...##', '######.', '#####..', '##.##..', '##..##.', '##...##' },
-  O = { '.#####.', '#######', '##...##', '##...##', '##...##', '##...##', '##...##', '#######', '.#####.' },
-  M = { '##...##', '###.###', '#######', '##.#.##', '##.#.##', '##...##', '##...##', '##...##', '##...##' },
-  A = { '..###..', '.#####.', '##...##', '##...##', '#######', '#######', '##...##', '##...##', '##...##' },
-  C = { '.#####.', '#######', '##...##', '##.....', '##.....', '##.....', '##...##', '#######', '.#####.' },
+  N = { '#####.###', '#####.###', '#####.###', '#####.###',
+        '###.#####', '###.#####', '###.#####', '###.#####',
+        '###..####', '###..####', '###..####', '###..####', '###..####' },
+  E = { '#########', '#########',
+        '###......', '###......', '###......',
+        '#######..', '#######..', '#######..',
+        '###......', '###......', '###......',
+        '#########', '#########' },
+  U = { '###...###', '###...###', '###...###', '###...###', '###...###',
+        '###...###', '###...###', '###...###', '###...###', '###...###',
+        '###...###', '.#######.', '..#####..' },
+  R = { '#######..', '########.', '###...###', '###...###', '###...###',
+        '########.', '#######..', '#####....', '###.##...', '###..##..',
+        '###...##.', '###....##', '###....##' },
+  O = { '..#####..', '.#######.', '###...###', '###...###', '###...###',
+        '###...###', '###...###', '###...###', '###...###', '###...###',
+        '###...###', '.#######.', '..#####..' },
+  M = { '###...###', '####.####', '#########', '###.#.###', '###.#.###',
+        '###...###', '###...###', '###...###', '###...###', '###...###',
+        '###...###', '###...###', '###...###' },
+  A = { '...###...', '..#####..', '.###.###.', '###...###', '###...###',
+        '###...###', '#########', '#########', '###...###', '###...###',
+        '###...###', '###...###', '###...###' },
+  C = { '..#####..', '.#######.', '###...###', '###......', '###......',
+        '###......', '###......', '###......', '###......', '###...###',
+        '###...###', '.#######.', '..#####..' },
 }
 
 local MOT = 'NEUROMANCER'
-local LARGEUR_G, HAUTEUR_G, CHASSE = 7, 9, 8
+local LARGEUR_G, HAUTEUR_G, CHASSE = 9, 13, 11
+local LARG_LOGO, HAUT_LOGO = 128, 28
+local X0, Y0 = 4, 5
+local RAYON_HALO = 3
+local BAYER = { 0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5 }
 
 local function logo()
-  local largeur = #MOT * CHASSE
-  local sprite = Sprite(largeur + 8, HAUTEUR_G + 10)
+  local sprite = Sprite(LARG_LOGO, HAUT_LOGO)
   L.palette.appliquer(sprite)
   sprite.layers[1].name = 'Logo'
   local img = sprite.cels[1].image
 
-  -- Une ombre portee magenta, decalee d'un pixel en bas a droite, puis les
-  -- lettres en blanc par-dessus.
-  --
-  -- Premiere version : trois copies du mot decalees de plus ou moins un pixel,
-  -- pour imiter l'aberration chromatique d'un tube mal regle. Sur des jambages
-  -- de deux pixels, les trois couches se recouvraient entierement et le mot
-  -- devenait une suite de colonnes magenta et cyan. Une frange ne marche que
-  -- si le trait est plus large que le decalage.
-  local function ecrire(dx, dy, cle)
-    for i = 1, #MOT do
-      local glyphe = GLYPHES[MOT:sub(i, i)]
-      local ox = 4 + (i - 1) * CHASSE + dx
-      for y, ligne in ipairs(glyphe) do
-        for x = 1, LARGEUR_G do
-          if ligne:sub(x, x) == '#' then
-            img:drawPixel(ox + x - 1, 4 + y - 1 + dy, L.palette.rgba(cle))
-          end
+  local function poser(x, y, cle)
+    if x >= 0 and y >= 0 and x < LARG_LOGO and y < HAUT_LOGO then
+      img:drawPixel(x, y, L.palette.rgba(cle))
+    end
+  end
+
+  -- Le masque d'abord, le dessin ensuite. Chaque passe interroge le masque au
+  -- lieu de redessiner le mot : c'est ce qui permet a l'arete de savoir de quel
+  -- cote est le vide.
+  local masque = {}
+  local function plein(x, y) return masque[y * LARG_LOGO + x] == true end
+  for i = 1, #MOT do
+    local glyphe = GLYPHES[MOT:sub(i, i)]
+    local ox = X0 + (i - 1) * CHASSE
+    for y, ligne in ipairs(glyphe) do
+      for x = 1, LARGEUR_G do
+        if ligne:sub(x, x) == '#' then
+          masque[(Y0 + y - 1) * LARG_LOGO + (ox + x - 1)] = true
         end
       end
     end
   end
-  ecrire(1, 1, 'f')
-  ecrire(0, 0, 'z')
 
-  -- Le soulignement cyan : il tient le mot et il donne l'enseigne.
-  for x = 3, sprite.width - 5 do
-    img:drawPixel(x, 15, L.palette.rgba('j'))
-    img:drawPixel(x, 16, L.palette.rgba('k'))
+  -- 1. Le halo cyan, CUIT dans l'image. Un bloom applique au runtime
+  -- adoucirait le pixel art ; ici la diffusion est faite de pixels entiers,
+  -- pris dans la palette, et elle survit a l'agrandissement en plus proche
+  -- voisin.
+  --
+  -- Le halo est TRAME, et ce n'est pas un ornement. Onze lettres a onze pixels
+  -- de chasse laissent deux pixels entre chaque jambage : une diffusion pleine
+  -- sur trois pixels se referme d'une lettre a l'autre et le mot se retrouve
+  -- pose sur une plaque turquoise opaque — verifie a l'ecran, c'est exactement
+  -- ce qui s'est passe. Un damier de Bayer garde la lueur poreuse, donc le ciel
+  -- passe au travers et les lettres se detachent encore.
+  for y = 0, HAUT_LOGO - 1 do
+    for x = 0, LARG_LOGO - 1 do
+      if not plein(x, y) then
+        local meilleur = 99
+        for dy = -RAYON_HALO, RAYON_HALO do
+          for dx = -RAYON_HALO, RAYON_HALO do
+            if plein(x + dx, y + dy) then
+              local d = dx * dx + dy * dy
+              if d < meilleur then meilleur = d end
+            end
+          end
+        end
+        local seuil = BAYER[(y % 4) * 4 + (x % 4) + 1]
+        if meilleur <= 1 then poser(x, y, 'j')
+        elseif meilleur <= 4 and seuil < 10 then poser(x, y, 'j')
+        elseif meilleur <= 9 and seuil < 6 then poser(x, y, 'i') end
+      end
+    end
   end
-  for x = 3, sprite.width - 5, 7 do
-    img:drawPixel(x, 17, L.palette.rgba('i'))
+
+  -- 2. L'ombre portee magenta, un pixel a droite et deux en bas. Une frange ne
+  -- marche que si le trait est plus large que le decalage : sur des jambages de
+  -- trois pixels, deux passent.
+  --
+  -- Le decalage horizontal est de UN et non de deux, et c'est la seule valeur
+  -- qui marche : la chasse laisse deux pixels entre deux lettres, et une ombre
+  -- decalee de deux les remplit exactement. Le mot devenait une chaine de
+  -- lettres soudees par leur propre ombre.
+  for y = 0, HAUT_LOGO - 1 do
+    for x = 0, LARG_LOGO - 1 do
+      if plein(x, y) and not plein(x + 1, y + 2) then poser(x + 1, y + 2, 'f') end
+    end
+  end
+
+  -- 3. Le corps cisele. La lumiere vient du haut et de la gauche : un pixel qui
+  -- a du vide au-dessus ou a sa gauche est une arete, un pixel qui a du vide en
+  -- dessous ou a sa droite est un chanfrein. Sur des jambages de trois pixels,
+  -- cela donne exactement arete / coeur / chanfrein, sans rien dessiner a la
+  -- main.
+  local hasard = L.rng(1984)
+  local MILIEU = Y0 + 6
+  for y = 0, HAUT_LOGO - 1 do
+    for x = 0, LARG_LOGO - 1 do
+      if plein(x, y) then
+        local arete = not plein(x, y - 1) or not plein(x - 1, y)
+        local chanfrein = not plein(x, y + 1) or not plein(x + 1, y)
+        local cle
+        if arete then cle = 'z'
+        elseif chanfrein then cle = '4'
+        else cle = (y < MILIEU) and 'd' or 'c' end
+        -- Un cran de bruit : l'enseigne a vingt ans et le tube fatigue. Sans
+        -- lui, les grandes surfaces de coeur se lisent comme du plastique.
+        if not arete and not chanfrein and hasard(100) < 9 then cle = 'b' end
+        if arete and hasard(100) < 4 then cle = 'l' end
+        poser(x, y, cle)
+      end
+    end
+  end
+
+  -- 4. Le soulignement cyan : il tient le mot et il donne l'enseigne.
+  local base = Y0 + HAUTEUR_G + 3
+  for x = 3, LARG_LOGO - 5 do
+    poser(x, base, 'j')
+    poser(x, base + 1, 'k')
+  end
+  for x = 3, LARG_LOGO - 5, 7 do
+    poser(x, base + 2, 'i')
   end
 
   return L.enregistrer(sprite, 'logo_titre', 'ui')
