@@ -591,6 +591,47 @@ Lua. Vérification : deux exécutions successives donnent le même MD5.
 L'ordre des tuiles dans un générateur fait foi. **Ajouter en fin de liste, ne jamais réordonner** —
 mais on peut retoucher librement les pixels d'une tuile existante, sa position ne bouge pas.
 
+### Les décors — un assemblage, pas une tilemap
+
+Un décor est désormais **un fond plus une atmosphère**. Le fond est soit des **plans de
+parallaxe** (`data/decors.json` → `plans`), soit la tilemap du même nom ; l'atmosphère (brume,
+vignette, halos) se pose par-dessus l'un comme l'autre. C'est ce qui permet à une rue d'avoir de
+la profondeur sans imposer une seule technique à tout le jeu.
+
+- **Les plans viennent de `tools/aseprite/etalonner.lua`**, qui prend les parallaxes CC0 de
+  `assets/parallax-src/` (Luis Zuno — *Ansimuz*, domaine public) et les fait entrer dans la
+  palette : courbe de tonalité nuit, halo cuit, quantification sur les 32 couleurs. Les réglages
+  vivent dans `data/etalonnage.json`. Déterministe, vérifié au MD5.
+- **Un seuil de saturation ne reconnaît pas un néon.** La première version déclarait néon tout
+  pixel saturé et clair : les 256×272 de brume orange du plan médian passaient le test, et le
+  coucher de soleil survivait en plein jeu. *Une enseigne est entourée de nuit, une brume ne
+  l'est pas* — d'où le test de contraste local, qui est le seul qui sépare réellement les deux.
+- **La courbe de tonalité s'applique à la VALEUR HSV**, pas au RGB déjà mélangé avec la teinte de
+  nuit, et elle a un **plancher**. Sans lui, tout ce qui est sous la moitié tombe à zéro et la
+  rue devient un trou noir avec des enseignes dedans.
+- **Le halo est cuit dans l'image, jamais un filtre au rendu.** Un bloom posé sur le stage
+  tournerait sur 320×180 et adoucirait le pixel art — c'est exactement ce que la règle du canvas
+  interdit. Et ce sont les néons qui diffusent, pas chaque pixel qui cherche un néon : cinquante
+  fois moins de travail pour le même résultat.
+- **Brume et vignette se tracent en bandes, jamais en dégradé continu.** Un dégradé lisse sur du
+  pixel art fabrique à l'écran des centaines de valeurs que la palette n'a jamais contenues, et
+  le décor se met à ressembler à une photo assombrie. Sept bandes suffisent à lire une
+  profondeur, et elles restent du pixel.
+- **La dérive des plans est minuscule** (un demi-pixel par seconde sur le plus lointain, zéro sur
+  le plus proche). Une parallaxe rapide sur une scène fixe raconte que la caméra avance, ce qui
+  est faux : le joueur est arrêté, il parle à quelqu'un. À cette vitesse on ne voit pas la ville
+  bouger, on la sent respirer. Elle est coupée par `prefers-reduced-motion`, comme le glitch —
+  c'est un mouvement continu en plein écran.
+- **Une planche de parallaxe se cadre, elle ne se recadre pas.** Ces images sont composées pour
+  une caméra plus large que 320×180 ; le plan *foreground* d'un jeu de parallaxe est une rue
+  entière, pas un bandeau d'avant-plan. À Ninsei, deux plans lointains donnent une ville, les
+  trois en donnaient un mur de devantures. Le cumul de la dérive reste en flottant et n'est
+  arrondi qu'à la pose : arrondir à chaque image figerait tout plan dont la dérive est inférieure
+  à un pixel par trame, c'est-à-dire tous.
+- `npm run validate:assets` refuse un `plans[].image` absent de `public/assets/parallax/` et un
+  décor qui n'a ni plans ni tilemap du même nom. Un plan renommé est pire qu'une tuile renommée :
+  la scène reste noire, et rien ne distingue cette panne d'une scène volontairement sans décor.
+
 ### Tilemaps — de la donnée, jamais du pixel
 
 Un décor est un `public/assets/tilemaps/<id>.json` : des rangées d'art ASCII plus une légende

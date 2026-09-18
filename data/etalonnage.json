@@ -3,16 +3,16 @@
   "profils": {
     "_note": "desaturation : part de saturation conservee hors neon. plancher/plafond/gamma : la courbe de tonalite, appliquee a la valeur HSV — gamma creuse, puis on remet a l'echelle entre les deux bornes. Le plancher est ce qui empeche la rue de devenir un trou noir avec des enseignes dedans. teinte/melange : la couleur de nuit vers laquelle on tire, et de combien — module par l'obscurite du pixel d'origine. neon : ce qui echappe a tout cela, seuils volontairement hauts, une facade tiede n'est pas une enseigne. halo : diffusion cuite dans l'image, jamais un filtre au rendu. tramage : amplitude du Bayer 4x4 avant quantification, en niveaux de 0-255. neon.contraste : un pixel n'est declare neon que s'il a, a moins de deux pixels, un voisin nettement plus sombre ou du vide. C'est ce qui separe une enseigne d'une brume de coucher de soleil.",
     "rue": {
-      "desaturation": 0.52,
+      "desaturation": 0.44,
       "teinte": "0x0e1526",
-      "melange": 0.46,
-      "gamma": 1.22,
-      "plancher": 0.075,
-      "plafond": 0.62,
+      "melange": 0.58,
+      "gamma": 1.35,
+      "plancher": 0.06,
+      "plafond": 0.52,
       "neon": {
-        "saturation": 0.55,
-        "valeur": 0.7,
-        "gain": 1.0,
+        "saturation": 0.62,
+        "valeur": 0.76,
+        "gain": 0.94,
         "contraste": 0.26
       },
       "halo": {

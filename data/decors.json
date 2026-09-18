@@ -1,4 +1,157 @@
 {
-  "_note": "Ce que le decor porte en plus de ses tuiles. `pluie` pose la nappe de pluie par-dessus le canvas. Freeside n'en a pas : c'est un cylindre ferme, il y fait toujours le meme temps, et c'est precisement ce qui le rend sinistre.",
-  "map_ninsei": { "pluie": true }
+  "_note": "Ce qu'un decor est, au-dela de ses tuiles. `plans` remplace la tilemap par des plans de parallaxe (public/assets/parallax/, produits par tools/aseprite/etalonner.lua) ; sans `plans`, le decor reste une tilemap du meme nom. `brume`, `vignette` et `halos` se posent PAR-DESSUS l'un comme l'autre. `pluie` est une nappe DOM et non une couche Pixi : c'est une tuile de 16 pixels que le CSS fait glisser, donc elle suit l'echelle entiere du reste de l'interface sans etre reechantillonnee. Freeside n'a pas de pluie : c'est un cylindre ferme, il y fait toujours le meme temps, et c'est precisement ce qui le rend sinistre. Les `derive` sont minuscules a dessein — voir Plans.animer.",
+  "map_ninsei": {
+    "plans": [
+      {
+        "image": "rue_fond",
+        "x": -10,
+        "y": 8,
+        "derive": 0.55,
+        "alpha": 0.8
+      },
+      {
+        "image": "rue_milieu",
+        "x": -34,
+        "y": -2,
+        "derive": 0.2
+      }
+    ],
+    "brume": 0.34,
+    "vignette": 0.6,
+    "pluie": true,
+    "halos": [
+      {
+        "x": 38,
+        "y": 40,
+        "r": 18,
+        "couleur": "0xff4fb8"
+      },
+      {
+        "x": 268,
+        "y": 42,
+        "r": 20,
+        "couleur": "0x5bf0ff"
+      },
+      {
+        "x": 150,
+        "y": 66,
+        "r": 16,
+        "couleur": "0xffc247"
+      }
+    ]
+  },
+  "map_freeside": {
+    "plans": [
+      {
+        "image": "port_fond",
+        "x": -20,
+        "y": -4,
+        "derive": 0.45,
+        "alpha": 0.85
+      },
+      {
+        "image": "port_milieu",
+        "x": -60,
+        "y": -8,
+        "derive": 0.18
+      },
+      {
+        "image": "port_avant",
+        "x": -18,
+        "y": -14,
+        "derive": 0
+      }
+    ],
+    "brume": 0.3,
+    "vignette": 0.58,
+    "halos": [
+      {
+        "x": 76,
+        "y": 54,
+        "r": 20,
+        "couleur": "0xffc247"
+      },
+      {
+        "x": 232,
+        "y": 46,
+        "r": 20,
+        "couleur": "0xff4fb8"
+      }
+    ]
+  },
+  "map_chatsubo": {
+    "brume": 0.22,
+    "vignette": 0.55,
+    "halos": [
+      {
+        "x": 56,
+        "y": 40,
+        "r": 18,
+        "couleur": "0xff4fb8"
+      },
+      {
+        "x": 232,
+        "y": 40,
+        "r": 16,
+        "couleur": "0x12b5c4"
+      }
+    ]
+  },
+  "map_finn": {
+    "brume": 0.2,
+    "vignette": 0.6,
+    "halos": [
+      {
+        "x": 168,
+        "y": 44,
+        "r": 20,
+        "couleur": "0x6ed46b"
+      }
+    ]
+  },
+  "map_coffin": {
+    "brume": 0.28,
+    "vignette": 0.72,
+    "halos": [
+      {
+        "x": 160,
+        "y": 56,
+        "r": 14,
+        "couleur": "0x12b5c4"
+      }
+    ]
+  },
+  "map_entrepot": {
+    "brume": 0.3,
+    "vignette": 0.68,
+    "halos": [
+      {
+        "x": 96,
+        "y": 36,
+        "r": 16,
+        "couleur": "0xd4820f"
+      }
+    ]
+  },
+  "map_straylight": {
+    "brume": 0.18,
+    "vignette": 0.62,
+    "halos": [
+      {
+        "x": 80,
+        "y": 48,
+        "r": 22,
+        "couleur": "0xffc247"
+      },
+      {
+        "x": 240,
+        "y": 48,
+        "r": 22,
+        "couleur": "0xffc247"
+      }
+    ]
+  },
+  "matrice": {
+    "vignette": 0.45
+  }
 }

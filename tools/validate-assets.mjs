@@ -1,9 +1,13 @@
 #!/usr/bin/env node
-// Verifie que chaque tilemap ne cite que des tuiles existantes et que ses
-// rangees sont rectangulaires.
+// Verifie que chaque tilemap ne cite que des tuiles existantes, que ses rangees
+// sont rectangulaires, et que chaque decor de data/decors.json designe quelque
+// chose qui existe.
 //
 // Sans cela, une tuile renommee dans un generateur Lua ne se voit qu'a
 // l'execution, sous la forme d'un decor vide et d'une exception dans la console.
+// Un plan de parallaxe renomme est pire encore : Assets.load echoue, la scene
+// reste noire, et rien ne distingue cette panne d'une scene volontairement sans
+// decor.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,6 +15,7 @@ import path from 'node:path';
 const RACINE = path.resolve(import.meta.dirname, '..');
 const TILEMAPS = path.join(RACINE, 'public/assets/tilemaps');
 const TILESETS = path.join(RACINE, 'public/assets/tilesets');
+const PARALLAX = path.join(RACINE, 'public/assets/parallax');
 
 const erreurs = [];
 const lire = (p) => JSON.parse(fs.readFileSync(p, 'utf-8'));
@@ -52,8 +57,41 @@ for (const fichier of fichiers) {
   }
 }
 
+// Les decors : soit des plans de parallaxe, soit une tilemap, jamais rien.
+const decors = lire(path.join(RACINE, 'data/decors.json'));
+const idsTilemap = new Set(fichiers.map((f) => f.replace(/\.json$/, '')));
+const plansExistants = new Set(
+  fs.existsSync(PARALLAX)
+    ? fs.readdirSync(PARALLAX).filter((f) => f.endsWith('.png')).map((f) => f.replace(/\.png$/, ''))
+    : [],
+);
+let nbDecors = 0;
+
+for (const [id, conf] of Object.entries(decors)) {
+  if (id.startsWith('_')) continue;
+  nbDecors += 1;
+
+  const plans = conf.plans ?? [];
+  for (const plan of plans) {
+    if (!plansExistants.has(plan.image)) {
+      erreurs.push(`decor ${id} : plan '${plan.image}' absent de public/assets/parallax/`);
+    }
+  }
+  // Un decor sans plans retombe sur la tilemap du meme nom. 'matrice' est une
+  // geometrie construite en code, et 'aucun' est le noir : ni l'un ni l'autre
+  // n'a de tilemap.
+  if (plans.length === 0 && id !== 'matrice' && id !== 'aucun' && !idsTilemap.has(id)) {
+    erreurs.push(`decor ${id} : ni plans de parallaxe ni tilemap du meme nom`);
+  }
+  for (const halo of conf.halos ?? []) {
+    if (!/^0x[0-9a-fA-F]{6}$/.test(String(halo.couleur))) {
+      erreurs.push(`decor ${id} : halo de couleur invalide '${halo.couleur}'`);
+    }
+  }
+}
+
 if (erreurs.length > 0) {
   console.error(erreurs.map((e) => `  ${e}`).join('\n'));
   process.exit(1);
 }
-console.log(`assets : ${fichiers.length} tilemap(s) coherente(s)`);
+console.log(`assets : ${fichiers.length} tilemap(s) et ${nbDecors} decor(s) coherent(s)`);
