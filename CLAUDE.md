@@ -129,6 +129,7 @@ node tools/jouer.mjs captures hasard  # joue une partie ENTIERE jusqu'a une fin
 node tools/acte3.mjs captures      # joue l'acte III jusqu'a une fin
 node tools/plonger.mjs captures    # prologue + branchement + plongee au hasard
 node tools/vitrine.mjs             # refait les captures du README
+node tools/clavier.mjs             # joue le prologue SANS UN SEUL CLIC
 ```
 
 ### Outillage — capture d'écran
@@ -396,6 +397,45 @@ entièrement écrite.
 Les outils de vérification ouvrent le jeu en `vitesseTexte: 0` (injecté dans `localStorage` par
 `ouvrirJeu`) : ils vérifient le jeu, pas la vitesse de l'animation. `derouler()` sait tout de
 même encaisser un clic qui ne fait que révéler.
+
+---
+
+## Le clavier — un seul écouteur à la fois
+
+Le jeu se joue entièrement sans souris, de la première réplique à la fin. Tout passe par
+`src/react/useNavigationClavier.ts`, et c'est une règle, pas une commodité.
+
+| Touche | Dialogue | Fiche / options | Cyberespace |
+|---|---|---|---|
+| `↑` `↓` | choix précédent / suivant | — | nœud voisin précédent / suivant |
+| `Entrée` | valider le choix visé, sinon avancer la réplique | — | ALLER, ou encaisser le butin |
+| `Espace` | avancer la réplique, fermer un entracte | — | — |
+| `1`…`9` | prendre directement le n-ième choix | — | exécuter le n-ième script |
+| `Tab` | fiche de partie | — | fiche de partie |
+| `Échap` | **ouvrir** les options | **fermer** le panneau | ouvrir les options |
+| `A` | — | — | piller |
+| `Ret. arr.` | — | — | se débrancher / encaisser |
+
+- **Un seul écouteur `window` à la fois.** `App.tsx` calcule une `couche`
+  (`titre` / `jeu` / `fiche` / `options`) et ne passe `actif` qu'à celle du dessus. Sans cette
+  règle, `Entrée` validait un choix de dialogue **et** fermait la fiche posée par-dessus : deux
+  écouteurs posés sur `window` reçoivent la même touche, et rien dans l'ordre du DOM ne dit lequel
+  est au-dessus. C'est arrivé, et le symptôme (« la fiche se referme toute seule ») n'accuse
+  jamais le bon fichier.
+- **`Échap` ouvre, il ne bascule pas.** Un `Échap` qui bascule ferme la fiche *et* ouvre les
+  options dans la même pression, parce que les deux écrans le voient. Les panneaux se ferment
+  eux-mêmes, par leur propre `surFermer`.
+- **Le pointeur et le clavier partagent le curseur.** `onPointerEnter` appelle `viser()` :
+  survoler déplace le curseur clavier. Deux curseurs concurrents sont la faute classique de ce
+  genre de refonte, et elle se voit tout de suite — on survole une ligne, on appuie sur `Entrée`,
+  et c'est une autre qui est prise.
+- **Aucun composant ne pose son propre `keydown` sur `window`.** Le cyberespace l'avait fait pour
+  ses flèches, ce qui recréait exactement le conflit que le crochet existe pour empêcher ; ses
+  touches passent maintenant par `surTouche`, le seul point d'extension prévu.
+- `node tools/clavier.mjs` joue le prologue **uniquement avec `keyboard.press`**, vérifie sous ses
+  yeux que `↓` déplace bien `.dlg__bouton--vise`, ouvre et referme la fiche puis les options, et
+  sort en code non nul s'il n'atteint pas le hub. Un test unitaire sur le crochet dirait que les
+  flèches déplacent un index ; il ne dirait pas qu'une palette de choix est atteignable au clavier.
 
 ---
 

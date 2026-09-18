@@ -1,4 +1,5 @@
 import { useUiStore } from '@/stores/uiStore';
+import { useNavigationClavier } from './useNavigationClavier';
 
 /** Rythmes proposes, en caracteres par seconde. 0 = tout d'un coup. */
 const VITESSES: { libelle: string; valeur: number }[] = [
@@ -29,8 +30,9 @@ function jauge(valeur: number, poser: (v: number) => void) {
  * esthetique a scanlines et glitch presente un risque photosensible reel, et
  * doit pouvoir etre coupee sans quitter la partie.
  */
-export function Options({ onFermer }: { onFermer: () => void }) {
+export function Options({ onFermer, actif = true }: { onFermer: () => void; actif?: boolean }) {
   const ui = useUiStore();
+  useNavigationClavier({ actif, nombre: 0, surFermer: onFermer });
 
   return (
     <div className="opt" role="dialog" aria-label="Options">
@@ -78,6 +80,36 @@ export function Options({ onFermer }: { onFermer: () => void }) {
       <p className="opt__note">
         La banque sonore se télécharge à part — voir docs/audio.md. Le jeu tourne sans.
       </p>
+
+      {/* Le jeu se joue entierement au clavier : encore faut-il le dire. Un
+        * raccourci qu'on ne decouvre qu'en appuyant dessus par hasard n'existe
+        * pas. */}
+      <div className="opt__touches">
+        <span>
+          <b>↑↓</b> choisir
+        </span>
+        <span>
+          <b>1-9</b> choix direct
+        </span>
+        <span>
+          <b>ENTRÉE</b> valider
+        </span>
+        <span>
+          <b>ESPACE</b> lire la suite
+        </span>
+        <span>
+          <b>TAB</b> fiche de partie
+        </span>
+        <span>
+          <b>ÉCHAP</b> options / fermer
+        </span>
+        <span>
+          <b>A</b> piller, dans la matrice
+        </span>
+        <span>
+          <b>RET. ARR.</b> se débrancher
+        </span>
+      </div>
 
       <button className="net__bouton opt__fermer" onClick={onFermer}>
         FERMER

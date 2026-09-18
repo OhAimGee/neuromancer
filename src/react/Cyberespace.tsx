@@ -16,6 +16,7 @@ import {
 import type { EtatSession } from '@/hacking/types';
 import { useProfileStore } from '@/stores/profileStore';
 import { useRunStore } from '@/stores/runStore';
+import { useNavigationClavier } from './useNavigationClavier';
 
 const LIGNES_JOURNAL = 3;
 
@@ -24,9 +25,10 @@ interface Props {
   graine: string;
   /** `flatline` vrai : Sable est reste dans la matrice, le recit en tient compte. */
   onSortie: (flatline: boolean) => void;
+  actif?: boolean;
 }
 
-export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie }: Props) {
+export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie, actif = true }: Props) {
   const competence = useRunStore((e) => e.competences['hacking'] ?? 0);
   const scriptsPossedes = useRunStore((e) => e.scripts);
   const implantsPoses = useRunStore((e) => e.implants);
@@ -115,6 +117,61 @@ export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie }: Prop
     }
     onSortie(etat.statut === 'flatline');
   }, [encaisse, etat.sac, etat.statut, cyclesConsommes, onSortie]);
+
+  // Les noeuds vivent sur un canvas : au clavier, on ne peut pas les designer,
+  // on les PARCOURT. Les voisins du noeud courant sont exactement ce sur quoi
+  // une action est possible — viser ailleurs ne servirait a rien.
+  const voisins = useMemo(() => (ici ? [...ici.voisins].sort() : []), [ici]);
+  const surTouche = useCallback(
+    (e: KeyboardEvent) => {
+      // Les fleches se traitent ICI et pas par la navigation de liste du
+      // crochet : la cible n'est pas un index dans une liste affichee, c'est un
+      // identifiant de noeud, et deux ecouteurs poses sur `window` pour le meme
+      // ecran se disputeraient la touche.
+      if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        if (voisins.length === 0) return true;
+        const sens = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : -1;
+        setCible((c) => {
+          const i = c === null ? -1 : voisins.indexOf(c);
+          return voisins[(i + sens + voisins.length) % voisins.length] ?? null;
+        });
+        return true;
+      }
+      if (!enCours) {
+        if (e.key === 'Enter' || e.key === 'Backspace') {
+          encaisser();
+          return true;
+        }
+        return false;
+      }
+      if (e.key === 'Enter') {
+        if (cible && voisin) setEtat((s) => deplacer(s, cible));
+        return true;
+      }
+      if (e.key === 'a' || e.key === 'A') {
+        if (ici?.butin && !ici.franchi) setEtat(piller);
+        return true;
+      }
+      if (e.key === 'Backspace') {
+        setEtat(deconnecter);
+        return true;
+      }
+      if (/^[1-9]$/.test(e.key)) {
+        const s = scripts[Number(e.key) - 1];
+        if (s && (etat.recharges[s.id] ?? 0) === 0) {
+          setEtat((sess) => executer(sess, s.id, cible ?? undefined));
+        }
+        return true;
+      }
+      return false;
+    },
+    [enCours, encaisser, cible, voisin, ici, scripts, etat.recharges, voisins],
+  );
+
+  // `nombre: 0` : cet ecran n'a pas de liste a parcourir, tout passe par
+  // `surTouche`. Le crochet sert ici a la regle qu'il porte — un seul ecouteur,
+  // et seulement quand l'ecran est au-dessus.
+  useNavigationClavier({ actif, nombre: 0, surTouche });
 
   const region = pointAcces(idPointAcces);
   const pctTrace = Math.round((etat.trace / etat.traceMax) * 100);

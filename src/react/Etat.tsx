@@ -4,6 +4,7 @@ import { IMPLANTS } from '@/hacking/implants';
 import { SCRIPTS } from '@/hacking/session';
 import { useProfileStore } from '@/stores/profileStore';
 import { MEMBRES_MAX, useRunStore } from '@/stores/runStore';
+import { useNavigationClavier } from './useNavigationClavier';
 
 interface Membre {
   nom: string;
@@ -44,7 +45,8 @@ function Vignette({ planche, rang }: { planche: string; rang: number }) {
  * plongees plus tot. Les connaissances y figurent parce qu'elles sont la vraie
  * progression du jeu — elles survivent a la partie, pas l'inventaire.
  */
-export function Etat({ onFermer }: { onFermer: () => void }) {
+export function Etat({ onFermer, actif = true }: { onFermer: () => void; actif?: boolean }) {
+  useNavigationClavier({ actif, nombre: 0, surFermer: onFermer });
   const run = useRunStore();
   const connaissances = useProfileStore((e) => e.connaissances);
   const infosConnues = hackingData.infos.filter((id) => connaissances.has(id));

@@ -11,6 +11,7 @@ import { Options } from './Options';
 import { useIntegerScale, VIEWPORT_W, VIEWPORT_H } from './useIntegerScale';
 
 type Niveau = 'ok' | 'warn' | 'err' | 'dim';
+type Couche = 'titre' | 'jeu' | 'fiche' | 'options';
 type Ligne = { texte: string; niveau: Niveau };
 
 const CLASSE: Record<Niveau, string> = {
@@ -85,21 +86,30 @@ export function App() {
     };
   }, [moteur, lance, demarrer]);
 
-  // Echap ouvre les options, Tab la fiche de partie — l'une comme l'autre en
-  // pleine scene, sans quitter la partie.
+  // Quel ecran est au-dessus. Un seul ecoute le clavier : deux ecouteurs poses
+  // sur `window` recoivent la meme touche, et rien dans l'ordre du DOM ne dit
+  // lequel est devant. C'est ici qu'on tranche, parce que c'est ici qu'on sait
+  // quel panneau est ouvert.
+  const couche: Couche = !lance ? 'titre' : options ? 'options' : fiche ? 'fiche' : 'jeu';
+
+  // Echap FERME d'abord ce qui est ouvert, et n'ouvre les options que s'il n'y
+  // a rien a fermer — c'est ce que le joueur attend de cette touche. Tab
+  // bascule la fiche de partie. Les panneaux gerent leur propre Echap ; celui-ci
+  // ne sert qu'a l'ouvrir depuis la scene.
   useEffect(() => {
+    if (couche !== 'jeu' && couche !== 'titre') return;
     const onTouche = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        setOptions((v) => !v);
+        setOptions(true);
       } else if (e.key === 'Tab') {
         e.preventDefault();
-        setFiche((v) => !v);
+        if (lance) setFiche((v) => !v);
       }
     };
     window.addEventListener('keydown', onTouche);
     return () => window.removeEventListener('keydown', onTouche);
-  }, []);
+  }, [couche, lance]);
 
   return (
     <div className="stage">
@@ -108,7 +118,13 @@ export function App() {
         style={{ '--s': scale } as React.CSSProperties}
       >
         {lance && moteur ? (
-          <Partie moteur={moteur} plongee={plongee} surPlongee={setPlongee} onRejouer={rejouer} />
+          <Partie
+            moteur={moteur}
+            plongee={plongee}
+            surPlongee={setPlongee}
+            onRejouer={rejouer}
+            actif={couche === 'jeu'}
+          />
         ) : (
           <div className="boot">
             {lignes.map((l, i) => (
@@ -147,8 +163,8 @@ export function App() {
           ⚙
         </button>
 
-        {fiche && lance && <Etat onFermer={() => setFiche(false)} />}
-        {options && <Options onFermer={() => setOptions(false)} />}
+        {fiche && lance && <Etat onFermer={() => setFiche(false)} actif={couche === 'fiche'} />}
+        {options && <Options onFermer={() => setOptions(false)} actif={couche === 'options'} />}
       </div>
 
       <div className="filigrane">
@@ -170,11 +186,13 @@ function Partie({
   plongee,
   surPlongee,
   onRejouer,
+  actif,
 }: {
   moteur: MoteurDialogue;
   plongee: number;
   surPlongee: (f: (n: number) => number) => void;
   onRejouer: () => void;
+  actif: boolean;
 }) {
   const etat = useSyncExternalStore(moteur.souscrire, moteur.lire);
   const numero = useRef(plongee);
@@ -214,6 +232,7 @@ function Partie({
           pointAcces={etat.plongee}
           graine={`plongee-${plongee}`}
           onSortie={sortir}
+          actif={actif}
         />
         {voile}
       </>
@@ -223,7 +242,7 @@ function Partie({
   return (
     <>
       <Decor moteur={moteur} />
-      <Dialogue moteur={moteur} />
+      <Dialogue moteur={moteur} actif={actif && etat.fin === null} />
       {etat.fin !== null && !etat.peutContinuer && (
         <Fin id={etat.fin} onRejouer={onRejouer} />
       )}

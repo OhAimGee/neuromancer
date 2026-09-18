@@ -8,6 +8,7 @@ import { useUiStore } from '@/stores/uiStore';
 import type { Etiquette } from '@/types/jeu';
 import { Boite } from './Boite';
 import { useMachineAEcrire } from './useMachineAEcrire';
+import { useNavigationClavier } from './useNavigationClavier';
 
 const GLOSES = gloses as Record<string, string>;
 
@@ -22,9 +23,10 @@ const COULEUR_ETIQUETTE: Record<Etiquette, string> = {
 
 interface Props {
   moteur: MoteurDialogue;
+  actif?: boolean;
 }
 
-export function Dialogue({ moteur }: Props) {
+export function Dialogue({ moteur, actif = true }: Props) {
   const etat = useSyncExternalStore(moteur.souscrire, moteur.lire);
   const cycles = useRunStore((e) => e.cycles);
   const humanite = useRunStore((e) => e.humanite);
@@ -90,22 +92,45 @@ export function Dialogue({ moteur }: Props) {
     moteur.continuer();
   }, [moteur, complet, toutReveler]);
 
-  // Espace et Entree font avancer la replique, comme dans tout RPG au tour par
-  // tour. Le clic sur la boite fait la meme chose.
-  useEffect(() => {
-    const onTouche = (e: KeyboardEvent) => {
+  const choisir = useCallback(
+    (index: number) => {
+      const c = etat.choix[index];
+      if (!c) return;
+      audio.effet(c.abordable ? 'ui_valide' : 'ui_refus');
+      if (c.abordable) moteur.choisir(c.index);
+    },
+    [etat.choix, moteur],
+  );
+
+  // Les choix ne sont navigables qu'une fois la replique ecrite — c'est la meme
+  // condition que leur affichage. Tant qu'il reste du texte, la liste est vide
+  // et le crochet laisse passer Espace et Entree a la lecture.
+  const choixOuverts = etat.choix.length > 0 && complet;
+
+  // Une touche pendant un entracte ne fait que le fermer : le carton bloque la
+  // scene, et laisser passer Entree jusqu'aux choix ferait valider a l'aveugle
+  // un choix que le joueur n'a pas encore vu.
+  const surTouche = useCallback(
+    (e: KeyboardEvent) => {
       if (entracte !== null) {
         fermerEntracte();
-        return;
+        return true;
       }
-      if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
+      if (e.key === ' ' || (e.key === 'Enter' && !choixOuverts)) {
         continuer();
+        return true;
       }
-    };
-    window.addEventListener('keydown', onTouche);
-    return () => window.removeEventListener('keydown', onTouche);
-  }, [entracte, fermerEntracte, continuer]);
+      return false;
+    },
+    [entracte, fermerEntracte, continuer, choixOuverts],
+  );
+
+  const { vise, viser } = useNavigationClavier({
+    actif,
+    nombre: choixOuverts ? etat.choix.length : 0,
+    surValider: choisir,
+    surTouche,
+  });
 
   const dejaRendu = new Set<string>();
 
@@ -156,12 +181,10 @@ export function Dialogue({ moteur }: Props) {
             return (
               <div key={c.index}>
                 <button
-                  className="dlg__bouton"
+                  className={`dlg__bouton${c.index === vise ? ' dlg__bouton--vise' : ''}`}
                   disabled={!c.abordable}
-                  onClick={() => {
-                    audio.effet(c.abordable ? 'ui_valide' : 'ui_refus');
-                    moteur.choisir(c.index);
-                  }}
+                  onPointerEnter={() => viser(c.index)}
+                  onClick={() => choisir(c.index)}
                 >
                   {c.etiquette && (
                     <span

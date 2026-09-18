@@ -22,7 +22,7 @@ if (fs.existsSync(LIBS)) {
  * duree d'une partie automatique par dix. Passer `vitesseTexte` pour capturer
  * l'effet.
  */
-export async function ouvrirJeu({ largeur = 1280, hauteur = 720, vitesseTexte = 0, captureBoot = null } = {}) {
+export async function ouvrirJeu({ largeur = 1280, hauteur = 720, vitesseTexte = 0, captureBoot = null, clavier = false } = {}) {
   const navigateur = await chromium.launch();
   const page = await navigateur.newPage({ viewport: { width: largeur, height: hauteur } });
 
@@ -44,7 +44,10 @@ export async function ouvrirJeu({ largeur = 1280, hauteur = 720, vitesseTexte = 
   // L'ecran de demarrage disparait au premier clic : qui veut le capturer n'a
   // pas d'autre occasion que celle-ci.
   if (captureBoot) await page.locator('.viewport').screenshot({ path: captureBoot });
-  await page.click('.viewport');
+  // `clavier` : l'outil qui prouve que le jeu se joue sans souris ne peut pas
+  // commencer par un clic.
+  if (clavier) await page.keyboard.press('Enter');
+  else await page.click('.viewport');
   await page.waitForSelector('.dlg', { timeout: 5_000 });
 
   return { navigateur, page, erreurs };

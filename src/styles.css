@@ -1216,3 +1216,24 @@ body {
     animation: none;
   }
 }
+
+/* --- La table des touches ------------------------------------------------ */
+
+/* Le jeu se joue entierement au clavier : encore faut-il le dire quelque part.
+ * Deux colonnes, parce qu'en une seule la liste poussait le bouton FERMER sous
+ * la decoupe du panneau. */
+.opt__touches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 calc(6 * var(--px));
+  margin-bottom: calc(3 * var(--px));
+  font-size: calc(7 * var(--px));
+  line-height: calc(10 * var(--px));
+  color: var(--n4);
+}
+.opt__touches b {
+  display: inline-block;
+  min-width: calc(30 * var(--px));
+  color: var(--c2);
+  font-weight: normal;
+}
