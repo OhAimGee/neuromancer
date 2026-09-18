@@ -164,16 +164,25 @@ export function Dialogue({ moteur }: Props) {
                   }}
                 >
                   {c.etiquette && (
-                    <span className="dlg__etq" style={{ color: COULEUR_ETIQUETTE[c.etiquette] }}>
-                      [{c.etiquette}]
+                    <span
+                      className="dlg__etq"
+                      style={{ backgroundColor: COULEUR_ETIQUETTE[c.etiquette] }}
+                    >
+                      {c.etiquette}
                     </span>
                   )}
                   <span>{c.texte}</span>
-                  {c.cout.cycles > 0 && (
-                    <span className="dlg__cout dlg__cout--horloge">-{c.cout.cycles} CYC</span>
+                  {(c.cout.cycles > 0 || c.cout.humanite > 0 || c.cout.credits > 0) && (
+                    <span className="dlg__couts">
+                      {c.cout.cycles > 0 && (
+                        <span className="dlg__cout dlg__cout--horloge">-{c.cout.cycles} CYC</span>
+                      )}
+                      {c.cout.humanite > 0 && (
+                        <span className="dlg__cout">-{c.cout.humanite} HUM</span>
+                      )}
+                      {c.cout.credits > 0 && <span className="dlg__cout">-{c.cout.credits} cr</span>}
+                    </span>
                   )}
-                  {c.cout.humanite > 0 && <span className="dlg__cout">-{c.cout.humanite} HUM</span>}
-                  {c.cout.credits > 0 && <span className="dlg__cout">-{c.cout.credits} cr</span>}
                 </button>
                 {miennes.map((id) => (
                   <p key={id} className="dlg__glose">

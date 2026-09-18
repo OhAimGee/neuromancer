@@ -256,7 +256,10 @@ body {
   margin: calc(4 * var(--px)) calc(6 * var(--px)) calc(6 * var(--px));
   padding: calc(5 * var(--px));
   border: var(--px) solid var(--c1);
-  background: color-mix(in srgb, var(--n0) 92%, transparent);
+  /* Presque opaque, et pas 92% : depuis que les decors ont de la matiere, une
+   * boite trop transparente laissait passer une enseigne au neon derriere une
+   * ligne de dialogue. Le decor doit rester present, pas disputer le texte. */
+  background: color-mix(in srgb, var(--n0) 96%, transparent);
   cursor: pointer;
 }
 
@@ -359,8 +362,8 @@ body {
   margin: auto calc(6 * var(--px)) calc(7 * var(--px));
   padding: calc(3 * var(--px)) calc(4 * var(--px));
   border: var(--px) solid var(--n3);
-  border-left: var(--px) solid var(--c0);
-  background: color-mix(in srgb, var(--n0) 85%, transparent);
+  border-left: calc(2 * var(--px)) solid var(--c1);
+  background: color-mix(in srgb, var(--n0) 96%, transparent);
   font-size: calc(10 * var(--px));
   line-height: calc(12 * var(--px));
   scrollbar-width: none;
@@ -372,15 +375,18 @@ body {
   display: none;
 }
 
+/* La gouttiere de gauche appartient au curseur, et elle est reservee meme quand
+ * il est ailleurs : sans largeur fixe, viser un choix decalait tout le texte
+ * d'un cran et la liste sautait sous le doigt. */
 .dlg__bouton {
+  position: relative;
   display: flex;
   gap: calc(3 * var(--px));
   align-items: baseline;
   width: 100%;
   text-align: left;
-  padding: var(--px) calc(3 * var(--px));
+  padding: var(--px) calc(3 * var(--px)) var(--px) calc(9 * var(--px));
   border: 0;
-  border-left: var(--px) solid transparent;
   background: transparent;
   color: var(--g3);
   font-family: inherit;
@@ -388,35 +394,70 @@ body {
   line-height: inherit;
   cursor: pointer;
 }
+.dlg__bouton::before {
+  content: '\25B8';
+  position: absolute;
+  left: calc(2 * var(--px));
+  color: var(--c2);
+  opacity: 0;
+}
+
+/* Le pointeur et le clavier partagent le meme etat. Deux curseurs concurrents
+ * — un survol et une selection — sont la faute classique de ce genre de
+ * refonte : on ne sait plus lequel Entree va valider. */
+.dlg__bouton--vise:not(:disabled),
 .dlg__bouton:hover:not(:disabled),
 .dlg__bouton:focus-visible {
   background: var(--n2);
-  border-left-color: var(--m2);
+  box-shadow: inset calc(2 * var(--px)) 0 0 var(--c2);
   color: var(--w0);
   outline: none;
+}
+.dlg__bouton--vise:not(:disabled)::before,
+.dlg__bouton:hover:not(:disabled)::before,
+.dlg__bouton:focus-visible::before {
+  opacity: 1;
+}
+.dlg__bouton:active:not(:disabled) {
+  background: var(--n3);
 }
 .dlg__bouton:disabled {
   color: var(--n4);
   cursor: not-allowed;
 }
+/* Un choix inabordable reste vise : le joueur doit pouvoir le lire et voir ce
+ * qui lui manque, pas le survoler sans retour. */
+.dlg__bouton--vise:disabled {
+  background: var(--n1);
+  box-shadow: inset calc(2 * var(--px)) 0 0 var(--n4);
+}
 
+/* L'etiquette est une pastille pleine, plus un mot entre crochets. Les crochets
+ * disaient deja « ceci est une categorie » — mais en caracteres, donc au meme
+ * poids que la replique, et l'oeil les lisait comme du texte. */
 .dlg__etq {
   flex: 0 0 auto;
+  padding: 0 calc(2 * var(--px));
+  color: var(--n0);
   font-family: 'Silkscreen', monospace;
   font-size: calc(7 * var(--px));
+}
+
+/* Les couts s'alignent en colonne a droite, pas en fin de phrase : ils se
+ * comparent d'un choix a l'autre, c'est tout leur interet. */
+.dlg__couts {
+  flex: 0 0 auto;
+  display: flex;
+  gap: calc(3 * var(--px));
+  margin-left: auto;
+  padding-left: calc(5 * var(--px));
 }
 
 .dlg__cout {
   flex: 0 0 auto;
-  margin-left: auto;
-  padding-left: calc(4 * var(--px));
   font-family: 'Silkscreen', monospace;
   font-size: calc(7 * var(--px));
   color: var(--o1);
-}
-/* Plusieurs couts sur un meme choix : seul le premier est pousse a droite. */
-.dlg__cout ~ .dlg__cout {
-  margin-left: 0;
 }
 /* L'horloge est la pression centrale du jeu : son cout ne se lit pas comme
  * les autres. */
@@ -448,7 +489,7 @@ body {
   margin: auto calc(6 * var(--px)) calc(7 * var(--px));
   padding: calc(4 * var(--px));
   border: var(--px) solid var(--n3);
-  background: color-mix(in srgb, var(--n0) 85%, transparent);
+  background: color-mix(in srgb, var(--n0) 96%, transparent);
   font-family: 'Silkscreen', monospace;
   font-size: calc(8 * var(--px));
   color: var(--n4);
@@ -521,18 +562,48 @@ body {
   color: var(--c2);
 }
 
-.opt {
+/* Un panneau ne couvre plus l'ecran d'un aplat noir jusqu'aux bords : il
+ * s'encadre, laisse un liseré de scene tout autour, et coupe deux coins —
+ * ouvrir la fiche ne doit pas donner l'impression d'avoir quitte la partie.
+ *
+ * Le fond reste OPAQUE. La premiere version le posait a 95% pour laisser
+ * deviner le decor : sur du texte blanc, cinq pour cent suffisent a faire lire
+ * deux ecrans l'un sur l'autre, et la fiche devenait illisible pile au moment
+ * ou on la consulte. Le cadre interieur se trace en `outline` a decalage
+ * negatif et non en pseudo-element — sur .etat, qui defile, un pseudo-element
+ * absolu defilerait avec le contenu. */
+.opt,
+.etat {
   position: absolute;
-  inset: 0;
+  inset: calc(5 * var(--px));
   z-index: 8;
+  border: var(--px) solid var(--c1);
+  outline: var(--px) solid var(--n3);
+  outline-offset: calc(-3 * var(--px));
+  background: var(--n0);
+  clip-path: polygon(
+    0 calc(7 * var(--px)), calc(7 * var(--px)) 0,
+    100% 0, 100% calc(100% - 7 * var(--px)),
+    calc(100% - 7 * var(--px)) 100%, 0 100%
+  );
+}
+
+.opt {
   display: flex;
   flex-direction: column;
-  gap: calc(4 * var(--px));
-  padding: calc(12 * var(--px)) calc(14 * var(--px));
-  background: var(--n0);
+  gap: calc(3 * var(--px));
+  /* Le panneau a perdu dix rangees en s'encadrant : sans ce defilement, le
+   * bouton FERMER passait sous la decoupe et devenait purement et simplement
+   * incliquable — la scene de dessous recevait le clic a sa place. */
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: calc(6 * var(--px)) calc(9 * var(--px));
   font-family: 'Silkscreen', monospace;
   font-size: calc(8 * var(--px));
   color: var(--g1);
+}
+.opt::-webkit-scrollbar {
+  display: none;
 }
 .opt__titre {
   margin: 0 0 calc(4 * var(--px));
@@ -604,12 +675,8 @@ body {
 /* --- Fiche de partie ----------------------------------------------------- */
 
 .etat {
-  position: absolute;
-  inset: 0;
-  z-index: 8;
   overflow-y: auto;
-  padding: calc(8 * var(--px)) calc(10 * var(--px)) calc(6 * var(--px));
-  background: var(--n0);
+  padding: calc(7 * var(--px)) calc(9 * var(--px)) calc(6 * var(--px));
   font-family: 'Silkscreen', monospace;
   font-size: calc(8 * var(--px));
   line-height: calc(11 * var(--px));
