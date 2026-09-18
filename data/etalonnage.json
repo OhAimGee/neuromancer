@@ -1,0 +1,120 @@
+{
+  "_note": "Etalonnage des plans de parallaxe : comment un PNG RGB d'Ansimuz devient une image de nuit conforme a la palette 32 couleurs. Les sources vivent dans assets/parallax-src/, le resultat dans public/assets/parallax/. Relancer : tools/aseprite.sh tools/aseprite/etalonner.lua",
+  "profils": {
+    "_note": "desaturation : part de saturation conservee hors neon. plancher/plafond/gamma : la courbe de tonalite, appliquee a la valeur HSV — gamma creuse, puis on remet a l'echelle entre les deux bornes. Le plancher est ce qui empeche la rue de devenir un trou noir avec des enseignes dedans. teinte/melange : la couleur de nuit vers laquelle on tire, et de combien — module par l'obscurite du pixel d'origine. neon : ce qui echappe a tout cela, seuils volontairement hauts, une facade tiede n'est pas une enseigne. halo : diffusion cuite dans l'image, jamais un filtre au rendu. tramage : amplitude du Bayer 4x4 avant quantification, en niveaux de 0-255. neon.contraste : un pixel n'est declare neon que s'il a, a moins de deux pixels, un voisin nettement plus sombre ou du vide. C'est ce qui separe une enseigne d'une brume de coucher de soleil.",
+    "rue": {
+      "desaturation": 0.52,
+      "teinte": "0x0e1526",
+      "melange": 0.46,
+      "gamma": 1.22,
+      "plancher": 0.075,
+      "plafond": 0.62,
+      "neon": {
+        "saturation": 0.55,
+        "valeur": 0.7,
+        "gain": 1.0,
+        "contraste": 0.26
+      },
+      "halo": {
+        "rayon": 2,
+        "force": 0.22
+      },
+      "tramage": 18
+    },
+    "lointain": {
+      "desaturation": 0.34,
+      "teinte": "0x0b1122",
+      "melange": 0.72,
+      "gamma": 1.55,
+      "plancher": 0.045,
+      "plafond": 0.38,
+      "neon": {
+        "saturation": 0.58,
+        "valeur": 0.72,
+        "gain": 0.88,
+        "contraste": 0.22
+      },
+      "halo": {
+        "rayon": 2,
+        "force": 0.16
+      },
+      "tramage": 22
+    },
+    "proche": {
+      "desaturation": 0.44,
+      "teinte": "0x080c18",
+      "melange": 0.54,
+      "gamma": 1.3,
+      "plancher": 0.065,
+      "plafond": 0.58,
+      "neon": {
+        "saturation": 0.55,
+        "valeur": 0.7,
+        "gain": 1.0,
+        "contraste": 0.26
+      },
+      "halo": {
+        "rayon": 3,
+        "force": 0.22
+      },
+      "tramage": 16
+    },
+    "ciel": {
+      "desaturation": 0.2,
+      "teinte": "0x0a0f1e",
+      "melange": 0.86,
+      "gamma": 1.7,
+      "plancher": 0.035,
+      "plafond": 0.3,
+      "neon": {
+        "saturation": 0.62,
+        "valeur": 0.76,
+        "gain": 0.85,
+        "contraste": 0.3
+      },
+      "halo": {
+        "rayon": 2,
+        "force": 0.14
+      },
+      "tramage": 26
+    }
+  },
+  "images": [
+    {
+      "nom": "rue_fond",
+      "profil": "lointain"
+    },
+    {
+      "nom": "rue_milieu",
+      "profil": "rue"
+    },
+    {
+      "nom": "rue_avant",
+      "profil": "proche"
+    },
+    {
+      "nom": "ciel_fond",
+      "profil": "ciel"
+    },
+    {
+      "nom": "ciel_tours",
+      "profil": "rue"
+    },
+    {
+      "nom": "ciel_avant",
+      "profil": "proche"
+    },
+    {
+      "nom": "port_fond",
+      "profil": "lointain"
+    },
+    {
+      "nom": "port_milieu",
+      "profil": "rue"
+    },
+    {
+      "nom": "port_avant",
+      "profil": "proche"
+    }
+  ]
+}
