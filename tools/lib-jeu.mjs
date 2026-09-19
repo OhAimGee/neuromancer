@@ -124,6 +124,43 @@ export async function dansLeReseau(page) {
   return (await page.locator('.net canvas').count()) > 0;
 }
 
+/** Vrai quand le recit a rendu la main a un comptoir. */
+export async function auComptoir(page) {
+  return (await page.locator('.bout').count()) > 0;
+}
+
+/**
+ * Fait ses courses et ressort.
+ *
+ * Un outil qui joue au hasard doit savoir sortir du comptoir, sinon la partie
+ * s'arrete la : le comptoir n'a pas de `.dlg__bouton`, et `derouler()` ne
+ * trouve plus rien a faire. Il achete le premier article a sa portee dans
+ * chaque rayon — sans cela le seul chemin verifie serait celui du joueur
+ * fauche, et l'achat ne serait jamais joue nulle part.
+ */
+export async function passerComptoir(page, { capture = null } = {}) {
+  await page.waitForSelector('.bout', { timeout: 5_000 });
+  await page.waitForTimeout(150);
+  if (capture) await page.locator('.viewport').screenshot({ path: capture });
+
+  const achetes = [];
+  const rayons = await page.locator('.bout__rayon').count();
+  for (let r = 0; r < rayons; r++) {
+    await page.locator('.bout__rayon').nth(r).click();
+    await page.waitForTimeout(80);
+    const offre = page.locator('.bout__article:not(.bout__article--hors)');
+    if ((await offre.count()) === 0) continue;
+    const nom = ((await offre.first().locator('.bout__titre').textContent()) ?? '').trim();
+    await offre.first().click();
+    await page.waitForTimeout(120);
+    achetes.push(nom);
+  }
+
+  await page.locator('.bout__sortir').click();
+  await page.waitForTimeout(200);
+  return achetes;
+}
+
 /**
  * Mene une plongee au hasard et se debranche.
  *

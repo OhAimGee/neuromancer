@@ -21,6 +21,31 @@ export interface OptionsNavigation {
 }
 
 /**
+ * `Echap` et `Tab` pour un ecran de jeu.
+ *
+ * Ces deux touches appartenaient a `App`, qui posait son propre ecouteur des
+ * que la partie etait a l'ecran. Cela a tenu tant que les ecrans du dessous ne
+ * reclamaient aucune des deux — le comptoir a rendu la faute visible : `Echap`
+ * le fermait ET ouvrait les options par-dessus, parce que deux ecouteurs poses
+ * sur `window` recoivent la meme touche. Chaque ecran les porte donc lui-meme,
+ * dans son `surTouche`, et un seul ecran est actif a la fois.
+ */
+export function toucheGlobale(
+  e: KeyboardEvent,
+  { onOptions, onFiche }: { onOptions?: (() => void) | undefined; onFiche?: (() => void) | undefined },
+): boolean {
+  if (e.key === 'Escape' && onOptions) {
+    onOptions();
+    return true;
+  }
+  if (e.key === 'Tab' && onFiche) {
+    onFiche();
+    return true;
+  }
+  return false;
+}
+
+/**
  * Navigation au clavier d'une liste : fleches, `Entree`, `Echap`, et les
  * chiffres pour atteindre directement une entree.
  *

@@ -1,0 +1,57 @@
+{
+  "_note": "Le comptoir du Finn. Le recit l'ouvre par ~ ouvrir_boutique(\"finn\", \"<knot de retour>\"), exactement comme il ouvre la matrice par plonger() : le jeu rend la main au recit la ou le recit l'a dit.",
+
+  "_prix": "Un article de rayon 'script' porte son prix ici, parce qu'il ne vit nulle part ailleurs. Un article de rayon 'implant' n'en porte PAS : sa fiche complete — prix, cycles, humanite, effet chiffre — est deja dans data/implants.json, et recopier un prix dans deux fichiers est la facon la plus sure de les voir diverger. Le validateur refuse un prix sur un implant.",
+
+  "finn": {
+    "nom": "LE FINN",
+    "portrait": "port_finn",
+    "accueil": [
+      "— Regarde, touche pas, paie.",
+      "— Tu as de l'argent, ou tu as des questions ? Les questions, c'est plus cher.",
+      "— Ne compte pas devant moi. Ça me donne envie d'arrondir."
+    ],
+    "adieu": "— C'est ça. Referme derrière toi.",
+    "rayons": [
+      {
+        "id": "logiciel",
+        "titre": "LOGICIEL",
+        "type": "script",
+        "articles": [
+          {
+            "id": "mimic",
+            "prix": { "credits": 800 },
+            "resume": "Ne casse rien. Rend ennuyeux — et la trace redescend de quinze.",
+            "reglisse": "— Un opérateur ennuyeux vit plus vieux qu'un opérateur doué."
+          },
+          {
+            "id": "boucle",
+            "prix": { "credits": 1200 },
+            "resume": "Trois ticks pendant lesquels la trace oublie de compter.",
+            "reglisse": "— Trois. Pas quatre. Les gens meurent sur le quatrième."
+          },
+          {
+            "id": "virus_lent",
+            "prix": { "credits": 1000 },
+            "resume": "Affaiblit d'un rang la glace visée. Se recharge en deux ticks.",
+            "reglisse": "— Il ne perce pas. Il fatigue. Ce n'est pas le même métier."
+          }
+        ]
+      },
+      {
+        "id": "atelier",
+        "titre": "ATELIER",
+        "type": "implant",
+        "requiert": "plan",
+        "articles": [
+          { "id": "bande_passante", "reglisse": "— Le temps va te paraître plus large là-dedans. Ce n'est pas une impression, c'est l'horloge qui ment moins." },
+          { "id": "reflexes_neuraux", "reglisse": "— Tu sentiras la trace monter. Ça ne veut pas dire qu'elle ne monte plus. Beaucoup confondent, une fois." },
+          { "id": "coprocesseur", "reglisse": "— Un rang de glace en plus. Un. Les gens entendent deux, et on me les ramène en sac." },
+          { "id": "filtre_noir", "reglisse": "— La première frappe, il la boit. La deuxième, il regarde. Compte jusqu'à une." },
+          { "id": "lentilles_molly", "reglisse": "— Plus personne ne lira rien sur toi. Toi non plus, remarque." },
+          { "id": "glandes_toxiques", "reglisse": "— Deux sacs sous la langue. Ne les mords pas en dormant. Ce conseil est compris dans le prix." }
+        ]
+      }
+    ]
+  }
+}

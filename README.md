@@ -152,6 +152,20 @@ plusieurs lots : six plans volables, aucune paillasse.
 
 ![La fiche, plans volés et implants posés](docs/images/implants.png)
 
+### Le comptoir du Finn
+
+Le Finn est le seul marchand du jeu, et il a son propre écran. Le récit l'ouvre depuis une
+réplique et reprend là où il l'a dit — la même mécanique que la matrice. On y compare les prix
+côte à côte, on y lit l'effet chiffré d'un implant, et **ce qu'on ne peut pas encore acheter reste
+affiché**, avec la raison : c'est là qu'on apprend quels plans existent, donc ce qu'il faut aller
+voler.
+
+Ce qui reste du dialogue chez le Finn, ce sont les scènes : le testament de Lady 3Jane, l'antidote,
+la ROM du Dixie, et la proposition de fermer boutique pour venir sur un coup. Une transaction n'est
+pas une scène.
+
+![Le comptoir du Finn](docs/images/boutique.png)
+
 ![Le cyberespace](docs/images/cyberespace.png)
 
 Le passage d'un côté à l'autre du câble se voit : un voile de bandes horizontales pince l'image

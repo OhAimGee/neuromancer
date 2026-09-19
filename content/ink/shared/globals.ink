@@ -73,24 +73,23 @@ EXTERNAL plonger(point_acces, retour)
 === function plonger(point_acces, retour) ===
 ~ return 0
 
+// Ouvre le comptoir d'un marchand. Meme mecanique que plonger() : le recit
+// sort du dialogue, le jeu prend la main sur un ecran a lui, et reprend au knot
+// annonce. Le catalogue vit dans data/boutique.json, les prix dans
+// data/boutique.json pour les scripts et data/implants.json pour les implants.
+EXTERNAL ouvrir_boutique(marchand, retour)
+=== function ouvrir_boutique(marchand, retour) ===
+~ return 0
+
 // Ajoute un script a l'inventaire de la partie. Le recit ne connait que des
 // identifiants ; les nombres restent dans data/hacking.json.
 EXTERNAL acquerir_script(id)
 === function acquerir_script(id) ===
 ~ return 0
 
-// Vrai quand le plan d'implant a ete vole dans une base de donnees. Un plan
-// reste au dossier une fois l'implant pose : c'est de l'information, pas une
-// piece. C'est has_implant() qui empeche de le poser deux fois.
-EXTERNAL a_plan(id)
-=== function a_plan(id) ===
-~ return false
-
-// Pose un implant. Le prix est preleve dans le corps du choix, en clair, pour
-// que le cout affiche et l'arithmetique restent verifiables par le validateur.
-EXTERNAL poser_implant(id)
-=== function poser_implant(id) ===
-~ return 0
+// `a_plan` et `poser_implant` ont disparu d'ici avec l'atelier : la pose se
+// fait au comptoir (ouvrir_boutique), et le plan vole y est la condition
+// d'affichage de l'article. Le recit n'a plus a connaitre le contenu du sac.
 
 // Recrute un equipier. Sans effet si les trois places sont prises : le recit
 // doit donc verifier places_libres() avant de proposer.

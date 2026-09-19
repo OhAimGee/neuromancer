@@ -15,6 +15,8 @@ export interface EtatDialogue {
   peutContinuer: boolean;
   /** Le recit reclame une plongee sur ce point d'acces physique. */
   plongee: string | null;
+  /** Le recit ouvre le comptoir de ce marchand. Meme mecanique que `plongee`. */
+  boutique: string | null;
   /** Identifiant de la fin atteinte. Non nul = la partie est finie. */
   fin: string | null;
   /** Explication de regle reclamee par le recit, a montrer une fois par profil. */
@@ -32,6 +34,7 @@ const ETAT_VIDE: EtatDialogue = {
   entracte: null,
   peutContinuer: false,
   plongee: null,
+  boutique: null,
   fin: null,
   glose: null,
   musique: null,
@@ -51,9 +54,17 @@ interface Beat {
   scene: MiseEnScene;
 }
 
-/** Une plongee demandee par le recit, et le knot ou il reprendra ensuite. */
-interface Plongee {
-  point: string;
+/**
+ * Une main rendue au jeu par le recit, et le knot ou il reprendra ensuite.
+ *
+ * Une plongee et un comptoir sont la meme chose vue du moteur : le recit sort
+ * du dialogue, le jeu prend la main sur un ecran a lui, et rend la main la ou
+ * le recit l'a dit. Une seule forme pour les deux, donc un seul endroit ou se
+ * tromper de knot de retour.
+ */
+interface Passage {
+  /** Point d'acces physique, ou identifiant de marchand. */
+  cible: string;
   retour: string;
 }
 
@@ -107,7 +118,8 @@ export class MoteurDialogue {
   /** Texte du choix qui vient d'etre pris ; sert a marquer son echo. */
   private repliqueAttendue: string | null = null;
   private sceneAResoudre: string | null = null;
-  private plongeeDemandee: Plongee | null = null;
+  private plongeeDemandee: Passage | null = null;
+  private boutiqueDemandee: Passage | null = null;
   private finEnregistree = false;
   private demarre = false;
 
@@ -153,7 +165,14 @@ export class MoteurDialogue {
     // sur-le-champ : le moteur lit une replique d'avance, et la plongee doit
     // attendre que le joueur ait fini de lire ce qui est a l'ecran.
     lier('plonger', ((point: string, retour: string) => {
-      this.plongeeDemandee = { point: String(point), retour: String(retour) };
+      this.plongeeDemandee = { cible: String(point), retour: String(retour) };
+      return 0;
+    }) as never);
+
+    // Meme mecanique, meme raison de differer : le comptoir ne doit pas
+    // s'ouvrir sous une replique que le joueur n'a pas encore lue.
+    lier('ouvrir_boutique', ((id: string, retour: string) => {
+      this.boutiqueDemandee = { cible: String(id), retour: String(retour) };
       return 0;
     }) as never);
 
@@ -167,15 +186,6 @@ export class MoteurDialogue {
 
     lier('acquerir_script', ((id: string) => {
       useRunStore.getState().acquerir('scripts', String(id));
-      return 0;
-    }) as never);
-
-    // Le plan vole est la condition d'entree de l'atelier du Finn : c'est ce
-    // qui relie le pillage a autre chose qu'un solde de credits.
-    lier('a_plan', ((id: string) => useRunStore.getState().plans.includes(String(id))) as never);
-
-    lier('poser_implant', ((id: string) => {
-      useRunStore.getState().acquerir('implants', String(id));
       return 0;
     }) as never);
 
@@ -273,6 +283,18 @@ export class MoteurDialogue {
     this.reprendre(flatline ? KNOT_FLATLINE : (demande?.retour ?? KNOT_HUB));
   }
 
+  /**
+   * Fermeture du comptoir. `reprendre()` repousse l'etat du store vers Ink,
+   * donc les credits, les cycles et l'humanite depenses au comptoir sont
+   * connus du recit des la replique suivante — sans quoi le Finn pourrait
+   * encore proposer un implant deja paye.
+   */
+  fermerBoutique(): void {
+    const demande = this.boutiqueDemandee;
+    this.boutiqueDemandee = null;
+    this.reprendre(demande?.retour ?? KNOT_HUB);
+  }
+
   /** Reprend la lecture apres un saut : replique courante, puis son avance. */
   private recharger(): void {
     const beat = this.consommer();
@@ -366,7 +388,9 @@ export class MoteurDialogue {
 
     // La plongee attend que le joueur ait lu ce qui est a l'ecran : sinon la
     // matrice s'ouvrirait sous une replique qu'il n'a pas encore vue.
-    const plongee = !enAttenteDeLecture && fin === null ? (this.plongeeDemandee?.point ?? null) : null;
+    const rendLaMain = !enAttenteDeLecture && fin === null;
+    const plongee = rendLaMain ? (this.plongeeDemandee?.cible ?? null) : null;
+    const boutique = rendLaMain ? (this.boutiqueDemandee?.cible ?? null) : null;
 
     this.etat = {
       ligne: this.courant?.ligne ?? null,
@@ -375,11 +399,17 @@ export class MoteurDialogue {
       entracte: this.courant?.scene.entracte ?? null,
       peutContinuer: enAttenteDeLecture,
       plongee,
+      boutique,
       fin,
       glose: this.courant?.scene.glose ?? null,
       musique: this.courant?.scene.musique ?? null,
       sfx: this.courant?.scene.sfx ?? null,
-      termine: !enAttenteDeLecture && choix.length === 0 && plongee === null && fin === null,
+      termine:
+        !enAttenteDeLecture &&
+        choix.length === 0 &&
+        plongee === null &&
+        boutique === null &&
+        fin === null,
     };
     this.notifier();
   }

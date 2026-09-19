@@ -16,7 +16,7 @@ import {
 import type { EtatSession } from '@/hacking/types';
 import { useProfileStore } from '@/stores/profileStore';
 import { useRunStore } from '@/stores/runStore';
-import { useNavigationClavier } from './useNavigationClavier';
+import { toucheGlobale, useNavigationClavier } from './useNavigationClavier';
 
 const LIGNES_JOURNAL = 3;
 
@@ -26,9 +26,18 @@ interface Props {
   /** `flatline` vrai : Sable est reste dans la matrice, le recit en tient compte. */
   onSortie: (flatline: boolean) => void;
   actif?: boolean;
+  onOptions?: () => void;
+  onFiche?: () => void;
 }
 
-export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie, actif = true }: Props) {
+export function Cyberespace({
+  pointAcces: idPointAcces,
+  graine,
+  onSortie,
+  actif = true,
+  onOptions,
+  onFiche,
+}: Props) {
   const competence = useRunStore((e) => e.competences['hacking'] ?? 0);
   const scriptsPossedes = useRunStore((e) => e.scripts);
   const implantsPoses = useRunStore((e) => e.implants);
@@ -163,9 +172,9 @@ export function Cyberespace({ pointAcces: idPointAcces, graine, onSortie, actif 
         }
         return true;
       }
-      return false;
+      return toucheGlobale(e, { onOptions, onFiche });
     },
-    [enCours, encaisser, cible, voisin, ici, scripts, etat.recharges, voisins],
+    [enCours, encaisser, cible, voisin, ici, scripts, etat.recharges, voisins, onOptions, onFiche],
   );
 
   // `nombre: 0` : cet ecran n'a pas de liste a parcourir, tout passe par

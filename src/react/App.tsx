@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import { MoteurDialogue } from '@/dialogue/moteur';
 import { useRunStore } from '@/stores/runStore';
 import { useUiStore } from '@/stores/uiStore';
+import { Boutique } from './Boutique';
 import { Cyberespace } from './Cyberespace';
 import { Decor } from './Decor';
 import { Dialogue } from './Dialogue';
@@ -68,30 +69,6 @@ export function App() {
   // quel panneau est ouvert.
   const couche: Couche = !lance ? 'titre' : options ? 'options' : fiche ? 'fiche' : 'jeu';
 
-  // Echap FERME d'abord ce qui est ouvert, et n'ouvre les options que s'il n'y
-  // a rien a fermer — c'est ce que le joueur attend de cette touche. Tab
-  // bascule la fiche de partie. Les panneaux gerent leur propre Echap ; celui-ci
-  // ne sert qu'a l'ouvrir depuis la scene.
-  //
-  // L'ecran-titre n'est PAS dans cette couche : il a son propre crochet de
-  // navigation, et c'est lui qui y branche Echap. Deux ecouteurs sur le meme
-  // ecran sont exactement ce que le crochet existe pour eviter, meme quand ils
-  // se partagent les touches sans se marcher dessus aujourd'hui.
-  useEffect(() => {
-    if (couche !== 'jeu') return;
-    const onTouche = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setOptions(true);
-      } else if (e.key === 'Tab') {
-        e.preventDefault();
-        setFiche((v) => !v);
-      }
-    };
-    window.addEventListener('keydown', onTouche);
-    return () => window.removeEventListener('keydown', onTouche);
-  }, [couche]);
-
   return (
     <div className="stage">
       <div
@@ -105,6 +82,8 @@ export function App() {
             surPlongee={setPlongee}
             onRejouer={rejouer}
             actif={couche === 'jeu'}
+            onOptions={() => setOptions(true)}
+            onFiche={() => setFiche((v) => !v)}
           />
         ) : (
           <Titre
@@ -159,12 +138,16 @@ function Partie({
   surPlongee,
   onRejouer,
   actif,
+  onOptions,
+  onFiche,
 }: {
   moteur: MoteurDialogue;
   plongee: number;
   surPlongee: (f: (n: number) => number) => void;
   onRejouer: () => void;
   actif: boolean;
+  onOptions: () => void;
+  onFiche: () => void;
 }) {
   const etat = useSyncExternalStore(moteur.souscrire, moteur.lire);
   const numero = useRef(plongee);
@@ -196,6 +179,22 @@ function Partie({
     [moteur, surPlongee],
   );
 
+  // Le comptoir : meme aiguillage que la matrice, et pour la meme raison —
+  // c'est le recit qui l'ouvre et qui nomme le knot ou il reprendra.
+  if (etat.boutique !== null) {
+    return (
+      <>
+        <Decor moteur={moteur} />
+        <Boutique
+          marchand={etat.boutique}
+          onFermer={() => moteur.fermerBoutique()}
+          actif={actif}
+          onFiche={onFiche}
+        />
+      </>
+    );
+  }
+
   if (etat.plongee !== null) {
     numero.current = plongee;
     return (
@@ -205,6 +204,8 @@ function Partie({
           graine={`plongee-${plongee}`}
           onSortie={sortir}
           actif={actif}
+          onOptions={onOptions}
+          onFiche={onFiche}
         />
         {voile}
       </>
@@ -214,7 +215,7 @@ function Partie({
   return (
     <>
       <Decor moteur={moteur} />
-      <Dialogue moteur={moteur} actif={actif && etat.fin === null} />
+      <Dialogue moteur={moteur} actif={actif} onOptions={onOptions} onFiche={onFiche} />
       {etat.fin !== null && !etat.peutContinuer && (
         <Fin id={etat.fin} onRejouer={onRejouer} />
       )}

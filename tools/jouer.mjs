@@ -9,7 +9,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { dansLeReseau, derouler, ouvrirJeu, plongerAuHasard } from './lib-jeu.mjs';
+import { auComptoir, dansLeReseau, derouler, ouvrirJeu, passerComptoir, plongerAuHasard } from './lib-jeu.mjs';
 
 const dossier = process.argv[2] ?? 'captures';
 const strategie = process.argv[3] ?? 'premier';
@@ -35,6 +35,12 @@ while (etape < 120) {
     continue;
   }
 
+  if (await auComptoir(page)) {
+    const achetes = await passerComptoir(page);
+    console.log(`\n=== comptoir : ${achetes.length ? achetes.join(', ') : 'rien a ma portee'}\n`);
+    continue;
+  }
+
   await derouler(page, {
     surReplique: async ({ nom, texte }) => {
       console.log(`   ${nom ? `[${nom}] ` : '           '}${texte}`);
@@ -50,6 +56,7 @@ while (etape < 120) {
     break;
   }
   if (await dansLeReseau(page)) continue;
+  if (await auComptoir(page)) continue;
 
   const boutons = page.locator('.dlg__bouton');
   const n = await boutons.count();

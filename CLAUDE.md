@@ -207,31 +207,75 @@ en quatre maillons, et il suffit qu'un seul lache pour que le hacking redevienne
 | Maillon | Ou |
 |---|---|
 | Le plan se pille | `data/hacking.json` → `plans`, tire par le butin des BDD |
-| Le recit le voit | `a_plan("<id>")`, lu dans `scenes/finn.ink` |
-| La pose l'ecrit | `poser_implant("<id>")` → `runStore.implants` |
+| Le comptoir le voit | `data/boutique.json` → rayon `atelier`, resolu par `src/boutique/catalogue.ts` |
+| L'achat l'ecrit | `runStore.acheter('implants', id, cout)` |
 | L'effet s'applique | `data/implants.json` → `src/hacking/implants.ts`, lu par `demarrer()` |
 
 - **Les effets sont figes au branchement**, comme la competence : `demarrer()` est le seul endroit
   qui lit les implants. `traceMax`, `cyclesParTicks` et `filtres` vivent donc dans `EtatSession`
   et non dans `data/hacking.json` — un implant les deplace. Relire `donnees.trace.max` dans
   `tracer()` annulerait silencieusement les reflexes neuraux ; un test le verrouille.
-- **Le prix se preleve dans le corps du choix, en clair** (`~ credits -= 2400`), parce que le
-  validateur compare le cout affiche a l'arithmetique Ink. Un `poser_implant()` qui prelevererait
-  lui-meme rendrait ce controle aveugle.
+- **Le prix d'un implant vit dans `data/implants.json`, et nulle part ailleurs.** Le catalogue de
+  la boutique ne le recopie pas — le validateur refuse un `prix` sur un article d'atelier. Trois
+  monnaies recopiees dans deux fichiers sont la facon la plus sure de les voir diverger, et le
+  joueur paierait alors un prix que l'equilibrage ignore.
 - **Un plan reste au dossier apres la pose** : c'est de l'information volee, pas une piece
   consommee. C'est `has_implant()` qui empeche de poser deux fois, et la fiche de partie filtre
   les plans deja montes pour ne pas afficher le meme objet dans deux sections.
 - **L'etiquette `[IMPLANT]` decrit une porte que seul un implant DEJA pose ouvre**
   (`data/gloses.json`). Elle n'a rien a faire sur un choix d'achat — la mettre la etait la
   premiere version, et elle contredisait la glose que le jeu affiche au joueur.
-- `npm run validate:narrative` refuse desormais un plan pillable qu'aucun `a_plan()` ne monte et
-  un implant de `data/implants.json` qu'aucun `poser_implant()` n'appelle. Les deux controles ont
-  ete verifies contre des fautes introduites volontairement.
+- `npm run validate:narrative` refuse un plan pillable qu'aucun article d'atelier ne monte, un
+  implant de `data/implants.json` que nul comptoir ne vend, un article dont l'identifiant n'existe
+  nulle part, un script sans prix, un prix recopie sur un implant, et un marchand qu'aucun
+  `ouvrir_boutique()` n'ouvre. Les six controles ont ete verifies contre des fautes introduites
+  volontairement.
 - **Sonde de developpement `window.__runStore`** (comme `window.__noeudsVisibles`) : l'etat de
   partie est jetable et ne passe pas par `localStorage` au demarrage, donc un outil de
   verification n'a aucun autre moyen de poser un butin avant d'ouvrir l'atelier. `vitrine.mjs`
   s'en sert pour la capture de la fiche, et remet les listes a vide aussitot apres. Retiree du
   build.
+
+---
+
+## Le comptoir — quand le recit cede la transaction
+
+`data/boutique.json` + `src/boutique/catalogue.ts` + `src/react/Boutique.tsx`. Le recit l'ouvre
+par `~ ouvrir_boutique("finn", "finn.retour_comptoir")` puis `-> DONE`, et le jeu rend la main par
+`moteur.fermerBoutique()`. **C'est exactement `plonger()` / `terminerPlongee()`**, et les deux
+partagent la meme structure `Passage` dans `moteur.ts` : un seul endroit ou se tromper de knot de
+retour.
+
+Pourquoi un ecran et pas des choix Ink : **un libelle de choix EST la replique de Sable**, piege
+des crochets oblige. Un comptoir ecrit en Ink obligeait donc a ecrire « Acheter un MIMIC. Huit
+cents. » — une phrase que Sable prononce ensuite a voix haute. Comparer trois prix, lire un effet
+chiffre et voir ce qui manque sont des gestes d'inventaire, pas des repliques.
+
+**La frontiere : le recit garde les SCENES, le comptoir prend les TRANSACTIONS.** Le testament de
+3Jane, l'antidote, le recrutement du Finn et la ROM du Dixie restent dans `finn.ink` — ce sont des
+scenes, avec un avant et un apres. L'achat d'un script n'en est pas une.
+
+- **Un article hors de portee reste affiche, lisible et visable au clavier**, avec la raison
+  (`Le Finn n'a pas le plan. Vole-le.`). Le masquer priverait le pillage de son objectif nomme :
+  c'est ici qu'un joueur apprend quels plans existent.
+- **La fiche est SOUS la liste et non a cote.** En deux colonnes, la colonne des noms tombait a
+  neuf caracteres sur une fenetre de 320 : `BANDE PASSANTE` s'affichait « BANDE PASS... ».
+- La liste defile — six implants ne tiennent pas dans 180 pixels — donc le curseur clavier
+  entraine le defilement (`scrollIntoView`), et un compteur `↕ 3/6` dit que la liste continue.
+- Le Finn commente l'article visé : sa phrase d'accueil ne sert plus que quand rien n'est choisi.
+
+### `Echap` : une touche, un seul ecouteur
+
+Le comptoir a rendu visible une faute qui dormait depuis le lot du clavier. `App` posait son
+propre `keydown` des que la partie etait a l'ecran (`Echap` → options, `Tab` → fiche) : cela a
+tenu tant qu'aucun ecran du dessous ne reclamait ces deux touches. Le comptoir reclame `Echap`
+pour se fermer — et `Echap` le fermait **et** ouvrait les options par-dessus.
+
+`App` n'ecoute donc plus rien pendant la partie. `Echap` et `Tab` passent par `toucheGlobale()`,
+appelee depuis le `surTouche` de l'ecran actif — `Dialogue`, `Cyberespace`, `Boutique` — et un
+seul ecran est actif a la fois. Le comptoir ne passe volontairement pas `onOptions` : son `Echap`
+lui appartient. `node tools/clavier.mjs` verifie precisement cela — apres l'`Echap` qui ferme le
+comptoir, il exige qu'aucun `.opt` ne soit ouvert.
 
 ---
 
@@ -405,23 +449,25 @@ même encaisser un clic qui ne fait que révéler.
 Le jeu se joue entièrement sans souris, de la première réplique à la fin. Tout passe par
 `src/react/useNavigationClavier.ts`, et c'est une règle, pas une commodité.
 
-| Touche | Dialogue | Fiche / options | Cyberespace |
-|---|---|---|---|
-| `↑` `↓` | choix précédent / suivant | — | nœud voisin précédent / suivant |
-| `Entrée` | valider le choix visé, sinon avancer la réplique | — | ALLER, ou encaisser le butin |
-| `Espace` | avancer la réplique, fermer un entracte | — | — |
-| `1`…`9` | prendre directement le n-ième choix | — | exécuter le n-ième script |
-| `Tab` | fiche de partie | — | fiche de partie |
-| `Échap` | **ouvrir** les options | **fermer** le panneau | ouvrir les options |
-| `A` | — | — | piller |
-| `Ret. arr.` | — | — | se débrancher / encaisser |
+| Touche | Dialogue | Comptoir | Fiche / options | Cyberespace |
+|---|---|---|---|---|
+| `↑` `↓` | choix précédent / suivant | article précédent / suivant | — | nœud voisin précédent / suivant |
+| `←` `→` | — | changer de rayon | — | — |
+| `Entrée` | valider le choix visé, sinon avancer la réplique | acheter | — | ALLER, ou encaisser le butin |
+| `Espace` | avancer la réplique, fermer un entracte | — | — | — |
+| `1`…`9` | prendre directement le n-ième choix | — | — | exécuter le n-ième script |
+| `Tab` | fiche de partie | fiche de partie | — | fiche de partie |
+| `Échap` | **ouvrir** les options | **sortir** du comptoir | **fermer** le panneau | ouvrir les options |
+| `A` | — | — | — | piller |
+| `Ret. arr.` | — | — | — | se débrancher / encaisser |
 
 - **Un seul écouteur `window` à la fois.** `App.tsx` calcule une `couche`
   (`titre` / `jeu` / `fiche` / `options`) et ne passe `actif` qu'à celle du dessus. Sans cette
   règle, `Entrée` validait un choix de dialogue **et** fermait la fiche posée par-dessus : deux
   écouteurs posés sur `window` reçoivent la même touche, et rien dans l'ordre du DOM ne dit lequel
   est au-dessus. C'est arrivé, et le symptôme (« la fiche se referme toute seule ») n'accuse
-  jamais le bon fichier.
+  jamais le bon fichier. **`App` n'écoute plus rien lui-même** : `Échap` et `Tab` passent par
+  `toucheGlobale()`, appelée depuis le `surTouche` de l'écran actif — voir « Le comptoir ».
 - **`Échap` ouvre, il ne bascule pas.** Un `Échap` qui bascule ferme la fiche *et* ouvre les
   options dans la même pression, parce que les deux écrans le voient. Les panneaux se ferment
   eux-mêmes, par leur propre `surFermer`.

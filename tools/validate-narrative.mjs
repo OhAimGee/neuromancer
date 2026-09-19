@@ -158,36 +158,88 @@ if (infosMortes.length > 0) {
   );
 }
 
-// Meme regle pour les plans. Un plan volable qu'aucun atelier ne sait poser est
-// exactement le meme butin mort qu'une info que personne ne lit, et c'est la
-// forme qu'avait le jeu jusqu'au lot des implants : six plans pillables, aucune
-// paillasse pour les monter.
-const plansPosables = new Set(
-  [...sourcesInk.matchAll(/a_plan\(\s*"([^"]+)"\s*\)/g)].map((m) => m[1]),
-);
-const plansMorts = hacking.plans.filter((id) => !plansPosables.has(id));
-if (plansMorts.length > 0) {
-  erreurs.push(
-    `dette narrative : ${plansMorts.length}/${hacking.plans.length} plans pillables ne sont ` +
-    `poses par aucun a_plan() dans content/ink — ${plansMorts.join(', ')}`,
-  );
-}
+// --- Le comptoir : la chaine du plan reste fermee -------------------------
+//
+// Les achats ont quitte le recit pour data/boutique.json, et le controle de
+// coherence les a suivis. Il verifiait jusqu'ici que le cout affiche sur un
+// choix correspondait a l'arithmetique Ink de son corps ; ces achats n'ayant
+// plus de corps Ink, ce controle perdrait sa cible et la maille la plus fragile
+// du jeu ne serait plus surveillee par personne.
+//
+// La chaine a quatre maillons — le plan se pille, le comptoir le reconnait, la
+// pose l'ecrit, l'effet s'applique — et il suffit qu'un seul lache pour que le
+// hacking redevienne decoratif.
 
-// Et l'inverse : un implant decrit dans data/implants.json que rien ne pose est
-// une ligne d'equilibrage qui ne s'applique jamais.
 const implantsData = JSON.parse(
   fs.readFileSync(path.join(RACINE, 'data/implants.json'), 'utf-8'),
 );
-const implantsPoses = new Set(
-  [...sourcesInk.matchAll(/poser_implant\(\s*"([^"]+)"\s*\)/g)].map((m) => m[1]),
+const boutique = JSON.parse(fs.readFileSync(path.join(RACINE, 'data/boutique.json'), 'utf-8'));
+
+const idsImplants = new Set(implantsData.implants.map((i) => i.id));
+const idsScripts = new Set(hacking.scripts.map((s) => s.id));
+const vendus = { script: new Set(), implant: new Set() };
+const marchandsOuverts = new Set(
+  [...sourcesInk.matchAll(/ouvrir_boutique\(\s*"([^"]+)"\s*,/g)].map((m) => m[1]),
 );
+
+for (const [marchand, fiche] of Object.entries(boutique)) {
+  if (marchand.startsWith('_')) continue;
+  if (!marchandsOuverts.has(marchand)) {
+    erreurs.push(
+      `boutique '${marchand}' : aucun ouvrir_boutique("${marchand}", ...) dans content/ink — ` +
+      `un catalogue qu'aucune replique n'ouvre est un ecran mort`,
+    );
+  }
+  for (const rayon of fiche.rayons ?? []) {
+    for (const article of rayon.articles ?? []) {
+      const ou = `boutique ${marchand}/${rayon.id} '${article.id}'`;
+      if (rayon.type === 'script') {
+        if (!idsScripts.has(article.id)) {
+          erreurs.push(`${ou} : aucun script de ce nom dans data/hacking.json`);
+        }
+        if (!(article.prix?.credits > 0)) {
+          erreurs.push(`${ou} : un script se vend, donc il porte un prix en credits`);
+        }
+        vendus.script.add(article.id);
+      } else if (rayon.type === 'implant') {
+        if (!idsImplants.has(article.id)) {
+          erreurs.push(`${ou} : aucun implant de ce nom dans data/implants.json`);
+        }
+        // Le prix d'un implant vit dans sa fiche, et NULLE PART ailleurs.
+        // Recopier trois monnaies dans deux fichiers est la facon la plus sure
+        // de les voir diverger, et le joueur paierait alors un prix que
+        // l'equilibrage ignore.
+        if (article.prix !== undefined) {
+          erreurs.push(
+            `${ou} : un article d'atelier ne porte pas de prix — il vient de data/implants.json`,
+          );
+        }
+        vendus.implant.add(article.id);
+      } else {
+        erreurs.push(`${ou} : type de rayon inconnu '${rayon.type}'`);
+      }
+    }
+  }
+}
+
+// Un plan volable qu'aucun atelier ne sait monter est exactement le meme butin
+// mort qu'une info que personne ne lit, et c'est la forme qu'avait le jeu
+// jusqu'au lot des implants : six plans pillables, aucune paillasse.
+const plansMorts = hacking.plans.filter((id) => !vendus.implant.has(id));
+if (plansMorts.length > 0) {
+  erreurs.push(
+    `dette narrative : ${plansMorts.length}/${hacking.plans.length} plans pillables ne sont ` +
+    `montes par aucun article d'atelier de data/boutique.json — ${plansMorts.join(', ')}`,
+  );
+}
+
+// Et l'inverse : un implant decrit dans data/implants.json que nul ne vend est
+// une ligne d'equilibrage qui ne s'applique jamais.
 const implantsOrphelins = implantsData.implants
   .map((i) => i.id)
-  .filter((id) => !implantsPoses.has(id));
+  .filter((id) => !vendus.implant.has(id));
 if (implantsOrphelins.length > 0) {
-  erreurs.push(
-    `implants jamais poses par le recit : ${implantsOrphelins.join(', ')}`,
-  );
+  erreurs.push(`implants qu'aucun comptoir ne vend : ${implantsOrphelins.join(', ')}`);
 }
 
 // --- Sons : un identifiant que la table ne connait pas est un silence ------
@@ -324,14 +376,6 @@ function jouerUnePartie(permissif = false) {
   // qu'on n'a plus ne decrirait aucun joueur. C'est ce qui fait entrer
   // l'atelier du Finn dans la passe aleatoire — sans lui, les six choix de
   // pose ne seraient jamais joues.
-  const plans = new Map();
-  lier('a_plan', (id) => {
-    if (permissif) return true;
-    const cle = String(id);
-    if (!plans.has(cle)) plans.set(cle, dé() < 0.4);
-    return plans.get(cle);
-  });
-  lier('poser_implant', () => 0);
   lier('crew_present', () => (permissif ? true : dé() < 0.3));
   lier('learn', () => 0);
   lier('resolve_scene', () => 0);
@@ -347,6 +391,16 @@ function jouerUnePartie(permissif = false) {
     return 0;
   });
 
+  // Le comptoir rend la main comme la plongee. Sans ce relais, la scene du Finn
+  // s'arreterait sur `-> DONE` des le premier passage par le comptoir, et tout
+  // ce qui suit — le recrutement, le Dixie, la cabine — serait declare
+  // inatteignable.
+  let retourDeBoutique = null;
+  lier('ouvrir_boutique', (_marchand, retour) => {
+    retourDeBoutique = String(retour);
+    return 0;
+  });
+
   let garde = 0;
   while (garde++ < 2000) {
     while (story.canContinue) {
@@ -358,6 +412,12 @@ function jouerUnePartie(permissif = false) {
     }
     if (story.currentChoices.length > 0) {
       story.ChooseChoiceIndex(choisirNouveau(story));
+      continue;
+    }
+    if (retourDeBoutique !== null) {
+      const sortie = retourDeBoutique;
+      retourDeBoutique = null;
+      story.ChoosePathString(sortie);
       continue;
     }
     if (retourDePlongee === null) break;

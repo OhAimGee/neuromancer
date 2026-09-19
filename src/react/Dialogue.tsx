@@ -8,7 +8,7 @@ import { useUiStore } from '@/stores/uiStore';
 import type { Etiquette } from '@/types/jeu';
 import { Boite } from './Boite';
 import { useMachineAEcrire } from './useMachineAEcrire';
-import { useNavigationClavier } from './useNavigationClavier';
+import { toucheGlobale, useNavigationClavier } from './useNavigationClavier';
 
 const GLOSES = gloses as Record<string, string>;
 
@@ -24,9 +24,11 @@ const COULEUR_ETIQUETTE: Record<Etiquette, string> = {
 interface Props {
   moteur: MoteurDialogue;
   actif?: boolean;
+  onOptions?: () => void;
+  onFiche?: () => void;
 }
 
-export function Dialogue({ moteur, actif = true }: Props) {
+export function Dialogue({ moteur, actif = true, onOptions, onFiche }: Props) {
   const etat = useSyncExternalStore(moteur.souscrire, moteur.lire);
   const cycles = useRunStore((e) => e.cycles);
   const humanite = useRunStore((e) => e.humanite);
@@ -120,9 +122,9 @@ export function Dialogue({ moteur, actif = true }: Props) {
         continuer();
         return true;
       }
-      return false;
+      return toucheGlobale(e, { onOptions, onFiche });
     },
-    [entracte, fermerEntracte, continuer, choixOuverts],
+    [entracte, fermerEntracte, continuer, choixOuverts, onOptions, onFiche],
   );
 
   const { vise, viser } = useNavigationClavier({

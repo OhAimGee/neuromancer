@@ -58,6 +58,8 @@ interface RunActions {
   placesLibres: () => number;
   gagnerCredits: (n: number) => void;
   acquerir: (categorie: 'plans' | 'scripts' | 'implants', id: string) => void;
+  /** Achat au comptoir : paie les trois monnaies et pose l'objet, ou rien. */
+  acheter: (categorie: 'scripts' | 'implants', id: string, cout: Cout) => boolean;
   demarrerHorloge: () => void;
   terminer: () => void;
 }
@@ -152,6 +154,17 @@ export const useRunStore = create<RunEtat & RunActions>()(
 
       acquerir: (categorie, id) =>
         set((e) => (e[categorie].includes(id) ? e : { [categorie]: [...e[categorie], id] })),
+
+      // Un seul endroit paie. Le prix se prelevait jusqu'ici dans le corps du
+      // choix Ink, en clair, pour que le validateur puisse comparer le cout
+      // affiche a l'arithmetique ; le comptoir sort ces achats du recit, et
+      // c'est le catalogue que le validateur controle desormais.
+      acheter: (categorie, id, cout) => {
+        if (get()[categorie].includes(id)) return false;
+        if (!get().payer(cout)) return false;
+        get().acquerir(categorie, id);
+        return true;
+      },
 
       demarrerHorloge: () => set({ horlogeLancee: true }),
 

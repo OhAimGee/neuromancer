@@ -13,7 +13,14 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { ouvrirJeu, derouler, passerEntracte, dansLeReseau, plongerAuHasard } from './lib-jeu.mjs';
+import {
+  ouvrirJeu,
+  derouler,
+  passerEntracte,
+  auComptoir,
+  dansLeReseau,
+  plongerAuHasard,
+} from './lib-jeu.mjs';
 
 const DOSSIER = 'docs/images';
 fs.mkdirSync(DOSSIER, { recursive: true });
@@ -165,6 +172,47 @@ if (!posable) {
   await page.waitForSelector('.etat', { state: 'detached', timeout: 3000 });
   await page.evaluate(() => window.__runStore.setState({ plans: [], implants: [] }));
 }
+
+// 6 ter. Le comptoir du Finn, rayon ATELIER.
+//
+// Meme raison de poser l'etat plutot que de le jouer : sans plan vole ni
+// credits, la capture ne montrerait qu'une liste grisee — ce qui est pourtant
+// bien ce que voit un joueur qui arrive les mains vides, et c'est pour cela que
+// les articles hors de portee restent lisibles a l'ecran.
+await page.evaluate(() => {
+  const run = window.__runStore.getState();
+  for (const id of ['coprocesseur', 'bande_passante']) run.acquerir('plans', id);
+  window.__runStore.setState({ credits: 4200 });
+});
+await page.locator('.dlg__bouton', { hasText: 'Descendre chez le Finn' }).first().click();
+await page.waitForTimeout(200);
+while (await avancer());
+const versComptoir = page.locator('.dlg__bouton', { hasText: 'sous le comptoir' });
+if ((await versComptoir.count()) === 0) {
+  console.error('le comptoir du Finn est introuvable depuis son menu');
+  process.exitCode = 1;
+} else {
+  await versComptoir.first().click();
+  await page.waitForTimeout(200);
+  while (await avancer());
+  if (!(await auComptoir(page))) {
+    console.error('ouvrir_boutique n’a pas rendu la main au jeu');
+    process.exitCode = 1;
+  } else {
+    await page.locator('.bout__rayon', { hasText: 'ATELIER' }).click();
+    await page.waitForTimeout(200);
+    await capturer('boutique');
+    await page.locator('.bout__sortir').click();
+    await page.waitForTimeout(250);
+  }
+}
+await page.evaluate(() => window.__runStore.setState({ plans: [], credits: 0 }));
+while (await avancer());
+// On remonte explicitement : le premier choix du menu du Finn rouvre le
+// comptoir, et `jusqua` prend toujours le premier.
+await page.locator('.dlg__bouton', { hasText: 'Je remonte' }).first().click();
+await page.waitForTimeout(200);
+await jusqua(auHub);
 
 // 7. Le cyberespace, une fois branche et deux noeuds plus loin.
 // Le voile de branchement ne dure que six dixiemes de seconde : on ne le

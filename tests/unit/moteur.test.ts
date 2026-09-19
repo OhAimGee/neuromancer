@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { compileInk } from '../../tools/compile-ink.mjs';
+import { etalage, type Article } from '@/boutique/catalogue';
 import { MoteurDialogue } from '@/dialogue/moteur';
+import { implant } from '@/hacking/implants';
 import { useProfileStore } from '@/stores/profileStore';
 import { useRunStore } from '@/stores/runStore';
 
@@ -348,61 +350,127 @@ describe('acte III — les frictions par paire', () => {
   });
 });
 
-// --- L'atelier du Finn -----------------------------------------------------
+// --- Le comptoir du Finn ---------------------------------------------------
 //
 // C'est la seule chose qui relie un plan vole a autre chose qu'une ligne
-// d'inventaire. Le recit lit `a_plan()`, paie en clair, et appelle
-// `poser_implant()` : les trois maillons se testent ensemble, parce qu'il
-// suffit qu'un seul lache pour que le butin redevienne mort.
-describe('acte II — la pose d’implants', () => {
+// d'inventaire. La chaine a quatre maillons — le plan se pille, le comptoir le
+// reconnait, l'achat l'ecrit, l'effet s'applique — et il suffit qu'un seul
+// lache pour que le hacking redevienne decoratif. Ils se testent donc ensemble.
+describe('acte II — le comptoir et la pose d’implants', () => {
   beforeEach(() => {
     useRunStore.getState().nouvellePartie();
     useProfileStore.getState().reinitialiser();
   });
 
-  /** Amene le moteur devant la paillasse du Finn. */
-  function aLAtelier(m: MoteurDialogue): void {
+  /** L'etalage tel qu'il se presente a cet instant de la partie en cours. */
+  function comptoir() {
+    const r = useRunStore.getState();
+    const m = etalage('finn', { scripts: r.scripts, implants: r.implants, plans: r.plans });
+    if (m === null) throw new Error('le marchand finn est absent de data/boutique.json');
+    return m;
+  }
+
+  function article(id: string): Article {
+    for (const rayon of comptoir().rayons) {
+      const a = rayon.articles.find((x) => x.id === id);
+      if (a) return a;
+    }
+    throw new Error(`article ${id} absent du comptoir`);
+  }
+
+  // Le recit rend la main au jeu, et le jeu la rend au recit : c'est la meme
+  // mecanique que `plonger()`, et c'est elle qui fait du comptoir autre chose
+  // qu'une modale posee par-dessus le dialogue.
+  it('le récit ouvre le comptoir et reprend là où il l’a dit', () => {
+    const m = neuf();
     m.demarrer();
     m.reprendre('finn');
     epuiser(m);
-    m.choisir(choixNomme(m, 'Faire poser'));
+    m.choisir(choixNomme(m, 'sous le comptoir'));
     epuiser(m);
-  }
 
-  it('sans plan volé, la paillasse ne propose rien', () => {
-    const m = neuf();
-    aLAtelier(m);
-    expect(m.lire().choix).toHaveLength(1);
-    expect(m.lire().choix[0]?.texte).toContain('rhabiller');
+    expect(m.lire().boutique).toBe('finn');
+    expect(m.lire().choix).toHaveLength(0);
+
+    m.fermerBoutique();
+    epuiser(m);
+    expect(m.lire().boutique).toBeNull();
+    expect(m.lire().choix.map((c) => c.texte).join(' ')).toContain('sous le comptoir');
   });
 
-  it('le plan volé ouvre la pose, et la pose écrit dans la partie', () => {
-    const run = useRunStore.getState();
-    run.acquerir('plans', 'coprocesseur');
-    useRunStore.setState({ credits: 5000 });
+  it('sans plan volé, l’atelier montre l’implant et dit ce qui manque', () => {
+    const a = article('coprocesseur');
+    expect(a.disponible).toBe(false);
+    expect(a.refus).toContain('plan');
+    // Visible et non masque : un joueur doit savoir ce qu'il rate, sinon le
+    // pillage n'a pas d'objectif nomme.
+    expect(a.nom).toBe('COPROCESSEUR');
+  });
 
-    const m = neuf();
-    aLAtelier(m);
+  it('le plan volé ouvre l’achat, et l’achat écrit dans la partie', () => {
+    useRunStore.getState().acquerir('plans', 'coprocesseur');
+    useRunStore.setState({ credits: 5000 });
     const humaniteAvant = useRunStore.getState().humanite;
-    m.choisir(choixNomme(m, 'Coprocesseur'));
-    epuiser(m);
+    const cyclesAvant = useRunStore.getState().cycles;
+
+    const a = article('coprocesseur');
+    expect(a.disponible).toBe(true);
+    expect(useRunStore.getState().acheter('implants', a.id, a.cout)).toBe(true);
 
     const apres = useRunStore.getState();
     expect(apres.implants).toContain('coprocesseur');
     expect(apres.credits).toBe(5000 - 2400);
     expect(apres.humanite).toBe(humaniteAvant - 8);
+    expect(apres.cycles).toBe(cyclesAvant - 2);
     // Un plan reste au dossier : c'est de l'information, pas une piece.
     expect(apres.plans).toContain('coprocesseur');
   });
 
-  it('un implant déjà posé ne se repropose pas', () => {
+  // Le prix d'un implant vit dans data/implants.json et nulle part ailleurs :
+  // le catalogue ne le recopie pas, donc il ne peut pas en diverger.
+  it('le prix affiché au comptoir est celui de la fiche d’implant', () => {
+    const fiche = implant('filtre_noir');
+    const a = article('filtre_noir');
+    expect(a.cout).toEqual({
+      credits: fiche?.coutCredits,
+      cycles: fiche?.coutCycles,
+      humanite: fiche?.coutHumanite,
+    });
+  });
+
+  // Un article visé au clavier reste visable meme inabordable : c'est l'achat
+  // qui doit refuser, pas la navigation.
+  it('un article inabordable ne se paie pas, et ne prélève rien', () => {
+    useRunStore.getState().acquerir('plans', 'filtre_noir');
+    useRunStore.setState({ credits: 100 });
+    const a = article('filtre_noir');
+
+    expect(useRunStore.getState().acheter('implants', a.id, a.cout)).toBe(false);
+    expect(useRunStore.getState().credits).toBe(100);
+    expect(useRunStore.getState().implants).toHaveLength(0);
+  });
+
+  it('un implant déjà posé ne se revend pas', () => {
     useRunStore.getState().acquerir('plans', 'coprocesseur');
     useRunStore.getState().acquerir('implants', 'coprocesseur');
     useRunStore.setState({ credits: 5000 });
 
-    const m = neuf();
-    aLAtelier(m);
-    expect(m.lire().choix.map((c) => c.texte).join(' ')).not.toContain('Coprocesseur');
+    const a = article('coprocesseur');
+    expect(a.disponible).toBe(false);
+    expect(a.refus).toContain('Déjà');
+    expect(useRunStore.getState().acheter('implants', a.id, a.cout)).toBe(false);
+    expect(useRunStore.getState().credits).toBe(5000);
+  });
+
+  it('un script acheté entre dans le deck, une seule fois', () => {
+    useRunStore.setState({ credits: 3000 });
+    const a = article('mimic');
+    expect(useRunStore.getState().acheter('scripts', a.id, a.cout)).toBe(true);
+    expect(useRunStore.getState().scripts).toContain('mimic');
+    expect(useRunStore.getState().credits).toBe(3000 - a.cout.credits);
+
+    expect(article('mimic').disponible).toBe(false);
+    expect(useRunStore.getState().acheter('scripts', 'mimic', a.cout)).toBe(false);
   });
 
   // L'etiquette IMPLANT decrit une porte que seul un implant DEJA pose ouvre

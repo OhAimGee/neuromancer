@@ -1350,3 +1350,200 @@ body {
   color: var(--c2);
   font-weight: normal;
 }
+
+/* --- Le comptoir -------------------------------------------------------- */
+
+/* Un marchand n'est pas une liste de repliques. Comparer trois prix, lire un
+ * effet chiffre et voir ce qui manque pour acheter sont des gestes
+ * d'inventaire : les faire tenir dans des choix Ink obligeait a ecrire
+ * « Acheter un MIMIC. Huit cents. », une phrase que Sable prononce ensuite a
+ * voix haute — un libelle de choix EST sa replique. */
+
+.bout {
+  position: absolute;
+  inset: calc(5 * var(--px));
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  border: var(--px) solid var(--n4);
+  outline: var(--px) solid var(--n0);
+  outline-offset: calc(-2 * var(--px));
+  background: var(--n0);
+  clip-path: polygon(
+    calc(4 * var(--px)) 0,
+    100% 0,
+    100% calc(100% - 4 * var(--px)),
+    calc(100% - 4 * var(--px)) 100%,
+    0 100%,
+    0 calc(4 * var(--px))
+  );
+}
+
+.bout__haut {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: calc(4 * var(--px)) calc(6 * var(--px)) calc(2 * var(--px));
+  border-bottom: var(--px) solid var(--n3);
+}
+
+.bout__nom {
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  letter-spacing: calc(1 * var(--px));
+  color: var(--c2);
+}
+
+.bout__solde,
+.bout__prix {
+  display: flex;
+  gap: calc(4 * var(--px));
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  white-space: nowrap;
+}
+
+/* Trois monnaies, trois couleurs, et les memes partout dans le jeu : le joueur
+ * ne doit pas relire l'unite pour savoir ce qu'on lui prend. */
+.bout__cr {
+  color: var(--o3);
+}
+.bout__cy {
+  color: var(--c2);
+}
+.bout__hu {
+  color: var(--m3);
+}
+
+.bout__rayons {
+  display: flex;
+  align-items: center;
+  gap: calc(2 * var(--px));
+  padding: calc(3 * var(--px)) calc(6 * var(--px));
+}
+
+/* Le rang dans la liste, parce qu'elle defile. Sans ce compte, une liste
+ * coupee au bord du panneau ressemble a une liste finie. */
+.bout__compte {
+  margin-left: auto;
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  color: var(--n4);
+}
+
+.bout__rayon {
+  padding: calc(2 * var(--px)) calc(5 * var(--px));
+  border: var(--px) solid var(--n3);
+  background: transparent;
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  color: var(--g1);
+  cursor: pointer;
+}
+
+.bout__rayon--actif {
+  border-color: var(--c1);
+  background: var(--c0);
+  color: var(--c3);
+}
+
+/* La fiche est SOUS la liste et non a cote. En deux colonnes, la colonne des
+ * noms tombait a neuf caracteres sur une fenetre de 320 : BANDE PASSANTE
+ * s'affichait « BANDE PASS... », et un joueur ne doit pas deviner ce qu'il
+ * achete. Pleine largeur, chaque nom tient, prix compris. */
+
+.bout__liste {
+  flex: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0 calc(6 * var(--px));
+  overflow-y: auto;
+}
+
+.bout__article {
+  display: flex;
+  align-items: center;
+  gap: calc(5 * var(--px));
+  width: 100%;
+  padding: calc(2 * var(--px)) calc(4 * var(--px)) calc(2 * var(--px)) calc(6 * var(--px));
+  border: 0;
+  background: transparent;
+  font-family: 'Silkscreen', monospace;
+  font-size: calc(8 * var(--px));
+  color: var(--g3);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.bout__titre {
+  flex: 1;
+}
+
+.bout__article--vise {
+  color: var(--w0);
+  background: rgba(18, 181, 196, 0.14);
+  box-shadow: inset calc(2 * var(--px)) 0 0 var(--c2);
+}
+
+/* Hors d'atteinte, mais toujours lisible et toujours visable au clavier : un
+ * article qu'on ne peut pas payer doit se lire, sinon le joueur ne sait pas ce
+ * qu'il rate ni ce qui lui manque. */
+.bout__article--hors {
+  color: var(--n4);
+}
+
+.bout__article--hors .bout__cr,
+.bout__article--hors .bout__cy,
+.bout__article--hors .bout__hu {
+  color: var(--n4);
+}
+
+.bout__fiche {
+  flex: 0 0 auto;
+  max-height: calc(34 * var(--px));
+  margin: calc(3 * var(--px)) calc(6 * var(--px)) 0;
+  padding-top: calc(3 * var(--px));
+  border-top: var(--px) solid var(--n3);
+  overflow-y: auto;
+}
+
+.bout__fiche p {
+  margin: 0 0 calc(2 * var(--px));
+  font-family: 'Jersey 10', sans-serif;
+  font-size: calc(10 * var(--px));
+  line-height: calc(10 * var(--px));
+  color: var(--g2);
+}
+
+.bout__effet {
+  font-family: 'Silkscreen', monospace !important;
+  font-size: calc(8 * var(--px)) !important;
+  color: var(--c2) !important;
+}
+
+.bout__refus {
+  color: var(--o2) !important;
+}
+
+.bout__vide {
+  color: var(--n4) !important;
+}
+
+.bout__bas {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: calc(6 * var(--px));
+  padding: calc(3 * var(--px)) calc(6 * var(--px)) calc(4 * var(--px));
+}
+
+.bout__dit {
+  flex: 1;
+  max-height: calc(20 * var(--px));
+  overflow: hidden;
+  font-family: 'Jersey 10', sans-serif;
+  font-size: calc(10 * var(--px));
+  line-height: calc(10 * var(--px));
+  color: var(--g0);
+}
