@@ -1129,6 +1129,19 @@ body {
  * — `steps(16)` et non une interpolation continue, sinon le navigateur la
  * rendrait entre deux pixels et la floutterait malgre `pixelated`.
  *
+ * DEUX animations, une par axe, et ce n'est pas un rafinement : une pluie qui
+ * penche se deplace de 1 pixel de cote pour 3 pixels de chute (c'est la pente
+ * dessinee dans `fx.lua`, `x0 - floor(k / 3)`). En une seule animation, il
+ * fallait donc aller de 0 a (-6, +16) sur un cycle : 16 est bien la hauteur de
+ * la tuile, mais 6 n'est pas sa largeur, et le motif RESSAUTAIT de six pixels
+ * sur le cote a chaque tour — la saccade qu'on voyait. Pire, `steps(16)` sur 6
+ * pixels pose chaque image sur un tiers de pixel.
+ *
+ * Chaque axe boucle donc sur une tuile entiere (16 pixels, 16 pas d'un pixel),
+ * et c'est le RAPPORT DES DUREES qui fait la pente : 0.55s pour la chute,
+ * trois fois plus pour la derive. Les deux cycles se referment ensemble, et il
+ * n'y a plus aucun saut nulle part.
+ *
  * Elle est sous le HUD et sous la boite de dialogue : il pleut sur la rue, pas
  * sur l'interface. */
 .pluie {
@@ -1141,20 +1154,32 @@ body {
   background-size: calc(16 * var(--px)) calc(16 * var(--px));
   background-repeat: repeat;
   image-rendering: pixelated;
-  animation: pluie 0.55s steps(16) infinite;
+  animation:
+    pluie-chute 0.55s steps(16) infinite,
+    pluie-derive 1.65s steps(16) infinite;
 }
-@keyframes pluie {
+@keyframes pluie-chute {
   from {
-    background-position: 0 0;
+    background-position-y: 0;
   }
   to {
-    background-position: calc(-6 * var(--px)) calc(16 * var(--px));
+    background-position-y: calc(16 * var(--px));
+  }
+}
+@keyframes pluie-derive {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: calc(-16 * var(--px));
   }
 }
 /* La bascule d'accessibilite coupe aussi la pluie : c'est un motif fin en
- * mouvement permanent, exactement ce que la bascule existe pour retirer. */
+ * mouvement permanent, exactement ce que la bascule existe pour retirer.
+ * Le rapport de trois entre les deux durees est la pente : le perdre ici
+ * ferait tomber la pluie de travers des que les scanlines sont coupees. */
 .viewport:not(.scanlines) .pluie {
-  animation-duration: 1.6s;
+  animation-duration: 1.6s, 4.8s;
   opacity: 0.32;
 }
 @media (prefers-reduced-motion: reduce) {

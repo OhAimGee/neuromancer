@@ -169,6 +169,7 @@ node tools/acte3.mjs captures      # joue l'acte III jusqu'a une fin
 node tools/plonger.mjs captures    # prologue + branchement + plongee au hasard
 node tools/vitrine.mjs             # refait les captures du README
 node tools/clavier.mjs             # joue le prologue SANS UN SEUL CLIC
+node tools/pluie.mjs               # releve la pluie trame par trame
 ```
 
 ### Outillage — capture d'écran
@@ -786,6 +787,17 @@ la profondeur sans imposer une seule technique à tout le jeu.
   trois en donnaient un mur de devantures. Le cumul de la dérive reste en flottant et n'est
   arrondi qu'à la pose : arrondir à chaque image figerait tout plan dont la dérive est inférieure
   à un pixel par trame, c'est-à-dire tous.
+- **Une animation de motif doit boucler sur la TUILE, sur chaque axe.** La pluie dérivait de
+  `(-6, +16)` par cycle : 16 est bien la hauteur de la tuile, 6 n'est pas sa largeur, et le motif
+  ressautait de six pixels sur le côté toutes les 0,55 s. Elle se fait donc en **deux animations,
+  une par axe**, chacune sur seize pixels et seize pas — c'est le *rapport des durées* qui donne
+  la pente (1 pour 3, celle dessinée dans `fx.lua`), jamais un déplacement oblique en un seul
+  `@keyframes`. Accessoirement, `steps(16)` sur six pixels posait chaque image sur un tiers de
+  pixel, ce que `pixelated` ne rattrape pas.
+- **`node tools/pluie.mjs` relève la position de fond à chaque trame** et refuse une image posée
+  entre deux pixels, un pas supérieur à un pixel, et une pente qui s'écarte du dessin. Une capture
+  d'écran ne distingue pas « ça bouge » de « ça bouge bien » : c'est tout l'intérêt. Vérifié contre
+  l'ancienne règle réintroduite — il y voit dix sauts de 10,375 px en six secondes.
 - `npm run validate:assets` refuse un `plans[].image` absent de `public/assets/parallax/` et un
   décor qui n'a ni plans ni tilemap du même nom. Un plan renommé est pire qu'une tuile renommée :
   la scène reste noire, et rien ne distingue cette panne d'une scène volontairement sans décor.
