@@ -158,6 +158,34 @@ if (infosMortes.length > 0) {
   );
 }
 
+// --- Le codex : une info sans texte est un butin muet ----------------------
+//
+// Symetrique exact de la dette narrative ci-dessus. Une info qu'aucun knows()
+// ne lit ne sert a rien au recit ; une info sans entree dans data/infos.json ne
+// sert a rien au JOUEUR — la fiche de partie affichait son identifiant brut,
+// « dossier medical armitage », et les archives ne sauraient rien en dire.
+
+const infosData = JSON.parse(fs.readFileSync(path.join(RACINE, 'data/infos.json'), 'utf-8'));
+const CHAMPS_INFO = ['titre', 'source', 'texte', 'ouvre'];
+for (const id of hacking.infos) {
+  const fiche = infosData[id];
+  if (fiche === undefined) {
+    erreurs.push(`info '${id}' pillable mais absente de data/infos.json — butin muet`);
+    continue;
+  }
+  for (const champ of CHAMPS_INFO) {
+    if (typeof fiche[champ] !== 'string' || fiche[champ].trim() === '') {
+      erreurs.push(`info '${id}' : champ '${champ}' vide ou absent dans data/infos.json`);
+    }
+  }
+}
+for (const id of Object.keys(infosData)) {
+  if (id.startsWith('_')) continue;
+  if (!hacking.infos.includes(id)) {
+    erreurs.push(`info '${id}' decrite dans data/infos.json mais pillable nulle part`);
+  }
+}
+
 // --- Le comptoir : la chaine du plan reste fermee -------------------------
 //
 // Les achats ont quitte le recit pour data/boutique.json, et le controle de

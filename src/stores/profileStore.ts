@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { replacer, reviver } from '@/save/serialize';
 
-export const VERSION_PROFIL = 2;
+export const VERSION_PROFIL = 3;
 
 /**
  * Profil persistant — survit a toutes les parties.
@@ -16,6 +16,8 @@ interface ProfilEtat {
   connaissances: Set<string>;
   /** Explications de regle deja montrees. Un joueur ne relit pas un tutoriel. */
   glosesVues: Set<string>;
+  /** Locuteurs deja croises, toutes parties confondues. Alimente le CARNET. */
+  rencontres: Set<string>;
   finsVues: string[];
   parties: number;
   /** Cycles restants a la meilleure fin atteinte. null si aucune partie finie. */
@@ -27,6 +29,7 @@ interface ProfilActions {
   aVuGlose: (id: string) => boolean;
   marquerGlose: (id: string) => void;
   connait: (id: string) => boolean;
+  rencontrer: (id: string) => void;
   enregistrerFin: (idFin: string, cyclesRestants: number) => void;
   reinitialiser: () => void;
 }
@@ -34,6 +37,7 @@ interface ProfilActions {
 const ETAT_INITIAL: ProfilEtat = {
   connaissances: new Set<string>(),
   glosesVues: new Set<string>(),
+  rencontres: new Set<string>(),
   finsVues: [],
   parties: 0,
   meilleursCycles: null,
@@ -52,6 +56,12 @@ export const useProfileStore = create<ProfilEtat & ProfilActions>()(
 
       connait: (id) => get().connaissances.has(id),
 
+      // Une rencontre survit a la partie, comme une connaissance : le carnet
+      // des archives se remplit au fil des parties, et c'est une des rares
+      // choses que le joueur voit grossir.
+      rencontrer: (id) =>
+        set((e) => (e.rencontres.has(id) ? e : { rencontres: new Set(e.rencontres).add(id) })),
+
       aVuGlose: (id) => get().glosesVues.has(id),
 
       marquerGlose: (id) =>
@@ -68,7 +78,12 @@ export const useProfileStore = create<ProfilEtat & ProfilActions>()(
         })),
 
       reinitialiser: () =>
-        set({ ...ETAT_INITIAL, connaissances: new Set<string>(), glosesVues: new Set<string>() }),
+        set({
+          ...ETAT_INITIAL,
+          connaissances: new Set<string>(),
+          glosesVues: new Set<string>(),
+          rencontres: new Set<string>(),
+        }),
     }),
     {
       name: 'neuromancer-profil',
@@ -83,8 +98,20 @@ export const useProfileStore = create<ProfilEtat & ProfilActions>()(
         // v2 : glosesVues n'existait pas. Sans ce defaut, un profil deja
         // enregistre appellerait .has() sur undefined des le premier choix.
         if (!(e.glosesVues instanceof Set)) e.glosesVues = new Set<string>();
+        // v3 : le carnet. Meme raison que ci-dessus — sans ce defaut, un profil
+        // deja enregistre appellerait .has() sur undefined des la premiere
+        // replique nominative.
+        if (!(e.rencontres instanceof Set)) e.rencontres = new Set<string>();
         return { ...ETAT_INITIAL, ...e } as ProfilEtat & ProfilActions;
       },
     },
   ),
 );
+
+// Sonde de developpement, comme `window.__runStore`. Le profil se reconstruit
+// en jouant plusieurs parties : un outil qui voudrait capturer des archives
+// remplies devrait donc terminer le jeu trois fois avant de prendre une image.
+// Retiree du build.
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as unknown as Record<string, unknown>)['__profileStore'] = useProfileStore;
+}

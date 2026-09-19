@@ -34,6 +34,7 @@ export function Titre(props: {
   lignes: LigneBoot[];
   pret: boolean;
   onDemarrer: () => void;
+  onArchives: () => void;
   onOptions: () => void;
   actif: boolean;
 }) {
@@ -82,12 +83,14 @@ function EcranTitre({
   lignes,
   pret,
   onDemarrer,
+  onArchives,
   onOptions,
   actif,
 }: {
   lignes: LigneBoot[];
   pret: boolean;
   onDemarrer: () => void;
+  onArchives: () => void;
   onOptions: () => void;
   actif: boolean;
 }) {
@@ -95,6 +98,7 @@ function EcranTitre({
 
   const entrees: Entree[] = [
     { id: 'nouvelle', libelle: 'NOUVELLE PARTIE', faire: onDemarrer, actif: pret },
+    { id: 'archives', libelle: 'ARCHIVES', faire: onArchives, actif: true },
     { id: 'options', libelle: 'OPTIONS', faire: onOptions, actif: true },
   ];
 

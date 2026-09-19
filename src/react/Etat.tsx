@@ -4,6 +4,7 @@ import { IMPLANTS } from '@/hacking/implants';
 import { SCRIPTS } from '@/hacking/session';
 import { useProfileStore } from '@/stores/profileStore';
 import { MEMBRES_MAX, useRunStore } from '@/stores/runStore';
+import infosData from '@data/infos.json';
 import { useNavigationClavier } from './useNavigationClavier';
 
 interface Membre {
@@ -23,6 +24,12 @@ const RANG_SCRIPT = new Map(SCRIPTS.map((s, i) => [s.id, i]));
 const RANG_PLAN = new Map(hackingData.plans.map((id, i) => [id, i]));
 const RANG_IMPLANT = new Map(IMPLANTS.map((i, rang) => [i.id, rang]));
 const NOM_IMPLANT = new Map(IMPLANTS.map((i) => [i.id, i.nom]));
+
+// La fiche affichait `id.replace(/_/g, ' ')`, donc « dossier medical armitage ».
+// Le butin le plus important du jeu — celui qui ouvre les fins — se lisait comme
+// une table de base de donnees. Le texte complet vit dans les archives ; ici on
+// ne montre que la plaque.
+const TITRE_INFO = infosData as unknown as Record<string, { titre: string }>;
 
 /** Une case d'une planche d'icones de 16x16, designee par son rang. */
 function Vignette({ planche, rang }: { planche: string; rang: number }) {
@@ -45,7 +52,15 @@ function Vignette({ planche, rang }: { planche: string; rang: number }) {
  * plongees plus tot. Les connaissances y figurent parce qu'elles sont la vraie
  * progression du jeu — elles survivent a la partie, pas l'inventaire.
  */
-export function Etat({ onFermer, actif = true }: { onFermer: () => void; actif?: boolean }) {
+export function Etat({
+  onFermer,
+  onArchives,
+  actif = true,
+}: {
+  onFermer: () => void;
+  onArchives?: () => void;
+  actif?: boolean;
+}) {
   useNavigationClavier({ actif, nombre: 0, surFermer: onFermer });
   const run = useRunStore();
   const connaissances = useProfileStore((e) => e.connaissances);
@@ -161,14 +176,21 @@ export function Etat({ onFermer, actif = true }: { onFermer: () => void; actif?:
       ) : (
         <ul className="etat__liste">
           {infosConnues.map((id) => (
-            <li key={id}>{id.replace(/_/g, ' ')}</li>
+            <li key={id}>{TITRE_INFO[id]?.titre ?? id.replace(/_/g, ' ')}</li>
           ))}
         </ul>
       )}
 
-      <button className="net__bouton etat__fermer" onClick={onFermer}>
-        FERMER
-      </button>
+      <div className="etat__bas">
+        {onArchives && (
+          <button className="net__bouton" onClick={onArchives}>
+            ARCHIVES
+          </button>
+        )}
+        <button className="net__bouton etat__fermer" onClick={onFermer}>
+          FERMER
+        </button>
+      </div>
     </div>
   );
 }

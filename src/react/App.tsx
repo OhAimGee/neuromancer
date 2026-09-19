@@ -3,6 +3,7 @@ import { MoteurDialogue } from '@/dialogue/moteur';
 import { useRunStore } from '@/stores/runStore';
 import { useUiStore } from '@/stores/uiStore';
 import { Boutique } from './Boutique';
+import { Archives } from './Archives';
 import { Cyberespace } from './Cyberespace';
 import { Decor } from './Decor';
 import { Dialogue } from './Dialogue';
@@ -12,7 +13,7 @@ import { Options } from './Options';
 import { Titre, type LigneBoot, type Niveau } from './Titre';
 import { useIntegerScale, VIEWPORT_W, VIEWPORT_H } from './useIntegerScale';
 
-type Couche = 'titre' | 'jeu' | 'fiche' | 'options';
+type Couche = 'titre' | 'jeu' | 'fiche' | 'archives' | 'options';
 
 export function App() {
   const scale = useIntegerScale();
@@ -20,6 +21,7 @@ export function App() {
   const glitch = useUiStore((e) => e.glitch);
   const [options, setOptions] = useState(false);
   const [fiche, setFiche] = useState(false);
+  const [archives, setArchives] = useState(false);
   const [lignes, setLignes] = useState<LigneBoot[]>([]);
   const [moteur, setMoteur] = useState<MoteurDialogue | null>(null);
   const [lance, setLance] = useState(false);
@@ -67,7 +69,15 @@ export function App() {
   // sur `window` recoivent la meme touche, et rien dans l'ordre du DOM ne dit
   // lequel est devant. C'est ici qu'on tranche, parce que c'est ici qu'on sait
   // quel panneau est ouvert.
-  const couche: Couche = !lance ? 'titre' : options ? 'options' : fiche ? 'fiche' : 'jeu';
+  const couche: Couche = options
+    ? 'options'
+    : archives
+      ? 'archives'
+      : !lance
+        ? 'titre'
+        : fiche
+          ? 'fiche'
+          : 'jeu';
 
   return (
     <div className="stage">
@@ -90,6 +100,7 @@ export function App() {
             lignes={lignes}
             pret={moteur !== null}
             onDemarrer={demarrer}
+            onArchives={() => setArchives(true)}
             onOptions={() => setOptions(true)}
             actif={couche === 'titre'}
           />
@@ -114,7 +125,16 @@ export function App() {
           ⚙
         </button>
 
-        {fiche && lance && <Etat onFermer={() => setFiche(false)} actif={couche === 'fiche'} />}
+        {fiche && lance && (
+          <Etat
+            onFermer={() => setFiche(false)}
+            onArchives={() => setArchives(true)}
+            actif={couche === 'fiche'}
+          />
+        )}
+        {archives && (
+          <Archives onFermer={() => setArchives(false)} actif={couche === 'archives'} />
+        )}
         {options && <Options onFermer={() => setOptions(false)} actif={couche === 'options'} />}
       </div>
 

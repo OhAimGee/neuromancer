@@ -1,20 +1,25 @@
 {
   "_note": "Nom affiche et portrait de chaque locuteur. Le .ink ne connait que l'identifiant : # speaker:molly. Un locuteur sans portrait n'affiche que sa plaque.",
+  "_carnet": "`carnet` : les deux lignes du CARNET des archives. Un personnage sans portrait n'y figure pas — c'est une voix, pas une rencontre.",
   "sable": {
     "nom": "SABLE",
-    "portrait": "port_sable"
+    "portrait": "port_sable",
+    "carnet": "Cowboy de console de Chiba City, brûlé. Il est mort quatre-vingt-quatorze secondes et quelque chose est revenu avec lui."
   },
   "molly": {
     "nom": "MOLLY",
-    "portrait": "port_molly"
+    "portrait": "port_molly",
+    "carnet": "Samouraï des rues, lentilles scellées aux orbites et dix lames sous les ongles. Elle dit ce qu'elle fera, et elle le fait."
   },
   "ratz": {
     "nom": "RATZ",
-    "portrait": "port_ratz"
+    "portrait": "port_ratz",
+    "carnet": "Barman du Chatsubo, bras de prothèse russe qui grince. Il connaît tout le monde et ne doit rien à personne."
   },
   "fragment": {
     "nom": "?",
-    "portrait": "port_fragment"
+    "portrait": "port_fragment",
+    "carnet": "La voix dans le crâne. Elle sait des choses que Sable n'a jamais apprises, et chaque réponse qu'elle souffle coûte de l'humanité."
   },
   "medecin": {
     "nom": "MÉDECIN",
@@ -22,31 +27,38 @@
   },
   "finn": {
     "nom": "LE FINN",
-    "portrait": "port_finn"
+    "portrait": "port_finn",
+    "carnet": "Receleur. Une boutique qui tient dans un couloir, et derrière le comptoir un homme qui n'a jamais été jeune."
   },
   "armitage": {
     "nom": "ARMITAGE",
-    "portrait": "port_armitage"
+    "portrait": "port_armitage",
+    "carnet": "L'employeur. Un homme trop droit pour un civil, payé d'avance, et qui n'existait pas il y a onze ans."
   },
   "riviera": {
     "nom": "RIVIERA",
-    "portrait": "port_riviera"
+    "portrait": "port_riviera",
+    "carnet": "Illusionniste holographique. Il fabrique ce que les autres veulent voir, et il aime regarder ce que ça leur fait."
   },
   "dixie": {
     "nom": "DIXIE",
-    "portrait": "port_dixie"
+    "portrait": "port_dixie",
+    "carnet": "McCoy Pauley, mort trois fois. Une personnalité sur cartouche, qui rit sans souffle et veut qu'on l'efface."
   },
   "maelcum": {
     "nom": "MAELCUM",
-    "portrait": "port_maelcum"
+    "portrait": "port_maelcum",
+    "carnet": "Pilote de Zion. Il emmène qui le demande et refuse de continuer quand on tue."
   },
   "yonderboy": {
     "nom": "YONDERBOY",
-    "portrait": "port_yonderboy"
+    "portrait": "port_yonderboy",
+    "carnet": "Panther Modern. Il fait diversion parce que c'est joli, et il s'ennuie plus vite qu'on ne prépare un coup."
   },
   "3jane": {
     "nom": "LADY 3JANE",
-    "portrait": "port_3jane"
+    "portrait": "port_3jane",
+    "carnet": "Dernière des Tessier-Ashpool à marcher. Elle a hérité d'une tutelle, d'une clause, et d'un testament qu'elle n'a jamais lu."
   },
   "hideo": {
     "nom": "HIDEO"

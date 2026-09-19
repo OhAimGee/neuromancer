@@ -214,6 +214,39 @@ await page.locator('.dlg__bouton', { hasText: 'Je remonte' }).first().click();
 await page.waitForTimeout(200);
 await jusqua(auHub);
 
+// 6 quater. Les archives.
+//
+// Le profil est POSE, pour la meme raison que le butin : les archives se
+// remplissent sur plusieurs parties, et un outil qui devrait terminer le jeu
+// trois fois avant de prendre une image ne serait pas un outil. Ce qu'on
+// verifie ici est l'affichage — les silhouettes de ce qui manque a cote de ce
+// qu'on sait. L'etat est retire aussitot.
+const profilPose = await page.evaluate(() => {
+  if (!window.__profileStore) return false;
+  const p = window.__profileStore.getState();
+  for (const id of ['identite_employeur', 'wintermute_existe', 'antidote_formule']) {
+    p.apprendre(id);
+  }
+  window.__profileStore.setState({ finsVues: ['la_rue', 'flatline'], parties: 2 });
+  return true;
+});
+if (!profilPose) {
+  console.error('sonde __profileStore absente : capture des archives impossible');
+  process.exitCode = 1;
+} else {
+  await page.keyboard.press('Tab');
+  await page.waitForSelector('.etat', { timeout: 3000 });
+  await page.locator('.etat .net__bouton', { hasText: 'ARCHIVES' }).click();
+  await page.waitForSelector('.arch', { timeout: 3000 });
+  await page.waitForTimeout(250);
+  await capturer('archives');
+  await page.locator('.arch__fermer').click();
+  await page.waitForSelector('.arch', { state: 'detached', timeout: 3000 });
+  await page.locator('.etat .net__bouton').last().click();
+  await page.waitForSelector('.etat', { state: 'detached', timeout: 3000 });
+  await page.evaluate(() => window.__profileStore.setState({ finsVues: [], parties: 0 }));
+}
+
 // 7. Le cyberespace, une fois branche et deux noeuds plus loin.
 // Le voile de branchement ne dure que six dixiemes de seconde : on ne le
 // capture pas en le poursuivant, on se contente de verifier qu'il est bien

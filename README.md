@@ -166,6 +166,18 @@ pas une scène.
 
 ![Le comptoir du Finn](docs/images/boutique.png)
 
+### Les archives
+
+Ce qu'on vole se lit. Chaque information a une plaque, une source, un extrait d'archive, et la
+ligne qui compte : **ce qu'elle a ouvert** dans le récit. Ce qu'on ne sait pas encore y figure en
+silhouette, à la bonne longueur, la source toujours lisible — c'est la différence entre une case
+vide et un objectif.
+
+Le carnet et la liste des fins suivent la même règle, et tous trois **survivent à la partie** :
+c'est ce qui progresse quand on recommence.
+
+![Les archives](docs/images/archives.png)
+
 ![Le cyberespace](docs/images/cyberespace.png)
 
 Le passage d'un côté à l'autre du câble se voit : un voile de bandes horizontales pince l'image

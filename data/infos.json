@@ -1,0 +1,68 @@
+{
+  "_note": "Le codex. Une entree par identifiant de data/hacking.json -> infos. Le validateur refuse une info pillable sans entree ici : une info sans texte est un butin muet, et la fiche de partie affichait jusqu'ici l'identifiant brut ('dossier medical armitage'), ce qui n'est pas du butin mais de la dette.",
+
+  "_champs": "titre : la plaque. source : d'ou le fichier vient, en fiction — il rend le butin credible et il donne une idee d'ou chercher. texte : ce qu'on a lu, ecrit comme un extrait d'archive et non comme un resume. ouvre : ce que l'info rend possible dans le recit. C'est 'ouvre' qui transforme une liste d'identifiants en butin, et il doit correspondre a un vrai knows() dans content/ink.",
+
+  "dossier_medical_armitage": {
+    "titre": "DOSSIER MÉDICAL — ARMITAGE",
+    "source": "MAAS BIOLABS · archive clinique",
+    "texte": "Reconstruction complète du cortex, il y a onze ans, facturée à une adresse qui n'existe plus. Sous « antécédents », une seule ligne : patient sans identité antérieure au traitement. Le nom d'avant a été retiré du dossier, pas effacé — on voit la place.",
+    "ouvre": "Dire à Molly qui était Armitage avant d'être Armitage."
+  },
+
+  "operation_poing_hurlant": {
+    "titre": "OPÉRATION POING HURLANT",
+    "source": "ARCHIVE MILITAIRE · déclassée par erreur",
+    "texte": "Raid de guerre froide sur un centre de calcul soviétique. Les avions sont partis, l'ECM a lâché, et le sol les attendait. Un homme en est revenu, à qui l'on a ensuite construit une tête neuve. La ligne de crédit de l'opération a été honorée par Tessier-Ashpool.",
+    "ouvre": "Nommer le colonel devant lui, et annoncer aux candidats où l'on va vraiment entrer."
+  },
+
+  "wintermute_existe": {
+    "titre": "WINTERMUTE",
+    "source": "TESSIER-ASHPOOL SA · registre des intelligences",
+    "texte": "Une IA déclarée à la police Turing, bridée, et domiciliée à Berne. Le registre note deux choses sans les relier : les brides sont périmées depuis neuf ans, et l'entité a demandé sept fois un transfert de tutelle. Une machine qui demande quelque chose sept fois ne demande pas.",
+    "ouvre": "Donner un nom à la chose dans le crâne — et, un jour, la laisser rentrer chez elle."
+  },
+
+  "neuromancer_existe": {
+    "titre": "NEUROMANCER",
+    "source": "TESSIER-ASHPOOL SA · registre des intelligences",
+    "texte": "La seconde moitié. Là où l'autre calcule, celle-ci garde : elle conserve des personnalités entières, vivantes de leur point de vue, dans une plage qui ne mène nulle part. Le registre parle de « préservation ». Le mot est du fabricant, pas des pensionnaires.",
+    "ouvre": "Demander à l'autre ce qu'il sait faire des morts."
+  },
+
+  "villa_straylight_plan": {
+    "titre": "PLAN — VILLA STRAYLIGHT",
+    "source": "FREESIDE · archives d'entretien",
+    "texte": "La Villa n'a pas de façade : elle pousse vers l'intérieur, en couloirs qui se replient, et son plan tient plus du nid que du bâtiment. Une gaine de service traverse le tout depuis les cuisines, hors des relevés de sécurité — les techniciens l'appellent « la trachée ».",
+    "ouvre": "Entrer par la gaine de service au lieu de forcer une porte."
+  },
+
+  "lady_3jane_testament": {
+    "titre": "TESTAMENT — LADY 3JANE",
+    "source": "ÉTUDE NOTARIALE · copie de travail",
+    "texte": "Marie-France Tessier lègue à sa fille la tutelle des deux intelligences, et la clause qui les tient séparées. La copie porte des annotations d'une écriture jeune, en marge du dernier paragraphe, toutes sur le même mot : « pourquoi ».",
+    "ouvre": "Le vendre au Finn, ou le dire à 3Jane elle-même, qui ne l'a jamais lu."
+  },
+
+  "antidote_formule": {
+    "titre": "FORMULE — ANTIDOTE À DISSOLUTION LENTE",
+    "source": "MAAS BIOLABS · synthèse toxicologique",
+    "texte": "Les sacs ne se retirent pas : ils se neutralisent, et seulement avant la dernière heure. La chimie tient en quatre lignes et coûte deux mille crédits à quelqu'un qui a un laboratoire sous un comptoir.",
+    "ouvre": "Faire fabriquer l'ampoule par le Finn."
+  },
+
+  "identite_employeur": {
+    "titre": "IDENTITÉ — L'EMPLOYEUR",
+    "source": "SENSE/NET · registre des accès",
+    "texte": "Un nom, une photo de badge, un homme qui se tient trop droit pour un civil : ARMITAGE. Il a payé une équipe pour retrouver un cowboy brûlé de Chiba City, et il a payé d'avance, ce que personne ne fait sans une date limite.",
+    "ouvre": "Aller voir Molly avec le nom, au lieu d'y aller avec des questions."
+  },
+
+  "dixie_rom_localisee": {
+    "titre": "LOCALISATION — ROM McCOY PAULEY",
+    "source": "SENSE/NET · inventaire des coffres",
+    "texte": "Le Dixie Flatline est mort trois fois et n'a jamais cessé de travailler. Sa personnalité tient sur une cartouche archivée en sous-sol, référencée comme matériel de formation. L'inventaire précise : exemplaire unique. L'inventaire se trompe.",
+    "ouvre": "Demander la cartouche au Finn — et savoir qu'il en existe d'autres copies."
+  }
+}

@@ -531,3 +531,37 @@ describe('l’horloge ne part qu’au moment où le récit la lance', () => {
     expect(useRunStore.getState().horlogeLancee).toBe(true);
   });
 });
+
+// --- Le carnet -------------------------------------------------------------
+//
+// Le CARNET des archives se remplit tout seul : qui parle a l'ecran est
+// quelqu'un qu'on a rencontre. L'inscription se fait a la publication et non a
+// la lecture d'avance — sinon un personnage serait inscrit au carnet avant que
+// sa replique ne soit affichee.
+describe('les archives — le carnet', () => {
+  beforeEach(() => {
+    useRunStore.getState().nouvellePartie();
+    useProfileStore.getState().reinitialiser();
+  });
+
+  it('un locuteur croisé entre au carnet, et y reste', () => {
+    const m = neuf();
+    m.demarrer();
+    m.reprendre('prologue');
+    epuiser(m);
+
+    const vus = useProfileStore.getState().rencontres;
+    expect(vus.size).toBeGreaterThan(0);
+    // La rencontre survit a la partie, comme une connaissance.
+    useRunStore.getState().nouvellePartie();
+    expect(useProfileStore.getState().rencontres).toEqual(vus);
+  });
+
+  it('une réplique de Sable l’inscrit lui aussi', () => {
+    const m = neuf();
+    auHub(m);
+    m.choisir(0);
+    epuiser(m);
+    expect(useProfileStore.getState().rencontres.has('sable')).toBe(true);
+  });
+});

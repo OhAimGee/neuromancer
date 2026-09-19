@@ -368,6 +368,13 @@ export class MoteurDialogue {
   private publier(): void {
     if (this.sceneAResoudre !== null) this.resoudreScene(this.sceneAResoudre);
 
+    // Le carnet se remplit tout seul : qui parle a l'ecran est quelqu'un qu'on
+    // a rencontre. Ici et pas dans `consommer()`, parce que le moteur lit une
+    // replique d'avance — l'y mettre inscrirait au carnet un personnage dont la
+    // replique n'est pas encore affichee.
+    const locuteur = this.courant?.ligne.locuteur ?? null;
+    if (locuteur !== null) useProfileStore.getState().rencontrer(locuteur);
+
     // Les choix n'existent qu'une fois le texte epuise : sinon ils
     // s'afficheraient sous une replique que le joueur n'a pas encore lue.
     const enAttenteDeLecture = this.suivant !== null;

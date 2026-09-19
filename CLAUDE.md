@@ -279,6 +279,38 @@ comptoir, il exige qu'aucun `.opt` ne soit ouvert.
 
 ---
 
+## Les archives — ce que le joueur emporte d'une partie a l'autre
+
+`src/react/Archives.tsx`, ouvert depuis l'ecran-titre et depuis la fiche de partie. Trois onglets,
+un compteur chacun : **CE QUE TU SAIS** (`data/infos.json`), **CARNET**
+(`data/personnages.json` → `carnet`), **FINS** (`data/fins.json`).
+
+L'ecran existe parce que la fiche de partie affichait `id.replace(/_/g, ' ')` pour les infos
+volees — donc « dossier medical armitage ». Le butin le plus important du jeu, celui qui ouvre les
+fins, se lisait comme une table de base de donnees.
+
+- **Ce qu'on ne sait pas encore figure en SILHOUETTE, a la bonne longueur, et sa `source` reste
+  lisible.** C'est la difference entre une case vide et un objectif : le joueur voit combien il en
+  reste et ou aller chercher. C'est le moteur de rejouabilite rendu visible, et c'est la seule
+  raison d'etre de cet ecran.
+- **`ouvre` est le champ qui transforme une liste d'identifiants en butin** : il dit ce que l'info
+  a rendu possible dans le recit. Il doit correspondre a un vrai `knows()` de `content/ink`.
+- `npm run validate:narrative` refuse une info pillable sans entree, une entree dont un des quatre
+  champs est vide, et une entree qui decrit une info pillable nulle part. Les trois controles ont
+  ete verifies contre des fautes introduites volontairement.
+- **Le carnet se remplit tout seul** : `moteur.publier()` appelle `profileStore.rencontrer()` sur
+  le locuteur de la replique **affichee**. Dans `consommer()`, ce serait sur la replique d'avance —
+  un personnage entrerait au carnet avant que sa replique n'apparaisse. Un personnage sans
+  portrait n'y figure pas : c'est une voix, pas une rencontre.
+- **Le sous-titre d'une fin inconnue n'est pas mis en silhouette.** Il est en Jersey 10, dont le
+  bloc plein n'a pas la chasse des autres glyphes : la barre se brisait en morceaux de hauteurs
+  differentes et se lisait comme un bug. Elle affiche « Jamais atteinte. »
+- **Sonde `window.__profileStore`**, comme `__runStore` : les archives se remplissent sur
+  plusieurs parties, et un outil qui devrait terminer le jeu trois fois avant de prendre une image
+  ne serait pas un outil. Retiree du build.
+
+---
+
 ## Architecture
 
 - **Vite + TypeScript + React 19** — DOM pour dialogues, HUD, menus
@@ -458,6 +490,7 @@ Le jeu se joue entièrement sans souris, de la première réplique à la fin. To
 | `1`…`9` | prendre directement le n-ième choix | — | — | exécuter le n-ième script |
 | `Tab` | fiche de partie | fiche de partie | — | fiche de partie |
 | `Échap` | **ouvrir** les options | **sortir** du comptoir | **fermer** le panneau | ouvrir les options |
+| `←` `→` (archives) | — | — | changer d'onglet | — |
 | `A` | — | — | — | piller |
 | `Ret. arr.` | — | — | — | se débrancher / encaisser |
 
