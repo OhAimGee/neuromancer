@@ -117,6 +117,15 @@ export class MoteurDialogue {
   private suivant: Beat | null = null;
   /** Texte du choix qui vient d'etre pris ; sert a marquer son echo. */
   private repliqueAttendue: string | null = null;
+  /**
+   * Vrai quand le choix pris portait `# geste`.
+   *
+   * Le texte d'un choix est toujours reaffiche — piege des crochets — et le
+   * moteur le rejouait systematiquement au nom de Sable, plaque et portrait
+   * compris. « Dormir. » devenait donc une replique que Sable prononce a voix
+   * haute. Un geste n'a pas de locuteur : son echo est de la narration.
+   */
+  private echoMuet = false;
   private sceneAResoudre: string | null = null;
   private plongeeDemandee: Passage | null = null;
   private boutiqueDemandee: Passage | null = null;
@@ -258,6 +267,7 @@ export class MoteurDialogue {
     const choix = this.etat.choix[i];
     if (!choix || !choix.abordable) return;
     this.repliqueAttendue = choix.texte;
+    this.echoMuet = choix.geste;
     this.story.ChooseChoiceIndex(i);
     this.recharger();
   }
@@ -345,19 +355,25 @@ export class MoteurDialogue {
       // Les lignes vides ne sont pas des repliques : on les saute sans compter.
       if (!texte) continue;
 
-      const replique = this.repliqueAttendue !== null && texte === this.repliqueAttendue;
-      if (replique) this.repliqueAttendue = null;
+      const echo = this.repliqueAttendue !== null && texte === this.repliqueAttendue;
+      const geste = echo && this.echoMuet;
+      const replique = echo && !geste;
+      if (echo) {
+        this.repliqueAttendue = null;
+        this.echoMuet = false;
+      }
 
       return {
         ligne: {
           texte,
           // Une replique du joueur est prononcee par Sable, jamais par le PNJ
-          // dont la mise en scene est encore en place.
-          locuteur: replique ? 'sable' : this.miseEnScene.locuteur,
-          portrait: replique ? null : this.miseEnScene.portrait,
-          expression: this.miseEnScene.expression,
+          // dont la mise en scene est encore en place. Un GESTE, lui, n'a pas de
+          // locuteur du tout : c'est de la narration.
+          locuteur: geste ? null : replique ? 'sable' : this.miseEnScene.locuteur,
+          portrait: replique || geste ? null : this.miseEnScene.portrait,
+          expression: geste ? null : this.miseEnScene.expression,
           replique,
-          dite: replique || texte.startsWith('\u2014'),
+          dite: !geste && (replique || texte.startsWith('\u2014')),
         },
         scene: { ...this.miseEnScene },
       };
@@ -382,8 +398,15 @@ export class MoteurDialogue {
     const choix: ChoixDialogue[] = enAttenteDeLecture
       ? []
       : this.story.currentChoices.map((c, i) => {
-          const { etiquette, cout } = parseTagsChoix(c.tags ?? []);
-          return { index: i, texte: c.text, etiquette, cout, abordable: run.peutPayer(cout) };
+          const { etiquette, cout, geste } = parseTagsChoix(c.tags ?? []);
+          return {
+            index: i,
+            texte: c.text,
+            etiquette,
+            cout,
+            geste,
+            abordable: run.peutPayer(cout),
+          };
         });
 
     const fin = this.courant?.scene.fin ?? null;

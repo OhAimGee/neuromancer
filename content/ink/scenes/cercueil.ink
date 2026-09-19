@@ -7,22 +7,22 @@ Le cercueil faisait deux mètres sur un, et le tarif se payait à l'heure. Sable
 -> cercueil_menu
 
 = cercueil_menu
-+ Dormir. # cout_cycles:1
++ Dormir. # geste # cout_cycles:1
     ~ cycles_restants -= 1
     -> cercueil_dormir
 
-+ { humanite <= 85 } Laisser la chose parler. # etq:FRAGMENT # cout_humanite:10
++ { humanite <= 85 } Laisser la chose parler. # etq:FRAGMENT # geste # cout_humanite:10
     ~ humanite -= 10
     -> cercueil_fragment
 
-+ { not crew_present("yonderboy") } Répondre à l'écran qui s'allume tout seul.
++ { not crew_present("yonderboy") } Répondre à l'écran qui s'allume tout seul. # geste
     -> yonderboy ->
     -> cercueil_menu
 
-+ Se brancher sur le jack mural.
++ Se brancher sur le jack mural. # geste
     -> cercueil_cabine
 
-+ Sortir.
++ Sortir. # geste
     -> hub
 
 = cercueil_dormir

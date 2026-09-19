@@ -89,6 +89,20 @@ export function parseTagsLigne(tags: readonly string[]): MiseEnScene {
 export interface MetaChoix {
   etiquette: Etiquette | null;
   cout: Cout;
+  /**
+   * Le choix est un GESTE et non une parole.
+   *
+   * Le texte d'un choix est toujours reaffiche — un choix Ink ne peut pas
+   * contenir de crochets, donc le libelle EST la replique. Le moteur le
+   * rejouait systematiquement au nom de Sable, plaque et portrait compris, et
+   * « Descendre chez le Finn. » devenait une phrase qu'il prononce a voix
+   * haute. Ce tag dit que l'echo est de la narration.
+   *
+   * Il ne se deduit pas de l'etiquette : `ACTION` en designe beaucoup, mais
+   * « Laisser la chose repondre a ma place » est un geste porte par `FRAGMENT`,
+   * et « Promis. Tu seras efface. » est une parole portee par `ACTION`.
+   */
+  geste: boolean;
 }
 
 /**
@@ -99,10 +113,15 @@ export interface MetaChoix {
  */
 export function parseTagsChoix(tags: readonly string[]): MetaChoix {
   let etiquette: Etiquette | null = null;
+  let geste = false;
   const cout: Cout = { credits: 0, cycles: 0, humanite: 0 };
 
   for (const tag of tags) {
     const [cle, valeur] = segments(tag);
+    if (cle === 'geste') {
+      geste = true;
+      continue;
+    }
     if (cle === 'etq' && valeur && ETIQUETTES.has(valeur as Etiquette)) {
       etiquette = valeur as Etiquette;
       continue;
@@ -114,5 +133,5 @@ export function parseTagsChoix(tags: readonly string[]): MetaChoix {
     else if (cle === 'cout_humanite') cout.humanite = n;
   }
 
-  return { etiquette, cout };
+  return { etiquette, cout, geste };
 }

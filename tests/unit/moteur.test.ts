@@ -557,10 +557,16 @@ describe('les archives — le carnet', () => {
     expect(useProfileStore.getState().rencontres).toEqual(vus);
   });
 
-  it('une réplique de Sable l’inscrit lui aussi', () => {
+  // Le meme geste verifie les deux sens du tag `# geste` : un deplacement muet
+  // n'inscrit personne, la replique qui suit inscrit Sable.
+  it('une réplique de Sable l’inscrit lui aussi, un geste non', () => {
     const m = neuf();
     auHub(m);
-    m.choisir(0);
+    m.choisir(choixNomme(m, 'Parler à Ratz'));
+    epuiser(m);
+    expect(useProfileStore.getState().rencontres.has('sable')).toBe(false);
+
+    m.choisir(choixNomme(m, 'aller plus profond'));
     epuiser(m);
     expect(useProfileStore.getState().rencontres.has('sable')).toBe(true);
   });

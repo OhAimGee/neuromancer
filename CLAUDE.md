@@ -92,6 +92,7 @@ comportement voulu — c'est la réplique prononcée par Sable. Ne jamais redupl
 | Tag | Porté par | Rôle |
 |---|---|---|
 | `# etq:MENSONGE\|MENACE\|CONNAISSANCE\|FRAGMENT\|IMPLANT\|ACTION` | choix | Étiquette affichée au joueur |
+| `# geste` | choix | **Le libellé est un geste, pas une parole** — son écho est joué en narration |
 | `# cout_credits:N` `# cout_cycles:N` `# cout_humanite:N` | choix | Coût, filtré côté UI |
 | `# bg:<id>` `# musique:<id>` `# sfx:<id>` | ligne | Pilotage audiovisuel |
 | `# speaker:<id>` `# portrait:<id>:<expression>` | ligne | Portrait et locuteur |
@@ -110,6 +111,44 @@ Le vocabulaire ci-dessus fait foi : `npm run validate:narrative` rejette tout au
 accepte n'importe quelle étiquette et le moteur ignore celles qu'il ne connaît pas — une faute
 de frappe comme `# etiq:` ne se verrait donc jamais à l'exécution. Ajouter un tag au jeu, c'est
 l'ajouter aux trois endroits : ce tableau, `TAGS_CONNUS` dans le validateur, et `tags.ts`.
+
+---
+
+## La voix de Sable — un libellé de choix EST une réplique
+
+C'est la conséquence directe du piège ci-dessus : le texte d'un choix est toujours réaffiché,
+donc **on ne peut pas écrire un bouton et une réplique séparément**. Ce qu'on écrit dans le
+`.ink` est ce que Sable prononce. Les libellés de la première version étaient rédigés en langue
+de menu — « Acheter un MIMIC. Huit cents. », « Faire poser quelque chose. », « Parler d'un mort
+qui se souvient. » — et Sable parlait donc comme un menu, dans sa propre plaque nominative.
+
+Un libellé s'écrit comme une réplique : sec, coupé, jamais poli, avec la syntaxe du personnage.
+
+```ink
+// AVANT — langue de bouton
++ { credits >= 800 } Acheter un MIMIC. Huit cents. # cout_credits:800
+// APRÈS — Sable parle
++ { credits >= 800 } Ton MIMIC. Huit cents, et je ne discute pas. # cout_credits:800
+```
+
+**Tout n'est pas une parole**, et c'est à quoi sert `# geste`. « Dormir. », « Raccrocher. »,
+« Laisser tomber. » sont des actions muettes : le tag les fait rendre en narration — pas de
+locuteur, pas de portrait, cadre terne (`echoMuet` dans `moteur.ts`). Sans lui, Sable annonçait
+ses propres gestes à voix haute dans une pièce vide.
+
+- **`# geste` ne se déduit pas de `# etq:ACTION`.** Les deux axes sont indépendants et les quatre
+  croisements existent : « Laisser la chose répondre à ma place » est un `FRAGMENT` muet,
+  « Promis. Tu seras effacé. » est une `ACTION` parlée. Les confondre, c'était la première
+  version, et elle se trompait dans les deux sens.
+- **Le second temps.** Là où la réplique mérite d'être développée, le corps du choix ajoute une
+  *seconde* réplique sous `# speaker:sable` — le libellé ouvre, le corps donne le caractère. Ce
+  n'est pas la duplication interdite (qui redit le même texte) ; le validateur refuse d'ailleurs
+  deux répliques identiques d'affilée. À réserver aux moments qui comptent : en mettre partout
+  ajouterait un clic à chaque menu.
+- Le validateur avertit sur un libellé qui **commence par un infinitif sans porter `# geste`**.
+  Une question n'est jamais un geste (« Participer à quoi ? »), et le verbe doit être suivi d'une
+  espace ou d'un point — sans ce regard en avant, « Quatre-vingt-quatorze » et « Montre-moi »
+  passaient pour des infinitifs. Un avertissement qui crie à tort n'apprend qu'à être ignoré.
 
 ---
 

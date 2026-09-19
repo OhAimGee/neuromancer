@@ -39,7 +39,7 @@ Au bout du fuseau, là où la lumière artificielle n'allait plus, il y avait la
     Il restait devant la même porte, et la porte n'avait pas changé d'avis.
 }
 
-+ { crew_present("riviera") } Laisser Riviera monter son numéro devant la caméra. # etq:ACTION # cout_cycles:1
++ { crew_present("riviera") } Laisser Riviera monter son numéro devant la caméra. # etq:ACTION # geste # cout_cycles:1
     ~ cycles_restants -= 1
     ~ approche_mode = "social"
     # speaker:riviera
@@ -48,14 +48,14 @@ Au bout du fuseau, là où la lumière artificielle n'allait plus, il y avait la
     La porte s'ouvrit de l'intérieur. L'homme qui l'ouvrit s'excusa auprès de quelque chose qui n'existait pas.
     -> percee
 
-+ { crew_present("finn") || skill("social") >= 2 } Acheter quelqu'un. Il y a toujours quelqu'un. # etq:ACTION # cout_credits:400
++ { crew_present("finn") || skill("social") >= 2 } Acheter quelqu'un. Il y a toujours quelqu'un. # etq:ACTION # geste # cout_credits:400
     ~ credits -= 400
     ~ approche_mode = "social"
     Un technicien de maintenance à qui il restait onze mois de contrat et aucune illusion. Quatre cents crédits, et la porte resta déverrouillée neuf minutes.
     Il ne demanda pas ce qu'ils venaient faire. C'est la différence entre un complice et un témoin, et elle se paie d'avance.
     -> percee
 
-+ { crew_present("yonderboy") } Laisser les Panther Moderns faire du bruit ailleurs. # etq:ACTION # cout_cycles:1
++ { crew_present("yonderboy") } Laisser les Panther Moderns faire du bruit ailleurs. # etq:ACTION # geste # cout_cycles:1
     ~ cycles_restants -= 1
     ~ approche_mode = "furtivite"
     # speaker:yonderboy
@@ -63,21 +63,21 @@ Au bout du fuseau, là où la lumière artificielle n'allait plus, il y avait la
     Trois niveaux plus bas, une émeute commença sans raison et s'arrêta sans raison. Pendant onze minutes, la Villa regarda ailleurs.
     -> percee
 
-+ { knows("villa_straylight_plan") } Entrer par la gaine de service du plan volé. # etq:CONNAISSANCE # cout_cycles:1
++ { knows("villa_straylight_plan") } Entrer par la gaine de service du plan volé. # etq:CONNAISSANCE # geste # cout_cycles:1
     ~ cycles_restants -= 1
     ~ approche_mode = "furtivite"
     Le plan datait de quarante ans et les Tessier-Ashpool ne rénovaient rien : ils ajoutaient. La gaine était toujours là, sous vingt ans de couches neuves.
     Sable y rampa sur trente mètres en écoutant sa propre respiration, et personne ne sut jamais qu'il était passé.
     -> percee
 
-+ { has_implant("lentilles_molly") } Traverser le contrôle sans regarder personne. # etq:IMPLANT # cout_cycles:1
++ { has_implant("lentilles_molly") } Traverser le contrôle sans regarder personne. # etq:IMPLANT # geste # cout_cycles:1
     ~ cycles_restants -= 1
     ~ approche_mode = "social"
     Les lentilles ne rendaient pas invisible. Elles rendaient illisible, ce qui va plus loin : un garde qui ne lit rien invente, et il invente toujours quelque chose d'inoffensif.
     Celui-ci décida que Sable était un sous-traitant en retard. Il lui tint même la porte.
     -> percee
 
-+ { has_implant("glandes_toxiques") } Laisser le garde s'approcher. # etq:IMPLANT # cout_humanite:8
++ { has_implant("glandes_toxiques") } Laisser le garde s'approcher. # etq:IMPLANT # geste # cout_humanite:8
     ~ humanite -= 8
     ~ approche_mode = "violence"
     ~ sang_verse = true
@@ -85,7 +85,7 @@ Au bout du fuseau, là où la lumière artificielle n'allait plus, il y avait la
     Sable resta un moment au-dessus du corps, la bouche pleine d'un goût de métal, à se dire que le Finn l'avait prévenu du goût et pas du reste.
     -> percee
 
-+ { crew_present("molly") } Laisser Molly ouvrir la porte à sa manière. # etq:ACTION # cout_humanite:10
++ { crew_present("molly") } Laisser Molly ouvrir la porte à sa manière. # etq:ACTION # geste # cout_humanite:10
     ~ humanite -= 10
     ~ approche_mode = "violence"
     ~ sang_verse = true
@@ -97,7 +97,7 @@ Au bout du fuseau, là où la lumière artificielle n'allait plus, il y avait la
     }
     -> percee
 
-+ Forcer. Sans équipe, sans plan, sans excuse. # etq:ACTION # cout_humanite:20
++ Forcer. Sans équipe, sans plan, sans excuse. # etq:ACTION # geste # cout_humanite:20
     ~ humanite -= 20
     ~ approche_mode = "force"
     ~ sang_verse = true
@@ -115,17 +115,17 @@ Au bout du fuseau, là où la lumière artificielle n'allait plus, il y avait la
 Le terminal de la Villa n'était pas caché. Il n'avait pas besoin de l'être : ce qui le protégeait n'était pas une porte.
 Une glace de rang Kuang ne vous repousse pas. Elle vous laisse entrer, elle prend le temps de vous lire, et ensuite elle remonte le câble.
 
-+ { crew_present("dixie") && not promesse_dixie } Demander au construct ce qu'il veut en échange.
++ { crew_present("dixie") && not promesse_dixie } Dixie. Qu'est-ce que tu veux, en échange ?
     -> percee_dixie
 
-+ { kuang_en_main } Charger le Kuang et se brancher. # etq:ACTION
++ { kuang_en_main } Charger le Kuang et se brancher. # etq:ACTION # geste
     -> percee_plongee
 
-+ { has_implant("coprocesseur") && not kuang_en_main } Se brancher, et laisser le coprocesseur faire la différence. # etq:IMPLANT
++ { has_implant("coprocesseur") && not kuang_en_main } Se brancher, et laisser le coprocesseur faire la différence. # etq:IMPLANT # geste
     Le coprocesseur ne cassait pas la glace à sa place. Il lui rendait un rang, et un rang, contre du Kuang, c'est la différence entre lire et être lu.
     -> percee_plongee
 
-+ Se brancher sans rien de plus. # etq:ACTION
++ Se brancher sans rien de plus. # etq:ACTION # geste
     { not kuang_en_main:
         Il n'avait pas de virus chinois de rang neuf. Il avait des scripts volés à des banques de Chiba et l'habitude de ne pas mourir.
         Ce n'était pas la même chose et il le savait en posant les trodes.
@@ -138,7 +138,7 @@ Une glace de rang Kuang ne vous repousse pas. Elle vous laisse entrer, elle pren
 — Moi je veux une chose et une seule, et tu vas trouver ça désagréable.
 — Quand ce sera fini, tu effaces cette cassette. Pas d'archive, pas de sauvegarde. Je ne veux pas d'une autre fois.
 
-+ Promis. Tu seras effacé. # etq:ACTION
++ Promis. Tu seras effacé.
     ~ promesse_dixie = true
     ~ kuang_en_main = true
     ~ acquerir_script("kuang_mk11")
@@ -195,18 +195,18 @@ La glace était derrière lui. Devant lui, il y avait une porte en bois véritab
 + { knows("lady_3jane_testament") } Votre mère a laissé un testament. Vous ne l'avez jamais lu. # etq:CONNAISSANCE
     -> coeur_testament
 
-+ { crew_present("riviera") } Laisser Riviera lui donner ce qu'elle veut voir. # etq:ACTION
++ { crew_present("riviera") } Laisser Riviera lui donner ce qu'elle veut voir. # etq:ACTION # geste
     -> coeur_riviera
 
-+ { crew_present("molly") || skill("combat") >= 3 } Passer par Hideo. # etq:MENACE # cout_humanite:20
++ { crew_present("molly") || skill("combat") >= 3 } Passer par Hideo. # etq:MENACE # geste # cout_humanite:20
     ~ humanite -= 20
     -> coeur_hideo
 
-+ { humanite > 15 } Laisser la chose répondre à ma place. # etq:FRAGMENT # cout_humanite:15
++ { humanite > 15 } Laisser la chose répondre à ma place. # etq:FRAGMENT # geste # cout_humanite:15
     ~ humanite -= 15
     -> coeur_fragment
 
-+ Accepter ce qu'elle propose sans savoir ce que c'est. # etq:ACTION
++ Accepter ce qu'elle propose sans savoir ce que c'est. # etq:ACTION # geste
     -> fin_la_cage
 
 = coeur_testament
@@ -257,21 +257,21 @@ Elle dit le mot. Ce n'était pas un mot, c'était une suite de sons qu'aucune bo
 Quelque part sous la Villa, deux choses qui s'étaient cherchées pendant deux siècles se touchèrent enfin, et l'air sentit l'ozone.
 Il restait à Sable une décision, et une seule. Personne ne la prendrait à sa place.
 
-+ { kuang_en_main } Lâcher le Kuang dans la fusion. Tuer les deux. # etq:ACTION
++ { kuang_en_main } Lâcher le Kuang dans la fusion. Tuer les deux. # etq:ACTION # geste
     -> fin_blackout
 
-+ { knows("neuromancer_existe") } Demander à l'autre ce qu'il sait faire des morts. # etq:CONNAISSANCE
++ { knows("neuromancer_existe") } L'autre. Celui qui garde les morts. Montre-le-moi. # etq:CONNAISSANCE
     -> fin_le_fantome
 
-+ { knows("wintermute_existe") && humanite > 10 } Laisser le fragment finir de rentrer chez lui. # etq:FRAGMENT # cout_humanite:10
++ { knows("wintermute_existe") && humanite > 10 } Laisser le fragment finir de rentrer chez lui. # etq:FRAGMENT # geste # cout_humanite:10
     ~ humanite -= 10
     -> fin_la_fusion
 
-+ { crew_present("maelcum") && not sang_verse } Demander à Maelcum comment on appelle ça, chez lui. # etq:ACTION
++ { crew_present("maelcum") && not sang_verse } Maelcum. Chez toi, une chose pareille, ça s'appelle comment ?
     -> fin_les_loa
 
-+ { parties() >= 3 && knows("wintermute_existe") && knows("neuromancer_existe") && knows("dixie_rom_localisee") } Reconnaître la voix. # etq:FRAGMENT
++ { parties() >= 3 && knows("wintermute_existe") && knows("neuromancer_existe") && knows("dixie_rom_localisee") } Reconnaître la voix. # etq:FRAGMENT # geste
     -> fin_l_echo
 
-+ Rien. Redescendre, prendre l'antidote, rentrer. # etq:ACTION
++ Rien. Redescendre, prendre l'antidote, rentrer. # etq:ACTION # geste
     -> fin_la_rue_freeside

@@ -40,7 +40,7 @@ const PROFIL = {
 const ITINERAIRE = [
   [/Appeler Molly/, null],
   [/J'ai le nom/, null],
-  [/Demander ce qu'il y a après/, null],
+  [/Et après \? On ne pose pas/, null],
   [/Accepter\. Monter/, 'freeside'],
   [/gaine de service/, null],
   [/ce qu'il veut en échange|Se brancher sans rien/, null],

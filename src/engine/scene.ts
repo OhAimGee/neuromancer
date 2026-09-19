@@ -152,6 +152,14 @@ export class SceneJeu {
     this.app.stage.removeChildren();
     this.courant = assemblage;
     if (assemblage) this.app.stage.addChild(assemblage.couche);
+
+    // Sonde pour les outils de capture : les plans de parallaxe se chargent en
+    // asynchrone, et rien dans le DOM ne dit qu'ils sont peints. `titre.png`
+    // est partie sur du noir sans que rien ne la distingue d'une regression.
+    // Developpement uniquement, comme `__noeudsVisibles`.
+    if (import.meta.env.DEV) {
+      (window as unknown as Record<string, unknown>)['__decorAffiche'] = id;
+    }
   }
 
   detruire(): void {

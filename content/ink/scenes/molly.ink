@@ -32,7 +32,7 @@ Il n'y avait pas de numéro. Il y avait une phrase à dire au barman, et Molly a
     — Alors tu me fais perdre un cycle, et tu n'en as pas tant que ça.
     -> hub
 
-+ Raccrocher.
++ Raccrocher. # geste
     -> hub
 
 = molly_nom
@@ -53,19 +53,19 @@ L'entrepôt sentait le sel et le béton neuf. Armitage se tenait debout au milie
 — Vous avez le fichier. Je le vois à la façon dont vous tenez votre tête.
 Il ouvrit une mallette. À l'intérieur, une seule ampoule grise.
 
-+ Donner le fragment. Prendre l'ampoule. Rentrer.
++ Donner le fragment. Prendre l'ampoule. Rentrer. # etq:ACTION # geste
     -> fin_la_rue
 
-+ Demander ce qu'il y a après. # etq:ACTION
++ Et après ? On ne pose pas quinze sacs à un homme pour une ampoule.
     -> rendez_vous_contrat
 
 + { knows("operation_poing_hurlant") } Poing Hurlant. Vous y étiez, colonel. Vous en êtes le seul revenu. # etq:CONNAISSANCE
     -> rendez_vous_corto
 
-+ { antidote_en_poche } Garder le fragment. J'ai déjà mon antidote. # etq:ACTION
++ { antidote_en_poche } Gardez votre ampoule. J'ai la mienne. # etq:MENACE
     -> fin_la_rue_seul
 
-+ { humanite > 20 } Laisser la chose répondre à ma place. # etq:FRAGMENT # cout_humanite:15
++ { humanite > 20 } Laisser la chose répondre à ma place. # etq:FRAGMENT # geste # cout_humanite:15
     ~ humanite -= 15
     -> rendez_vous_fragment
 
@@ -102,17 +102,19 @@ Il referma la mallette sans la donner. C'était la réponse à une question que 
 # speaker:armitage
 — L'antidote est au bout du travail. Pas avant. Vous n'avez pas de raison de me croire et vous n'avez pas d'autre option.
 
-+ Accepter. Monter. # etq:ACTION
++ Accepter. Monter. # etq:ACTION # geste
     ~ learn("contrat_freeside")
     ~ resolve_scene("rendez_vous_contrat")
     -> freeside
 
-+ { antidote_en_poche } Refuser. J'ai mon antidote et vous n'avez plus rien. # etq:ACTION
++ { antidote_en_poche } J'ai mon antidote. Vous n'avez plus rien à me vendre.
     -> fin_la_rue_seul
 
-+ Refuser. Prendre l'ampoule et disparaître. # etq:MENACE
++ Je prends l'ampoule, et vous ne me revoyez pas. # etq:MENACE
     ~ soupcon += 5
     # speaker:armitage
     Il regarda Sable pendant trois secondes et lui tendit la mallette.
     — Comme vous voudrez. On vous retrouvera quand la chose se réveillera, et elle se réveillera.
+    # speaker:sable
+    — Elle est déjà réveillée, colonel. C'est vous qui dormez.
     -> fin_la_rue

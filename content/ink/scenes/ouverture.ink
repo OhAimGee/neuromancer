@@ -21,7 +21,7 @@ Branché, le monde devenait de la géométrie. Des grappes et des constellations
 
 Ce soir-là : un client sans nom, un fichier sans titre, et une banque de données bien trop mal gardée pour ce qu'elle contenait.
 
-* C'est trop facile. # etq:ACTION
+* C'est trop facile.
     ~ learn("sable_prudent")
     Il le pensa, et il continua quand même. C'était le métier : penser une chose et faire l'autre.
 
@@ -48,17 +48,17 @@ Sable était un voleur.
 
 Il lui restait peut-être sept secondes, et trois façons de les dépenser.
 
-* Forcer. Le fichier d'abord, la peur ensuite. # etq:ACTION
+* Forcer. Le fichier d'abord, la peur ensuite. # etq:ACTION # geste
     ~ boost_competence("hacking")
     Il jeta tout ce qu'il avait contre le mur noir. Le mur le laissa faire, parce que ça l'amusait, et Sable eut son fichier.
     Il l'a toujours. Il ne l'a jamais ouvert.
 
-* Lui parler. Toute glace est un programme, et tout programme écoute.
+* Lui parler. Toute glace est un programme, et tout programme écoute. # etq:ACTION # geste
     ~ boost_competence("social")
     Il lui parla. Elle répondit — pas avec des mots, avec une image : lui, de dos, plus vieux de trois ans, descendant Ninsei sous la pluie.
     Il ne comprit ce qu'il avait vu que beaucoup plus tard.
 
-* Arracher les trodes. Se débrancher à la main. # etq:ACTION
+* Arracher les trodes. Se débrancher à la main. # etq:ACTION # geste
     ~ boost_competence("combat")
     Il s'arracha les trodes du crâne avec assez de force pour emporter la peau avec.
     Deux secondes trop tard. Il apprit ce soir-là que deux secondes, c'est une durée.
@@ -106,7 +106,7 @@ Sable, lui, la sentit tout de suite. Une attention. Quelque chose qui regardait 
     Pas de réponse. Pas cette année-là.
     Mais quelque chose, derrière l'os frontal, nota la question et la garda.
 
-* Ne rien demander. Certaines questions sont des invitations. # etq:ACTION
+* Ne rien demander. Certaines questions sont des invitations. # etq:ACTION # geste
     ~ learn("fragment_ignore")
     Il se tut. La chose aussi. Ils apprirent à cohabiter comme deux locataires qui se détestent et partagent un bail.
 

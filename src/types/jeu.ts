@@ -38,6 +38,8 @@ export interface ChoixDialogue {
   etiquette: Etiquette | null;
   cout: Cout;
   abordable: boolean;
+  /** Le choix est un geste : son echo sera de la narration, pas une parole. */
+  geste: boolean;
 }
 
 /** Une replique, telle que la boite de dialogue doit l'afficher. */

@@ -59,6 +59,20 @@ export async function ouvrirJeu({
   await page.keyboard.press('Space');
 
   await page.waitForSelector('.titre__entree:not([disabled])', { timeout: 10_000 });
+  // ARCHIVES n'est jamais desactive : le selecteur ci-dessus est donc vrai des
+  // le tout premier rendu du titre, avant que le logo soit decode et avant que
+  // Pixi ait peint la ville. La capture partait sur du noir sans logo, une fois
+  // sur deux, et rien ne la distinguait d'une regression. On attend la peinture.
+  await page.waitForFunction(() => {
+    const logo = document.querySelector('.titre__logo');
+    return (
+      logo instanceof HTMLImageElement &&
+      logo.complete &&
+      logo.naturalWidth > 0 &&
+      window.__decorAffiche === 'titre'
+    );
+  }, { timeout: 10_000 });
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   if (captureTitre) await page.locator('.viewport').screenshot({ path: captureTitre });
   // `clavier` : l'outil qui prouve que le jeu se joue sans souris ne peut pas
   // commencer par un clic. NOUVELLE PARTIE est la premiere entree, donc visee.

@@ -47,7 +47,7 @@ Ses dents d'acier accrochèrent le néon quand il sourit.
     ~ confiance += 2
     — Ça, dit Ratz, c'est la première chose vraie que tu me dis cette année.
 
-* Vider le verre sans répondre. # etq:ACTION
+* Vider le verre sans répondre. # etq:ACTION # geste
     ~ confiance += 1
     Ratz hocha la tête comme si c'était une réponse acceptable. Ce l'était.
 
@@ -57,7 +57,7 @@ Ses dents d'acier accrochèrent le néon quand il sourit.
     — Tu ne devrais pas savoir ça.
     Je sais beaucoup de choses que je ne devrais pas. C'est mon seul capital.
 
-* { humanite > 20 } Laisser la chose parler à ta place. # etq:FRAGMENT # cout_humanite:5
+* { humanite > 20 } Laisser la chose parler à ta place. # etq:FRAGMENT # geste # cout_humanite:5
     ~ humanite -= 5
     ~ confiance += 3
     ~ soupcon += 1
@@ -94,7 +94,7 @@ Ce n'était pas une question.
     ~ soupcon += 1
     — Quelqu'un qui paie pour le savoir. Ça devrait déjà t'inquiéter.
 
-* Ne rien dire et soutenir le regard qu'elle n'a pas. # etq:ACTION
+* Ne rien dire et soutenir le regard qu'elle n'a pas. # etq:ACTION # geste
     ~ confiance += 1
     ~ soupcon += 1
     Elle laissa le silence s'étirer, puis parut approuver.
@@ -130,10 +130,16 @@ Elle posa un jeton de crédit sur le zinc.
 * Je commence maintenant.
     ~ confiance += 3
     — Évidemment.
+    # speaker:sable
+    — Je n'ai pas dit oui. J'ai dit maintenant. À douze cycles, c'est la même phrase.
 
 * Et si je refuse ?
     ~ soupcon += 2
     — Alors tu meurs dans douze cycles au lieu de mourir plus tard. À ton âge et dans ton état, la différence relève du détail comptable.
+    # speaker:sable
+    — Vous avez répété cette phrase.
+    # speaker:molly
+    — Oui. Elle marche.
 
 * { skill("hacking") >= 2 } Vous m'avez posé les sacs avant de me poser la question. Vous saviez déjà que j'accepterais. # etq:CONNAISSANCE
     ~ confiance += 2

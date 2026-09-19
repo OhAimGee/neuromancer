@@ -49,7 +49,7 @@ Trois jours de navette, et Riviera avait passé le troisième a projeter des cho
     ~ learn("riviera_attend_son_moment")
     ->->
 
-+ Laisser faire. Regarder ce qu'il sait faire. # etq:FRAGMENT # cout_humanite:10
++ Laisser faire. Regarder ce qu'il sait faire. # etq:FRAGMENT # geste # cout_humanite:10
     ~ humanite -= 10
     Sable regarda jusqu'au bout. Il y avait quelque chose dans le crâne qui trouvait ça instructif, et c'était bien le problème.
     ~ boost_competence("social")

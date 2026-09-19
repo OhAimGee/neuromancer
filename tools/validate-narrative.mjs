@@ -27,7 +27,7 @@ const avertissements = [];
 // Le vocabulaire fait foi : tout tag hors de cette liste est une faute de
 // frappe, car Ink accepte n'importe quel tag et le moteur l'ignore en silence.
 const TAGS_CONNUS = new Set([
-  'etq', 'cout_credits', 'cout_cycles', 'cout_humanite',
+  'etq', 'geste', 'cout_credits', 'cout_cycles', 'cout_humanite',
   'bg', 'musique', 'sfx', 'speaker', 'portrait',
   'ending', 'hub', 'horloge', 'entracte', 'glose',
 ]);
@@ -38,6 +38,25 @@ const TAGS_CONNUS = new Set([
 // pour les mots longs, qui passent a la ligne sans se couper.
 const MAX_SIGNES = 180;
 const ETIQUETTES = new Set(['MENSONGE', 'MENACE', 'CONNAISSANCE', 'FRAGMENT', 'IMPLANT', 'ACTION']);
+
+// Un libelle de choix EST la replique de Sable : un choix Ink ne peut pas
+// contenir de crochets, donc son texte est toujours reaffiche. Un libelle qui
+// commence par un verbe a l'infinitif — « Dormir. », « Descendre chez le
+// Finn. » — n'est donc pas une phrase que quelqu'un prononce, c'est un geste,
+// et il doit porter `# geste` pour que le moteur en fasse de la narration.
+// Sans ce controle, la faute revient : elle ne casse rien, elle fait seulement
+// parler Sable comme un menu.
+// Le verbe doit etre suivi d'une espace ou d'une ponctuation FORTE : sans ce
+// regard en avant, « Quatre-vingt-quatorze » et « Montre-moi » passaient pour
+// des infinitifs, l'un a cause de « Quatre », l'autre a cause de « Montre ».
+const VERBE_INFINITIF = /^(?:Ne\s+(?:rien|pas)\s+)?[A-ZÀ-Ý][a-zà-ÿ]*(?:er|ir|re|oir)(?=[\s.,]|$)/;
+// Les mots qui ressemblent a un infinitif sans en etre un. Sans cette liste, le
+// controle crierait sur des repliques parfaitement ecrites.
+const FAUX_INFINITIFS = new Set([
+  'Combien', 'Peter', 'Votre', 'Notre', 'Leur', 'Encore', 'Pire', 'Autre', 'Contre',
+  'Père', 'Mère', 'Frère', 'Terre', 'Guerre', 'Pierre', 'Molly', 'Dixie', 'Maelcum',
+  'Riviera', 'Armitage', 'Sable', 'Ratz',
+]);
 // Tag de cout -> variable Ink que le corps du choix doit reellement decrementer.
 const VARIABLE_DU_COUT = {
   cout_credits: 'credits',
@@ -87,6 +106,20 @@ for (const fichier of fichiersInk(INK)) {
       );
     }
 
+    // Un geste ecrit a l'infinitif doit se declarer comme tel.
+    if (choix && affiche !== '' && !/#\s*geste\b/.test(zoneTags)) {
+      const premier = affiche.split(/[\s,.]/)[0];
+      // Une question est toujours une parole, quel que soit son premier mot :
+      // « Participer a quoi ? » n'est pas un geste.
+      const question = affiche.includes('?');
+      if (!question && VERBE_INFINITIF.test(affiche) && !FAUX_INFINITIFS.has(premier)) {
+        avertissements.push(
+          `${ou} : le choix « ${affiche.slice(0, 48)} » commence par un infinitif mais ne porte ` +
+          `pas '# geste' — son echo sera joue comme une phrase que Sable prononce a voix haute`,
+        );
+      }
+    }
+
     for (const tag of zoneTags.split('#').map((t) => t.trim()).filter(Boolean)) {
       const cle = tag.split(':')[0].trim();
       if (!TAGS_CONNUS.has(cle)) {
@@ -127,6 +160,42 @@ for (const fichier of fichiersInk(INK)) {
 }
 
 // --- Les EXTERNAL declares doivent etre lies par le moteur -----------------
+
+// --- Deux repliques identiques d'affilee -----------------------------------
+//
+// La faute que `CLAUDE.md` interdit depuis toujours : redupliquer sous un choix
+// la replique que le libelle affiche deja. Le moteur rejoue l'echo du choix, et
+// la meme phrase apparaissait deux fois de suite dans la boite — une fois au
+// nom de Sable, une fois en narration.
+
+for (const fichier of fichiersInk(INK)) {
+  const rel = path.relative(RACINE, fichier);
+  let precedente = null;
+  let ouPrecedente = 0;
+  fs.readFileSync(fichier, 'utf-8').split('\n').forEach((ligne, i) => {
+    const sansCommentaire = ligne.replace(/\/\/.*$/, '');
+    const debutTags = sansCommentaire.indexOf('#');
+    const texte = (debutTags === -1 ? sansCommentaire : sansCommentaire.slice(0, debutTags))
+      .replace(/^\s*[*+][*+\s]*/, '')
+      .replace(/^\s*\{[^}]*\}\s*/, '')
+      .trim();
+    if (texte === '') return;
+    if (/^(===|->|VAR\b|CONST\b|LIST\b|EXTERNAL\b|INCLUDE\b|~|\{|\}|=|-)/.test(texte)) {
+      // Une directive coupe la suite : deux repliques identiques separees par un
+      // branchement ne se suivent pas a l'ecran.
+      precedente = null;
+      return;
+    }
+    if (texte === precedente) {
+      erreurs.push(
+        `${rel}:${i + 1} : replique identique a la ligne ${ouPrecedente} — ` +
+        `la boite l'afficherait deux fois de suite`,
+      );
+    }
+    precedente = texte;
+    ouPrecedente = i + 1;
+  });
+}
 
 const globals = fs.readFileSync(path.join(INK, 'shared/globals.ink'), 'utf-8');
 const moteur = fs.readFileSync(path.join(RACINE, 'src/dialogue/moteur.ts'), 'utf-8');

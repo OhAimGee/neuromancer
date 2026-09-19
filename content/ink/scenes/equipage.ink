@@ -47,14 +47,14 @@ Personne ne regardait la femme. Tout le monde regardait ailleurs avec beaucoup d
     — Je sais surtout qui y habite. Ce n'est pas la même chose, et c'est beaucoup plus utile.
     -> riviera_choix
 
-+ Partir sans lui parler.
++ Partir sans lui parler. # geste
     Sable sortit. Derrière lui, la femme de lumière recommença depuis le début, pour personne.
     ->->
 
 = riviera_choix
 Sable savait exactement ce qu'il regardait. Un homme qui fait souffrir pour le plaisir de la mise en scène, et qui ouvre des portes qu'aucun honnête homme n'ouvre.
 
-+ L'emmener. # etq:ACTION # cout_humanite:10
++ L'emmener. # etq:ACTION # geste # cout_humanite:10
     ~ humanite -= 10
     ~ recruter("riviera")
     ~ learn("riviera_embarque")
@@ -62,7 +62,7 @@ Sable savait exactement ce qu'il regardait. Un homme qui fait souffrir pour le p
     Ce n'était pas une mise en garde. C'était un programme.
     ->->
 
-+ Refuser.
++ Non. Je sais ce que vous êtes, et je n'en ai pas besoin.
     # speaker:riviera
     — Dommage. Vous auriez été un très bon décor.
     ->->
@@ -94,7 +94,7 @@ Sable savait exactement ce qu'il regardait. Un homme qui fait souffrir pour le p
     ~ learn("finn_embarque")
     ->->
 
-+ Laisser tomber.
++ Laisser tomber. # geste
     ->->
 
 // --- DIXIE : un construct ROM. On ne le recrute pas, on le vole.
@@ -179,7 +179,7 @@ Le remorqueur de Zion sentait la ganja, l'huile et le métal chaud. Le dub sorta
 # speaker:maelcum
 — Je pilote. Je ne tue pas. Si tu tues devant moi, je te descends au port le plus proche et tu continues seul.
 
-+ Accepter ses conditions. # etq:ACTION
++ Accepter ses conditions. # etq:ACTION # geste
     ~ recruter("maelcum")
     ~ learn("maelcum_embarque")
     — Alors on est d'accord. Jah aide ceux qui savent ce qu'ils demandent.
@@ -192,7 +192,7 @@ Le remorqueur de Zion sentait la ganja, l'huile et le métal chaud. Le dub sorta
     — Alors va-t'en. Tu connais le chemin, tu l'as pris pour venir.
     ->->
 
-+ Partir.
++ Partir sans insister. # geste
     ->->
 
 // --- YONDERBOY : les Panther Moderns. On les contacte par le reseau.
@@ -218,19 +218,19 @@ L'écran du cercueil s'alluma tout seul. Personne ne l'avait allumé, et c'étai
     — Ça, c'est intéressant. Ça, on le fait gratuitement.
     -> yonderboy_choix
 
-+ Couper l'écran.
++ Couper l'écran. # geste
     L'écran s'éteignit. Il se ralluma deux secondes, juste pour montrer qu'il pouvait.
     ->->
 
 = yonderboy_choix
-+ L'embarquer. # etq:ACTION
++ L'embarquer. # etq:ACTION # geste
     ~ recruter("yonderboy")
     ~ learn("yonderboy_embarque")
     # speaker:yonderboy
     — Parfait. Préviens-nous avant que ça devienne ennuyeux. On part quand ça devient ennuyeux.
     ->->
 
-+ Refuser. Le chaos ne se dirige pas.
++ Non. Le chaos ne se dirige pas, et je n'ai pas le temps d'essayer.
     # speaker:yonderboy
     — C'est exact. C'est même tout l'intérêt.
     ->->

@@ -17,30 +17,30 @@
     {&Dehors, la pluie de Ninsei tombait sur le néon et n'éteignait rien.|Le Chatsubo n'avait ni fenêtre ni horloge. Sable comptait quand même.|Quelque part sous sa peau, quinze poches se dissolvaient à leur rythme.|Ratz essuyait un verre avec un chiffon plus sale que le verre.}
 }
 
-+ Se brancher sur la cabine du fond.
++ Se brancher sur la cabine du fond. # geste
     -> hub_cabine
 
-+ Descendre chez le Finn. # cout_cycles:1
++ Descendre chez le Finn. # geste # cout_cycles:1
     ~ cycles_restants -= 1
     -> finn
 
-+ Monter à l'hôtel-cercueil. # cout_cycles:1
++ Monter à l'hôtel-cercueil. # geste # cout_cycles:1
     ~ cycles_restants -= 1
     -> cercueil
 
-+ Descendre au port de Ninsei. # cout_cycles:1
++ Descendre au port de Ninsei. # geste # cout_cycles:1
     ~ cycles_restants -= 1
     -> maelcum ->
     -> hub
 
-+ { not crew_present("riviera") } Traverser la salle vers l'homme qui projette.
++ { not crew_present("riviera") } Traverser la salle vers l'homme qui projette. # geste
     -> riviera ->
     -> hub
 
-+ Appeler Molly.
++ Appeler Molly. # geste
     -> molly_appel
 
-+ Parler à Ratz.
++ Parler à Ratz. # geste
     -> hub_ratz
 
 = hub_cabine
@@ -76,6 +76,6 @@ Il revint dans son corps par la nuque, comme toujours, avec le goût de cuivre e
     — Pas à moi. Je vends de la bière tiède.
     — Le Finn achète tout ce qui n'a pas de propriétaire vivant. Descends, et ne lui dis pas que tu sais ce que ça vaut.
 
-+ Rien. Sortir.
++ Rien. Je bois et je m'en vais. # geste
 
 - -> hub
